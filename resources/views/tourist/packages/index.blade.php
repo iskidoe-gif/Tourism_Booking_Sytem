@@ -57,12 +57,13 @@
         @php($selectedPackage = $packages->first())
         <div class="card">
             <div class="card-body">
-                <form id="quick-booking-form" method="POST" action="{{ route('bookings.store', $selectedPackage) }}">
+                <form id="quick-booking-form" method="POST" action="{{ route('bookings.store') }}">
                     @csrf
+                    <input type="hidden" name="tour_package_id" id="tour-package-id" value="{{ $selectedPackage->id }}">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold">Tour package</label>
-                            <select id="tour-package-select" class="form-select" data-action-template="{{ url('/book') }}/__PACKAGE_ID__">
+                            <select id="tour-package-select" class="form-select">
                                 @foreach($packages as $package)
                                     <option value="{{ $package->id }}"
                                             data-price="{{ $package->price }}"
@@ -124,6 +125,7 @@
 <script>
     const bookingForm = document.getElementById('quick-booking-form');
     const packageSelect = document.getElementById('tour-package-select');
+    const packageInput = document.getElementById('tour-package-id');
     const guestsInput = document.getElementById('num-guests');
     const totalDisplay = document.getElementById('total-display');
     const guestDisplay = document.getElementById('guest-display');
@@ -142,10 +144,10 @@
         const currentGuests = Number(guestsInput.value || 1);
         totalDisplay.textContent = '\u20b1' + (price * currentGuests).toLocaleString('en-PH');
         guestDisplay.textContent = '(' + currentGuests + (currentGuests === 1 ? ' guest)' : ' guests)');
-        bookingForm.action = packageSelect.dataset.actionTemplate.replace('__PACKAGE_ID__', selected.value);
+        packageInput.value = selected.value;
     }
 
-    if (bookingForm && packageSelect && guestsInput) {
+    if (bookingForm && packageSelect && packageInput && guestsInput) {
         packageSelect.addEventListener('change', updateBookingSummary);
         guestsInput.addEventListener('input', updateBookingSummary);
         updateBookingSummary();

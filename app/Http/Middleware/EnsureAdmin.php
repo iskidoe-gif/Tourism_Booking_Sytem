@@ -11,7 +11,7 @@ class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::guard('admin')->user();
+        $user = Auth::guard('admin')->user() ?? $request->user();
 
         if (! $user) {
             return $request->expectsJson()

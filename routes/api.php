@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/packages', [TourPackageController::class, 'index']);
 Route::get('/packages/{package}', [TourPackageController::class, 'show']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->name('api.')->group(function () {
     Route::apiResource('bookings', BookingController::class);
     Route::apiResource('payments', PaymentController::class)->only([
         'index',

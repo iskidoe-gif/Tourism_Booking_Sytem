@@ -20,8 +20,9 @@
         <div class="card">
             <div class="card-header bg-white fw-semibold">Booking Details</div>
             <div class="card-body">
-                <form method="POST" action="{{ route('bookings.store', $tourPackage) }}">
+                <form method="POST" action="{{ route('bookings.store') }}">
                     @csrf
+                    <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">
 
                     <div class="mb-3">
                         <label class="form-label">Tour Date</label>
