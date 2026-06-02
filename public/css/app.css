@@ -1151,8 +1151,15 @@ textarea {
 }
 
 .bolinao-button-outline {
-    background: rgba(234, 224, 207, 0.04);
-    color: var(--palette-cream);
+    background: rgba(79, 111, 217, 0.18);
+    color: #e8eeff;
+    border: 1px solid rgba(123, 168, 255, 0.4);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.bolinao-button-outline:hover {
+    background: rgba(123, 168, 255, 0.2);
+    transform: translateY(-1px);
 }
 
 .bolinao-socials {

@@ -168,13 +168,19 @@ body {
 }
 
 .bolinao-button-outline {
-    background: transparent;
-    color: var(--palette-cream);
-    border: 1px solid rgba(234, 224, 207, 0.22);
+    background: rgba(79, 111, 217, 0.18);
+    color: #e8eeff;
+    border: 1px solid rgba(123, 168, 255, 0.4);
     padding: 0.45rem 0.9rem;
     min-width: auto;
     font-size: 0.85rem;
     border-radius: 0.5rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.bolinao-button-outline:hover {
+    background: rgba(123, 168, 255, 0.2);
+    transform: translateY(-1px);
     opacity: 0.95;
 }
 
