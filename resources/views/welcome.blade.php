@@ -31,11 +31,6 @@
                 <span>ig</span>
             </div>
 
-            <div class="bolinao-progress">
-                <span class="bolinao-play">▶</span>
-                <span class="bolinao-line"></span>
-            </div>
-
             <div class="bolinao-dots" aria-hidden="true">
                 <span class="active"></span>
                 <span></span>
