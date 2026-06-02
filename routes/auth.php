@@ -10,6 +10,9 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [LoginController::class, 'showForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
+
+    Route::get('/admin/login', [LoginController::class, 'showAdminForm'])->name('admin.login');
+    Route::post('/admin/login', [LoginController::class, 'adminLogin'])->name('admin.login.store');
 });
 
 Route::post('/logout', [LoginController::class, 'logout'])

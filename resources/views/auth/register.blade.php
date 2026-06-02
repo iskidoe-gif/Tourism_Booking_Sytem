@@ -1,30 +1,66 @@
 <x-layout>
-    <div class="panel">
-        <h1 class="title">Register</h1>
-        <p class="lead">Create a tourist account.</p>
+    <section class="login-hero" aria-label="Create tourist account">
+        <div class="login-card register-card">
+            <div class="login-photo">
+                <a href="{{ route('home') }}" class="login-brand">Bolinao</a>
+                <div>
+                    <p class="login-kicker">Start Exploring</p>
+                    <h1>Create your Bolinao trip account.</h1>
+                    <p>
+                        Book local packages, manage reservations, and keep your
+                        Pangasinan heritage and coastal plans in one place.
+                    </p>
+                </div>
+            </div>
 
-        <form class="form" method="POST" action="{{ route('register') }}">
-            @csrf
-            <div class="group">
-                <label class="label">Name</label>
-                <input name="name" type="text" value="{{ old('name') }}" class="input" />
-                @error('name')<p class="error">{{ $message }}</p>@enderror
+            <div class="login-panel">
+                <div class="login-heading">
+                    <p>Tourist Registration</p>
+                    <h2>Create account</h2>
+                </div>
+
+                @if ($errors->any())
+                    <div class="alert alert-error">
+                        <strong>Registration error</strong>
+                        <div>Please check the errors below and try again.</div>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('register') }}" class="auth-form">
+                    @csrf
+
+                    <div class="auth-group">
+                        <label for="name">Full Name</label>
+                        <input id="name" name="name" type="text" value="{{ old('name') }}" placeholder="Juan Dela Cruz" class="auth-input" required autofocus />
+                        @error('name')<p class="error-text">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="auth-group">
+                        <label for="email">Email Address</label>
+                        <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="you@example.com" class="auth-input" required />
+                        @error('email')<p class="error-text">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="auth-group">
+                        <label for="password">Password</label>
+                        <input id="password" name="password" type="password" placeholder="Password" class="auth-input" required />
+                        @error('password')<p class="error-text">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="auth-group">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <input id="password_confirmation" name="password_confirmation" type="password" placeholder="Confirm password" class="auth-input" required />
+                    </div>
+
+                    <button type="submit" class="btn-primary">Create My Account</button>
+                </form>
+
+                <div class="login-switch">
+                    <a href="{{ route('login') }}">Sign in</a>
+                    <span></span>
+                    <a href="{{ route('admin.login') }}">Admin login</a>
+                </div>
             </div>
-            <div class="group">
-                <label class="label">Email</label>
-                <input name="email" type="email" value="{{ old('email') }}" class="input" />
-                @error('email')<p class="error">{{ $message }}</p>@enderror
-            </div>
-            <div class="group">
-                <label class="label">Password</label>
-                <input name="password" type="password" class="input" />
-                @error('password')<p class="error">{{ $message }}</p>@enderror
-            </div>
-            <div class="group">
-                <label class="label">Confirm Password</label>
-                <input name="password_confirmation" type="password" class="input" />
-            </div>
-            <button class="primary">Create account</button>
-        </form>
-    </div>
+        </div>
+    </section>
 </x-layout>

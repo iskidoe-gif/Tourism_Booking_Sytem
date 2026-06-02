@@ -1,50 +1,46 @@
-<!DOCTYPE html>
-<html lang="ENG">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        @if (file_exists(public_path('build/manifest.json')))
-            @vite(['resources/css/app.css'])
-        @endif
-    </head>
-    <body class="shell">
-        <header class="topbar">
-            <div class="frame">
-                <a href="{{ route('home') }}" class="brand">Tourism Booking System</a>
-                @if (Route::has('login'))
-                    <nav class="menu menu-right">
-                    @auth
-                        <a
-                            href="{{ route('dashboard') }}"
-                            class="navbtn">
-                            Dashboard
-                        </a>
-                    @else
-                        <a
-                            href="{{ route('login') }}"
-                            class="navbtn"
-                        >
-                            Log in
-                        </a>
+<x-layout>
+    <section class="bolinao-hero" aria-label="Bolinao tourism landing page">
+        <div class="bolinao-card">
+            <nav class="bolinao-nav" aria-label="Main navigation">
+                <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
+                <div class="bolinao-navlinks">
+                    <a href="{{ route('home') }}">Home</a>
+                    <a href="{{ route('packages.index') }}">Trips</a>
+                    <a href="{{ route('login') }}">Sign in</a>
+                    <a href="{{ route('register') }}">Register</a>
+                </div>
+            </nav>
 
-                        @if (Route::has('register'))
-                            <a
-                                href="{{ route('register') }}"
-                                class="navbtn">
-                                Register
-                            </a>
-                        @endif
-                    @endauth
-                    </nav>
-                @endif
+            <div class="bolinao-copy">
+                <p class="bolinao-kicker">Heritage</p>
+                <h1>Bolinao</h1>
+                <p>
+                    Visit centuries-old stone landmarks, coastal villages, beaches,
+                    caves, and quiet Pangasinan views in one memorable trip.
+                </p>
+
+                <div class="bolinao-actions">
+                    <a href="{{ route('register') }}" class="bolinao-button bolinao-button-light">Explore all trips</a>
+                    <a href="{{ route('login') }}" class="bolinao-button bolinao-button-outline">Explore packages</a>
+                </div>
             </div>
-        </header>
-        <main class="frame">
-            <div class="hero">
-                <p class="eyebrow">Tourism Booking System</p>
-                <h1 class="hero-title">Plan, book, and manage trips.</h1>
-                <p class="hero-copy">A simple travel platform for tourists and admins.</p>
+
+            <div class="bolinao-socials" aria-label="Social links">
+                <span>f</span>
+                <span>x</span>
+                <span>ig</span>
             </div>
-        </main>
-    </body>
-</html>
+
+            <div class="bolinao-progress">
+                <span class="bolinao-play">▶</span>
+                <span class="bolinao-line"></span>
+            </div>
+
+            <div class="bolinao-dots" aria-hidden="true">
+                <span class="active"></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </section>
+</x-layout>

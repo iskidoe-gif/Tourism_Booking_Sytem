@@ -33,6 +33,39 @@ class LoginController extends Controller
             ->withErrors(['email' => 'These credentials do not match our records.']);
     }
 
+    public function showAdminForm()
+    {
+        return view('auth.admin-login');
+    }
+
+    public function adminLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // Attempt to login as admin
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // Check if user is an admin
+            if (!$user->isAdmin()) {
+                Auth::logout();
+                return back()
+                    ->withInput($request->only('email'))
+                    ->withErrors(['email' => 'You do not have admin privileges.']);
+            }
+
+            $request->session()->regenerate();
+            return redirect()->route('admin.dashboard')->with('success', 'Welcome back, Admin ' . $user->name . '!');
+        }
+
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['email' => 'These credentials do not match our records.']);
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
