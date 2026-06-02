@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Tourist\BookingController;
+use App\Http\Controllers\Tourist\PackageController as TouristPackageController;
 use App\Http\Controllers\Tourist\ReservationController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
@@ -23,7 +25,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
-    ->middleware('auth')
     ->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -33,6 +34,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::get('/packages', [DashboardController::class, 'packages'])
     ->middleware('auth')
     ->name('packages.index');
+
+Route::get('/packages/{tourPackage}', [TouristPackageController::class, 'show'])
+    ->middleware('auth')
+    ->name('packages.show');
+
+Route::get('/bookings/{tourPackage}/create', [BookingController::class, 'create'])
+    ->middleware('auth')
+    ->name('bookings.create');
 
 Route::get('/reservations', [ReservationController::class, 'index'])
     ->middleware('auth')
@@ -56,16 +65,17 @@ Route::post('/bookings', [DashboardController::class, 'storeBooking'])
     ->name('bookings.store');
 
 Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
-    ->middleware(['auth:admin', EnsureAdmin::class])
+    ->middleware([EnsureAdmin::class])
     ->name('admin.dashboard');
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth:admin', EnsureAdmin::class])
+    ->middleware([EnsureAdmin::class])
     ->group(function () {
         Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
         Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
         Route::post('/packages', [PackageController::class, 'store'])->name('packages.store');
+        Route::get('/packages/{package}', [PackageController::class, 'show'])->name('packages.show');
         Route::get('/packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit');
         Route::put('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
         Route::delete('/packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');

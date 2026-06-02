@@ -27,7 +27,7 @@ class PackageController extends Controller
     public function show(TourPackage $tourPackage)
     {
         abort_if($tourPackage->status === 'inactive', 404);
-        $tourPackage->load('reviews.user');
+
         return view('tourist.packages.show', compact('tourPackage'));
     }
 }

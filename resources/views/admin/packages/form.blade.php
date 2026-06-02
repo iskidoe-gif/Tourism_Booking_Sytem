@@ -10,7 +10,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ $action }}">
+        <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
             @csrf
             @if($method === 'PUT')
                 @method('PUT')
@@ -57,6 +57,13 @@
                     <input type="text" name="image" value="{{ old('image', $package->image) }}" class="form-control" placeholder="images/your-image.png">
                 </div>
                 <div class="col-12 col-md-6">
+                    <label class="form-label">Upload image</label>
+                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input">
+                    <div class="mt-2">
+                        <img id="image_preview" src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}" alt="Preview" style="max-width:160px; max-height:120px; object-fit:cover; border-radius:6px;">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-control">
                         <option value="active" {{ old('status', $package->status) === 'active' ? 'selected' : '' }}>Active</option>
@@ -72,3 +79,19 @@
         </form>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('image_file_input');
+    const preview = document.getElementById('image_preview');
+    if (!input) return;
+    input.addEventListener('change', function (e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+            preview.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>

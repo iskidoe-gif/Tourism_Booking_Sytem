@@ -16,6 +16,7 @@
             <table class="table">
                 <thead>
                     <tr>
+                        <th class="th">Image</th>
                         <th class="th">Name</th>
                         <th class="th">Location</th>
                         <th class="th">Price</th>
@@ -27,12 +28,16 @@
                 <tbody>
                     @forelse($packages as $package)
                         <tr>
+                            <td class="td">
+                                <img src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}" alt="{{ $package->name }}" style="width:88px;height:56px;object-fit:cover;border-radius:6px;">
+                            </td>
                             <td class="td">{{ $package->name }}</td>
                             <td class="td">{{ $package->location }}</td>
                             <td class="td">PHP {{ number_format((float) $package->price, 2) }}</td>
                             <td class="td">{{ ucfirst($package->status) }}</td>
                             <td class="td">{{ number_format((float) $package->rating, 1) }}</td>
                             <td class="td d-flex gap-2">
+                                <a href="{{ route('admin.packages.show', $package) }}" class="btn btn-sm btn-outline-secondary">View</a>
                                 <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 <form method="POST" action="{{ route('admin.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?');">
                                     @csrf
@@ -43,7 +48,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="td empty">No tour packages found.</td>
+                            <td colspan="7" class="td empty">No tour packages found.</td>
                         </tr>
                     @endforelse
                 </tbody>

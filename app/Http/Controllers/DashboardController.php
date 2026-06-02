@@ -83,7 +83,7 @@ class DashboardController extends Controller
     {
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
-            'tour_date' => ['required', 'date'],
+            'tour_date' => ['required', 'date', 'after:today'],
             'num_guests' => ['required', 'integer', 'min:1'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
         ]);
@@ -91,6 +91,10 @@ class DashboardController extends Controller
         $package = TourPackage::whereKey($validated['tour_package_id'])
             ->where('status', 'active')
             ->firstOrFail();
+
+        $request->validate([
+            'num_guests' => ['max:' . $package->max_guests],
+        ]);
 
         $booking = Booking::create([
             'booking_number' => $this->bookingNumber(),

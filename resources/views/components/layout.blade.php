@@ -8,8 +8,9 @@
     <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 @php
-    $adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user();
-    $touristUser = auth()->user();
+    $webUser = auth()->user();
+    $adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user() ?: ($webUser?->isAdmin() ? $webUser : null);
+    $touristUser = $webUser?->isTourist() ? $webUser : null;
     $isAuthPage = request()->routeIs(['admin.login']);
 @endphp
 <body class="shell {{ request()->routeIs('home') ? 'home-shell' : ($isAuthPage ? 'auth-shell' : 'page-shell') }}">
@@ -32,6 +33,7 @@
                         </form>
                     @elseif($adminUser)
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Admin</x-nav-link>
+                        <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">Packages</x-nav-link>
                         <x-nav-link :href="route('admin.reports.bookings', 'csv')" :active="request()->routeIs('admin.reports.bookings')">Reports</x-nav-link>
                         <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf

@@ -85,6 +85,25 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $user = User::query()
+            ->where('email', $credentials['email'])
+            ->where('role', 'admin')
+            ->first();
+
+        if ($user && $this->passwordMatches($credentials['password'], $user->password)) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Logged in successfully.',
+                    'user' => $user,
+                ]);
+            }
+
+            return redirect()->intended($redirectTo);
+        }
+
         $admin = Admin::query()
             ->where('email', $credentials['email'])
             ->first();

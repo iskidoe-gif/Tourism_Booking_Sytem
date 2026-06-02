@@ -3,7 +3,8 @@
 <div class="row g-4">
     <div class="col-md-7">
         @if($tourPackage->image)
-            <img src="{{ asset('storage/' . $tourPackage->image) }}"
+            @php($imageUrl = str_starts_with($tourPackage->image, 'http') ? $tourPackage->image : asset($tourPackage->image))
+            <img src="{{ $imageUrl }}"
                  class="img-fluid rounded border" alt="{{ $tourPackage->name }}">
         @else
             <div class="bg-light border rounded d-flex align-items-center justify-content-center"
@@ -50,7 +51,4 @@
         </div>
     </div>
 </div>
-
-                            <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin" class="btn btn-primary w-100">
-                                Login to Book
-                            </a>
+</x-layout>
