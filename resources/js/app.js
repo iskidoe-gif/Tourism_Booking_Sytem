@@ -54,6 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const openOnError = () => {
+        const errorPanel = modal.querySelector('.auth-pane .alert-error');
+        if (errorPanel) {
+            const pane = errorPanel.closest('.auth-pane');
+            const mode = pane?.getAttribute('data-auth-pane') || 'signin';
+            openModal(mode);
+        }
+    };
+
     triggers.forEach((trigger) => {
         trigger.addEventListener('click', (event) => {
             event.preventDefault();
@@ -73,4 +82,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     openFromQuery();
+    openOnError();
 });

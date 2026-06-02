@@ -1,85 +1,85 @@
 <x-layout>
-    <div class="section">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="title">Tour Packages</h1>
-                <p class="lead">Browse active tour packages and book the perfect tour.</p>
-            </div>
-            <form method="GET" action="{{ route('packages.index') }}" class="d-flex gap-2">
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search destinations or titles"
-                       class="form-control" style="min-width:280px">
-                <button type="submit" class="btn btn-secondary">Search</button>
-            </form>
-        </div>
-    </div>
+    @php
+        $touristUser = auth()->user()?->isTourist() ? auth()->user() : null;
+    @endphp
 
-    @if($packages->isEmpty())
-        <div class="card empty">No active packages found.</div>
-    @else
-        <div class="grid2">
-            @foreach($packages as $package)
-                <div class="card package">
-                    <div class="package-image mb-3 overflow-hidden rounded" style="height:220px;">
+    <section class="packages-hero">
+        <div class="packages-hero-card">
+            <div class="packages-hero-copy">
+                <span class="visual-tag">Explore Bolinao&apos;s Natural Beauty</span>
+                <h1 class="visual-headline">Discover your next tour</h1>
+                <p class="visual-copy">
+                    Search tours by destination, package name, or experience. Choose from beachfront escapes, culture tours, and island adventures.
+                </p>
+                <form action="{{ route('packages.index') }}" method="GET" class="packages-search">
+                    <label for="search" class="sr-only">Search tours by destination or title</label>
+                    <input id="search" name="search" type="search" value="{{ request('search') }}"
+                           placeholder="eg. Patar Beach, Church..." class="form-control" />
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="packages-listing">
+        <div class="packages-listing-header">
+            <div>
+                <h2 class="section-title">Browse Tour Packages</h2>
+                <p class="section-copy">Handpicked Bolinao trips in one place.</p>
+            </div>
+            @if(request('search'))
+                <div class="search-summary">Showing results for “{{ request('search') }}”</div>
+            @endif
+        </div>
+
+        @if($packages->isEmpty())
+            <div class="card text-center text-muted py-5">No active packages found.</div>
+        @else
+            <div class="package-card-grid">
+                @foreach($packages as $package)
+                    <article class="package-card">
                         @php
                             $imageUrl = $package->image
                                 ? (str_starts_with($package->image, 'http') ? $package->image : asset($package->image))
                                 : asset('images/package-default.svg');
                         @endphp
-                        <img src="{{ $imageUrl }}" alt="{{ $package->name }}" class="img-fluid w-100 h-100" style="object-fit:cover;">
-                    </div>
-
-                    <div class="package-head d-flex justify-content-between align-items-start mb-3">
-                        <div>
-                            <h2 class="subtitle">{{ $package->name }}</h2>
-                            <p class="lead mb-0">{{ $package->location }}</p>
-                        </div>
-                        <strong class="price text-success">PHP {{ number_format((float) $package->price, 2) }}</strong>
-                    </div>
-
-                    <p class="text text-truncate" style="max-height:3.6em;overflow:hidden;">{{ $package->description }}</p>
-
-                    <div class="meta d-flex flex-wrap gap-2 mb-3 small text-muted">
-                        <span>Duration: {{ $package->duration_days }} day{{ $package->duration_days === 1 ? '' : 's' }}</span>
-                        <span>Max guests: {{ $package->max_guests }}</span>
-                    </div>
-
-                    <div class="d-grid gap-2 mb-3">
-                        <a href="{{ route('packages.show', $package) }}" class="btn btn-outline-secondary w-100">View details</a>
-                    </div>
-
-                    @auth
-                        <form class="form" method="POST" action="{{ route('bookings.store') }}">
-                            @csrf
-                            <input type="hidden" name="tour_package_id" value="{{ $package->id }}">
-                            <div class="row g-3 mb-3">
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label">Tour date</label>
-                                    <input type="date" name="tour_date" value="{{ old('tour_date', now()->toDateString()) }}" class="form-control">
+                        <div class="package-card-media" style="background-image: url('{{ $imageUrl }}');"></div>
+                        <div class="package-card-body">
+                            <div class="package-card-meta">
+                                <span>{{ $package->duration_days }} Day Tour</span>
+                                <span>{{ $package->destination?->name ?? 'Bolinao' }}</span>
+                                <span>Max {{ $package->max_guests }} guests</span>
+                            </div>
+                            <h3 class="package-card-title">{{ $package->name }}</h3>
+                            <p class="package-card-description">{{ Str::limit($package->description, 110) }}</p>
+                            <div class="package-card-rating">
+                                @for($i = 1; $i <= 5; $i++)
+                                    {!! $i <= round($package->rating) ? '&#9733;' : '&#9734;' !!}
+                                @endfor
+                            </div>
+                            <div class="package-card-footer">
+                                <div class="package-card-price">
+                                    <span class="price">&#8369;{{ number_format($package->price) }}</span>
+                                    <span class="price-note">/ person</span>
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="form-label">Guests</label>
-                                    <input type="number" min="1" name="num_guests" value="{{ old('num_guests', 1) }}" max="{{ $package->max_guests }}" class="form-control">
+                                <div class="package-card-actions">
+                                    <a href="{{ route('packages.show', $package) }}" class="btn btn-secondary">View details</a>
+                                    @if($touristUser)
+                                        <a href="{{ route('packages.show', $package) }}" class="btn btn-primary">Book now</a>
+                                    @else
+                                        <a href="{{ route('home', ['auth' => 'signin']) }}" class="btn btn-primary">Login to Book</a>
+                                        <a href="{{ route('home', ['auth' => 'register']) }}" class="btn btn-outline-secondary">Register</a>
+                                    @endif
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Special requests</label>
-                                <textarea name="special_requests" rows="2" class="form-control">{{ old('special_requests') }}</textarea>
-                            </div>
-                            <button class="btn btn-primary w-100">Book this tour</button>
-                        </form>
-                    @else
-                        <div class="card border-secondary p-3 text-center">
-                            <p class="mb-3 text-muted">Register or log in to book this tour.</p>
-                            <a href="{{ route('home', ['auth' => 'signin']) }}" class="btn btn-primary w-100 mb-2">Login to Book</a>
-                            <a href="{{ route('home', ['auth' => 'register']) }}" class="btn btn-outline-secondary w-100">Register</a>
                         </div>
-                    @endauth
-                </div>
-            @endforeach
-        </div>
+                    </article>
+                @endforeach
+            </div>
 
-        @if($packages->hasPages())
-            <div class="mt-4">{{ $packages->links() }}</div>
+            <div class="package-pagination">
+                {{ $packages->links() }}
+            </div>
         @endif
-    @endif
+    </section>
 </x-layout>

@@ -14,7 +14,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): JsonResponse|View
+    public function index(Request $request): JsonResponse|View|RedirectResponse
     {
         if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -40,7 +40,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', $data);
     }
 
-    public function packages(Request $request): JsonResponse|View
+    public function packages(Request $request): JsonResponse|View|RedirectResponse
     {
         if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');
@@ -52,7 +52,7 @@ class DashboardController extends Controller
                 ->orWhere('description', 'like', "%{$request->search}%")
             )
             ->orderBy('updated_at', 'desc')
-            ->paginate(9)
+            ->paginate(6)
             ->withQueryString();
 
         $data = compact('packages');
@@ -68,7 +68,7 @@ class DashboardController extends Controller
         return view('tourist.packages', $data);
     }
 
-    public function reservations(Request $request): JsonResponse|View
+    public function reservations(Request $request): JsonResponse|View|RedirectResponse
     {
         if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');

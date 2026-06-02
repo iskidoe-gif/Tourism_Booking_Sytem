@@ -22,7 +22,7 @@ class AuthController extends Controller
 
     public function showAdminLoginForm(): View
     {
-        return view('auth.login', ['role' => 'admin']);
+        return view('auth.admin-login');
     }
 
     public function showRegisterForm(): View

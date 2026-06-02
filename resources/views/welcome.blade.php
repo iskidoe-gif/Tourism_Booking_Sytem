@@ -11,27 +11,35 @@
                         @auth
                             <a href="{{ route('dashboard') }}">Dashboard</a>
                         @else
-                            <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
+                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="signin">Login</a>
                             <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
                         @endauth
                     </div>
                 </nav>
             </header>
-            <div class="bolinao-copy">
-                <p class="bolinao-kicker">Heritage</p>
-                <h1>Bolinao</h1>
-                <p>
-                    Visit centuries-old stone landmarks, coastal villages, beaches,
-                    caves, and quiet Pangasinan views in one memorable trip.
-                </p>
+            <div class="bolinao-hero-grid">
+                <div class="bolinao-copy">
+                    <p class="bolinao-kicker">Heritage</p>
+                    <h1>Bolinao</h1>
+                    <p>
+                        Visit centuries-old stone landmarks, coastal villages, beaches,
+                        caves, and quiet Pangasinan views in one memorable trip.
+                    </p>
 
-                <div class="bolinao-actions">
-                    @auth
-                        <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
-                    @else
-                        <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="register">Book a Trip Now</a>
-                    @endauth
-                    <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-outline">Browse Tour Packages</a>
+                    <div class="bolinao-actions">
+                        @auth
+                            <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
+                        @else
+                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="register">Book a Trip Now</a>
+                        @endauth
+                        <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-outline">Browse Tour Packages</a>
+                    </div>
+                </div>
+
+                <div class="bolinao-hero-visual" aria-hidden="true">
+                    <span class="visual-tag">Featured destination</span>
+                    <h2 class="visual-headline">Saint James Church</h2>
+                    <p class="visual-copy">Experience heritage, beach vistas, and coastal sunsets in Bolinao’s most iconic location.</p>
                 </div>
             </div>
         </div>
@@ -73,7 +81,6 @@
                 </article>
             </div>
         </div>
-        </div>
     </section>
 
     <div class="auth-modal" data-auth-modal hidden>
@@ -88,6 +95,17 @@
             </div>
 
             <div class="auth-pane active" data-auth-pane="signin">
+                @if ($errors->any() && ! old('name') && ! old('password_confirmation'))
+                    <div class="alert alert-error">
+                        <strong>Login Failed</strong>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('login.store') }}" class="auth-form">
                     @csrf
 
@@ -108,9 +126,24 @@
 
                     <button type="submit" class="btn-primary">Sign In</button>
                 </form>
+
+                <div class="auth-helper">
+                    <p>Need admin access? <a href="{{ route('admin.login') }}">Sign in here</a>.</p>
+                </div>
             </div>
 
             <div class="auth-pane" data-auth-pane="register">
+                @if ($errors->any() && (old('name') || old('password_confirmation')))
+                    <div class="alert alert-error">
+                        <strong>Registration Error</strong>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('register') }}" class="auth-form">
                     @csrf
 

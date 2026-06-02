@@ -44,7 +44,7 @@ textarea {
 
 .frame,
 .content {
-    width: min(100%, 72rem);
+    width: min(100%, 88rem);
     margin: 0 auto;
 }
 
@@ -55,6 +55,435 @@ textarea {
 .content {
     padding-top: 7rem;
     padding-bottom: 2rem;
+}
+
+.packages-hero {
+    padding: 2.5rem 0 1rem;
+}
+
+.packages-hero-card {
+    /* Pagination Styling */
+    .pagination {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        justify-content: center;
+        padding: 0.5rem 0;
+        list-style: none;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .pagination li {
+        display: inline-block;
+    }
+
+    .pagination a,
+    .pagination span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0.15rem 0.5rem;
+        border: 1px solid rgba(234, 224, 207, 0.12);
+        border-radius: 0.35rem;
+        background: rgba(17, 24, 68, 0.82);
+        color: var(--palette-cream);
+        font-weight: 500;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.12s ease;
+    }
+
+    .pagination a:hover {
+        border-color: rgba(234, 224, 207, 0.28);
+        background: rgba(17, 24, 68, 0.94);
+    }
+
+    .pagination .active span {
+        background: linear-gradient(90deg, var(--palette-cream) 0%, var(--palette-secondary) 100%);
+        color: var(--palette-ink);
+        border-color: var(--palette-secondary);
+        padding: 0.05rem 0.5rem;
+        min-width: auto;
+    }
+
+    .pagination .disabled span {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .pagination .disabled span:hover {
+        background: rgba(17, 24, 68, 0.82);
+        border-color: rgba(234, 224, 207, 0.12);
+    }
+
+    /* Make prev/next compact and inline (less-than / greater-than) */
+    .pagination li a[rel="prev"],
+    .pagination li a[rel="next"] {
+        min-width: 2.2rem;
+        height: 2rem;
+        padding: 0.05rem 0.5rem;
+        font-size: 0.95rem;
+    }
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin-top: 2rem;
+}
+
+.packages-search .form-control {
+    flex: 1 1 320px;
+    min-width: 0;
+    border-radius: 1rem;
+}
+
+.packages-search .btn {
+    min-width: 12rem;
+}
+
+.packages-listing {
+    padding: 2rem 0 3rem;
+}
+
+.packages-listing-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.packages-listing-header .section-copy {
+    margin: 0.5rem 0 0;
+    color: rgba(234, 224, 207, 0.78);
+}
+
+.search-summary {
+    color: rgba(234, 224, 207, 0.75);
+    font-size: 0.95rem;
+}
+
+.package-card-grid {
+    display: grid;
+    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    grid-auto-rows: 1fr;
+}
+
+@media (min-width: 992px) {
+    .package-card-grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 1280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+.package-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 15rem;
+    border-radius: 0.85rem;
+    overflow: hidden;
+    border: 1px solid rgba(234, 224, 207, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0.45rem 0.9rem rgba(0, 0, 0, 0.10);
+}
+
+.package-card-media {
+    position: relative;
+    min-height: 120px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.package-card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(17, 24, 68, 0.15), rgba(17, 24, 68, 0.82));
+}
+
+.package-card-badge {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    display: inline-flex;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(234, 224, 207, 0.14);
+    color: var(--palette-cream);
+    font-weight: 700;
+    font-size: 0.8rem;
+    z-index: 1;
+}
+
+.package-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    flex: 1;
+}
+
+.package-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    color: rgba(234, 224, 207, 0.72);
+    font-size: 0.9rem;
+}
+
+.package-card-title {
+    margin: 0;
+    color: var(--palette-cream);
+    font-size: 0.98rem;
+    line-height: 1.08;
+}
+
+.package-card-description {
+    margin: 0;
+    color: rgba(234, 224, 207, 0.78);
+    line-height: 1.4;
+    min-height: 2.2rem;
+}
+
+/* Ensure any large arrow elements inserted by templates are compact and inline */
+.package-pagination .big-arrow,
+.package-card-grid .big-arrow,
+.packages-listing .big-arrow,
+.big-arrow {
+    display: inline-flex !important;
+    width: 2rem !important;
+    height: 2rem !important;
+    padding: 0.15rem !important;
+    font-size: 1.05rem !important;
+    line-height: 1 !important;
+    border-radius: 0.35rem !important;
+    background: rgba(17, 24, 68, 0.82) !important;
+    color: var(--palette-cream) !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    position: static !important;
+    transform: none !important;
+}
+
+.package-card-rating {
+    display: flex;
+    gap: 0.18rem;
+    color: #f3c55b;
+    font-size: 1rem;
+}
+
+.package-card-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.package-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    color: var(--palette-cream);
+}
+
+.package-card-price .price {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.package-card-price .price-note {
+    color: rgba(234, 224, 207, 0.7);
+    font-size: 0.95rem;
+}
+
+.package-card-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.package-card-actions .btn {
+    width: 100%;
+    min-width: auto;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.9rem;
+}
+
+.package-card-actions .btn + .btn {
+    margin-top: 0;
+}
+
+.package-card-footer {
+    margin-top: auto;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.btn-outline-secondary {
+    border: 1.5px solid rgba(234, 224, 207, 0.32);
+    background: transparent;
+    color: var(--palette-cream);
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(234, 224, 207, 0.08);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.package-pagination {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* Compact, centered pagination for package listing */
+.package-pagination .pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+.package-pagination .pagination li {
+    margin: 0;
+}
+.package-pagination .pagination li a,
+.package-pagination .pagination li span {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.95rem;
+    border-radius: 0.5rem;
+}
+.package-pagination .pagination li a[rel="prev"],
+.package-pagination .pagination li a[rel="next"] {
+    font-size: 0.9rem;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.15rem 0.5rem;
+}
+
+.package-pagination nav {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.package-pagination nav > div:first-child {
+    display: none !important;
+}
+
+.package-pagination nav > div:last-child {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+.package-pagination nav > div:last-child > div {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    width: 100% !important;
+}
+
+.package-pagination nav .inline-flex,
+.package-pagination nav .inline-flex.items-center,
+.package-pagination nav .inline-flex.items-center.px-2.py-2,
+.package-pagination nav .inline-flex.items-center.px-4.py-2,
+.package-pagination nav .inline-flex.items-center.px-4.py-2.-ml-px {
+    display: inline-flex !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: 2rem !important;
+    padding: 0.25rem 0.5rem !important;
+    margin: 0 !important;
+    font-size: 0.85rem !important;
+    line-height: 1 !important;
+    border-radius: 0.4rem !important;
+    white-space: nowrap !important;
+}
+
+.package-pagination nav svg {
+    width: 1rem !important;
+    height: 1rem !important;
+}
+
+.package-pagination nav .text-sm {
+    font-size: 0.85rem !important;
+}
+
+.package-pagination nav .px-4 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+}
+
+.package-pagination nav .py-2 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.package-pagination nav .rounded-l-md,
+.package-pagination nav .rounded-r-md,
+.package-pagination nav .rounded-md {
+    border-radius: 0.4rem !important;
+}
+
+.package-pagination nav .sm\:hidden {
+    display: none !important;
+}
+
+.package-pagination nav .hidden {
+    display: flex !important;
+}
+
+.package-pagination nav .big-arrow {
+    display: none !important;
+}
+
+@media (max-width: 720px) {
+    .packages-hero {
+        padding: 1.5rem 0 1rem;
+    }
+
+    .packages-hero-card {
+        padding: 1.75rem;
+        border-radius: 1.5rem;
+    }
+
+    .packages-search {
+        flex-direction: column;
+    }
+
+    .packages-listing-header {
+        align-items: stretch;
+    }
 }
 
 .menu {
@@ -186,7 +615,9 @@ textarea {
 }
 
 .auth-input,
-.input {
+.input,
+.form-control,
+.form-select {
     width: 100%;
     padding: 0.875rem 1rem;
     border: 1px solid rgba(234, 224, 207, 0.12);
@@ -197,7 +628,9 @@ textarea {
 }
 
 .auth-input:focus,
-.input:focus {
+.input:focus,
+.form-control:focus,
+.form-select:focus {
     outline: 2px solid rgba(114, 136, 174, 0.48);
     outline-offset: 2px;
 }
@@ -274,17 +707,25 @@ textarea {
 .navlink {
     position: relative;
     z-index: 9999;
+<<<<<<< Updated upstream
     padding: 0.25rem 0.5rem;
+=======
+    padding: 0.45rem 0.85rem;
+>>>>>>> Stashed changes
     color: var(--palette-cream);
+    border-radius: 9999px;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.navlink:hover,
+.navlink:hover {
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.12);
+}
+
 .navlink.active {
+    font-weight: 700;
     text-decoration: underline;
-}
-
-.navlink.active {
-    font-weight: 600;
+    background: rgba(255, 255, 255, 0.14);
 }
 
 .navbtn {
@@ -1035,24 +1476,25 @@ textarea {
 }
 
 .bolinao-hero {
-    min-height: 100vh;
+    min-height: calc(100vh - 5rem);
     display: grid;
     place-items: center;
+<<<<<<< Updated upstream
     padding: 8rem 0 0;
+=======
+    padding: 6rem 1rem 2rem;
+>>>>>>> Stashed changes
 }
 
 .bolinao-card {
     position: relative;
-    width: 100%;
-    min-height: 100vh;
+    width: min(100%, 76rem);
+    padding: clamp(2rem, 3.5vw, 3rem);
+    border-radius: 2rem;
+    background: linear-gradient(135deg, rgba(17, 24, 68, 0.92), rgba(56, 69, 118, 0.96)),
+        url("/images/bolinao-church.jpg") center/cover no-repeat;
+    box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.24);
     overflow: hidden;
-    background:
-        linear-gradient(90deg, rgba(17, 24, 68, 0.94) 0%, rgba(75, 86, 148, 0.74) 38%, rgba(17, 24, 68, 0.18) 74%),
-        url("/images/bolinao-church.jpg"),
-        linear-gradient(135deg, var(--palette-ink) 0%, var(--palette-primary) 52%, var(--palette-cream) 100%);
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
 }
 
 .bolinao-card::before {
@@ -1090,6 +1532,18 @@ textarea {
 .bolinao-brand,
 .bolinao-nav a {
     text-decoration: none;
+}
+
+.bolinao-nav a {
+    color: var(--palette-cream);
+    transition: color 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    padding: 0.5rem 0.85rem;
+    border-radius: 0.85rem;
+}
+
+.bolinao-nav a:hover {
+    opacity: 0.92;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .bolinao-navlinks {
@@ -1144,18 +1598,33 @@ textarea {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 8.75rem;
-    min-height: 2.5rem;
-    padding: 0.7rem 1.25rem;
-    border: 1px solid var(--palette-cream);
+    min-width: 9rem;
+    min-height: 2.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.95rem;
+    border: 1px solid rgba(234, 224, 207, 0.2);
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.bolinao-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.18);
+    opacity: 0.98;
 }
 
 .bolinao-button-light {
-    background: var(--palette-cream);
-    color: var(--palette-ink);
+    background: linear-gradient(135deg, #4f6fd9 0%, #79a6ff 100%);
+    color: #f7fbff;
+    border: none;
+    box-shadow: 0 0.9rem 1.5rem rgba(42, 74, 189, 0.28);
+    font-weight: 800;
+}
+
+.bolinao-button-light:hover {
+    background: linear-gradient(135deg, #6c85ff 0%, #a9c2ff 100%);
 }
 
 .bolinao-button-outline {
@@ -1340,20 +1809,24 @@ textarea {
     .bolinao-hero {
         padding: 8rem 0 0;
         place-items: stretch;
+        min-height: 100vh;
+        position: sticky;
+        top: 0;
+        z-index: 1;
     }
 
     .bolinao-card {
         min-height: 100vh;
+        border-radius: 1.75rem;
         background:
             linear-gradient(rgba(17, 24, 68, 0.82), rgba(75, 86, 148, 0.68)),
-            url("/images/bolinao-church.jpg"),
-            linear-gradient(135deg, var(--palette-ink) 0%, var(--palette-primary) 52%, var(--palette-cream) 100%);
+            url("/images/bolinao-church.jpg");
         background-size: cover;
         background-position: center;
     }
 
     .bolinao-nav {
-        align-items: flex-start;
+        align-items: center;
         padding: 1.5rem;
     }
 
