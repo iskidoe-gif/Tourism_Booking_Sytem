@@ -42,8 +42,8 @@
         </div>
 
         <div class="auth-links">
-            <a href="{{ route('login') }}" class="btn-secondary">Tourist Login</a>
-            <a href="{{ route('register') }}" class="btn-secondary">Create Tourist Account</a>
+            <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin" class="btn-secondary">Tourist Login</a>
+            <a href="{{ route('home') }}" data-auth-open data-auth-mode="register" class="btn-secondary">Create Tourist Account</a>
         </div>
     </div>
 </x-layout>

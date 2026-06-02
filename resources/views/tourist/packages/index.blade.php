@@ -121,49 +121,6 @@
     @endif
 </section>
 
-<hr class="my-4">
-
-<section id="my-reservations">
-    <div class="section-title mb-3">My Reservations</div>
-
-    <div class="card overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th>Booking #</th>
-                        <th>Package</th>
-                        <th>Date</th>
-                        <th>Guests</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($bookings as $booking)
-                        <tr>
-                            <td class="font-monospace text-muted">#{{ $booking->booking_number }}</td>
-                            <td class="fw-semibold">{{ $booking->tourPackage->name }}</td>
-                            <td>{{ $booking->tour_date->format('M d, Y') }}</td>
-                            <td>{{ $booking->num_guests }}</td>
-                            <td class="fw-semibold">&#8369;{{ number_format($booking->total_price) }}</td>
-                            <td>
-                                <span class="badge badge-{{ $booking->status }}">
-                                    {{ ucfirst($booking->status) }}
-                                </span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No reservations yet.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
-
 <script>
     const bookingForm = document.getElementById('quick-booking-form');
     const packageSelect = document.getElementById('tour-package-select');

@@ -4,41 +4,43 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Tourism Booking System') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
-<body class="shell {{ request()->routeIs('home') ? 'home-shell' : '' }}">
-    <div class="topbar {{ request()->routeIs('home') ? 'home-topbar' : '' }}">
-        <div class="frame">
-            <nav class="menu">
-                @php($adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user())
-                @php($touristUser = auth()->user())
+@php
+    $adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+    $touristUser = auth()->user();
+    $isAuthPage = request()->routeIs(['admin.login']);
+@endphp
+<body class="shell {{ request()->routeIs('home') ? 'home-shell' : ($isAuthPage ? 'auth-shell' : 'page-shell') }}">
 
-                {{-- Hide nav links on auth pages to avoid duplication with auth forms --}}
-                @if(request()->routeIs('login') || request()->routeIs('register') || request()->routeIs('admin.login'))
-                    {{-- Intentionally empty on auth pages --}}
-                @else
+    <div class="topbar {{ request()->routeIs('home') ? 'home-topbar' : ($isAuthPage ? 'auth-topbar' : 'page-topbar') }}">
+        <div class="frame">
+            <nav class="bolinao-nav" aria-label="Main navigation">
+                <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
+                <div class="bolinao-navlinks">
+                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
+                    <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Trips</x-nav-link>
                     @if($touristUser)
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Packages</x-nav-link>
-                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Reservations</x-nav-link>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
+                            <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf
                             <button class="navbtn">Logout</button>
                         </form>
                     @elseif($adminUser)
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Admin</x-nav-link>
                         <x-nav-link :href="route('admin.reports.bookings', 'csv')" :active="request()->routeIs('admin.reports.bookings')">Reports</x-nav-link>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf
                             <button class="navbtn">Logout</button>
                         </form>
                     @else
-                        <x-nav-link :href="route('login')" :active="request()->routeIs('login')">Login</x-nav-link>
-                        <x-nav-link :href="route('admin.login')" :active="request()->routeIs('admin.login')">Admin Login</x-nav-link>
-                        <x-nav-link :href="route('register')" :active="request()->routeIs('register')">Register</x-nav-link>
+                        <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
                     @endif
-                @endif
+                </div>
             </nav>
         </div>
     </div>

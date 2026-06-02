@@ -32,7 +32,7 @@ class AuthController extends Controller
 
     public function loginTourist(Request $request): JsonResponse|RedirectResponse
     {
-        return $this->authenticate($request, 'tourist', route('dashboard'));
+        return $this->authenticate($request, 'tourist', route('home'));
     }
 
     public function loginAdmin(Request $request): JsonResponse|RedirectResponse
@@ -177,7 +177,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Logged out successfully.']);
         }
 
-        return redirect()->route($user?->role === 'admin' ? 'admin.login' : 'login');
+        return redirect()->route('home');
     }
 
     private function passwordMatches(string $plainPassword, ?string $storedPassword): bool

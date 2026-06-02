@@ -1,11 +1,10 @@
 <x-layout>
     <div class="section">
         <h1 class="title">Tourist Dashboard</h1>
-        <p class="lead">Use the links below to browse packages or check your reservations.</p>
+        <p class="lead">Use the links below to browse packages and manage your account.</p>
 
         <div class="actions">
             <a href="{{ route('packages.index') }}" class="navbtn">Packages</a>
-            <a href="{{ route('reservations.index') }}" class="navbtn">Reservations</a>
         </div>
     </div>
 
