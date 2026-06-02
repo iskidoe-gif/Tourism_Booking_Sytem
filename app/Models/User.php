@@ -21,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
         'role',
     ];
@@ -46,5 +47,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isTourist(): bool
+    {
+        return $this->role === 'tourist';
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 }
