@@ -21,28 +21,28 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $adminAccount = Admin::updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@tourph.com'],
             [
                 'name' => 'Admin User',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('password123'),
                 'role' => 'admin',
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'admin@example.com'],
+            ['email' => 'admin@tourph.com'],
             [
                 'name' => 'Admin User',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('password123'),
                 'role' => 'admin',
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'creator@example.com'],
+            ['email' => 'juan@example.com'],
             [
-                'name' => 'Tourist Creator',
-                'password' => bcrypt('password'),
+                'name' => 'Juan Dela Cruz',
+                'password' => bcrypt('password123'),
                 'role' => 'tourist',
             ]
         );
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'tourist@example.com'],
             [
                 'name' => 'Tourist User',
-                'password' => bcrypt('password'),
+                'password' => bcrypt('password123'),
                 'role' => 'tourist',
             ]
         );

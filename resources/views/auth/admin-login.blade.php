@@ -22,7 +22,7 @@
 
             <div class="auth-group">
                 <label for="email">Admin Email</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="admin@example.com" class="auth-input" required autocomplete="email" />
+                <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="admin@tourph.com" class="auth-input" required autocomplete="email" />
                 @error('email')<p class="error-text">{{ $message }}</p>@enderror
             </div>
 

@@ -70,6 +70,7 @@ class PaymentController extends Controller
             'amount' => ['sometimes', 'required', 'numeric', 'min:0'],
             'method' => ['sometimes', 'required', 'string', 'max:255'],
             'reference_number' => ['nullable', 'string', 'max:255'],
+            'proof' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'required', 'in:pending,paid,refunded,failed'],
             'paid_at' => ['nullable', 'date'],
         ]);

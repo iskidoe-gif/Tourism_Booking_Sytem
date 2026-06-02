@@ -28,6 +28,8 @@
                 <p>{{ $tourPackage->description }}</p>
 
                 <dl class="row small mb-4">
+                    <dt class="col-5 text-muted">Destination</dt>
+                    <dd class="col-7">{{ $tourPackage->destination?->name ?? 'N/A' }}</dd>
                     <dt class="col-5 text-muted">Duration</dt>
                     <dd class="col-7">{{ $tourPackage->duration_days }} day(s)</dd>
                     <dt class="col-5 text-muted">Max Guests</dt>
@@ -51,4 +53,70 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-5">
+    <div class="col-12 col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="mb-3">Reviews</h5>
+
+                @if($tourPackage->reviews->isEmpty())
+                    <p class="text-muted">No reviews yet. Be the first to share your experience.</p>
+                @else
+                    @foreach($tourPackage->reviews as $review)
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>{{ $review->user->name }}</strong>
+                                    <span class="text-muted small">· {{ $review->created_at->diffForHumans() }}</span>
+                                </div>
+                                <div class="text-warning small">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        {{ $i <= $review->rating ? '★' : '☆' }}
+                                    @endfor
+                                </div>
+                            </div>
+                            <p class="mb-2">{{ $review->comment }}</p>
+                            @if(auth()->id() === $review->user_id)
+                                <form action="{{ route('reviews.destroy', $review) }}" method="POST" class="text-end">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+@if(auth()->check())
+    <div class="row mb-5">
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="mb-3">Submit a Review</h5>
+                    <form action="{{ route('reviews.store', $tourPackage) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-control">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>{{ $i }} star{{ $i === 1 ? '' : 's' }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea name="comment" rows="4" class="form-control">{{ old('comment') }}</textarea>
+                        </div>
+                        <button class="btn btn-primary">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
 </x-layout>

@@ -32,12 +32,18 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::get('/packages', [DashboardController::class, 'packages'])
-    ->middleware('auth')
     ->name('packages.index');
 
 Route::get('/packages/{tourPackage}', [TouristPackageController::class, 'show'])
-    ->middleware('auth')
     ->name('packages.show');
+
+Route::post('/packages/{tourPackage}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])
+    ->middleware('auth')
+    ->name('reviews.store');
+
+Route::delete('/reviews/{review}', [\App\Http\Controllers\ReviewController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('reviews.destroy');
 
 Route::get('/bookings/{tourPackage}/create', [BookingController::class, 'create'])
     ->middleware('auth')
@@ -80,7 +86,11 @@ Route::prefix('admin')
         Route::put('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
         Route::delete('/packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
+        Route::resource('destinations', \App\Http\Controllers\Admin\DestinationController::class)->except(['show']);
+
         Route::get('/reports/bookings/{format?}', [ReportController::class, 'bookings'])
             ->whereIn('format', ['json', 'csv', 'xlsx', 'pdf'])
             ->name('reports.bookings');
+
+        Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class)->only(['index', 'edit', 'update']);
     });

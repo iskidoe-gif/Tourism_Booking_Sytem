@@ -27,6 +27,20 @@
                 </div>
             </div>
 
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Destination</label>
+                    <select name="destination_id" class="form-control">
+                        <option value="">No destination selected</option>
+                        @foreach($destinations as $destination)
+                            <option value="{{ $destination->id }}" {{ old('destination_id', $package->destination_id) == $destination->id ? 'selected' : '' }}>
+                                {{ $destination->name }} — {{ $destination->location }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             <div class="mb-3">
                 <label class="form-label">Description</label>
                 <textarea name="description" rows="4" class="form-control">{{ old('description', $package->description) }}</textarea>

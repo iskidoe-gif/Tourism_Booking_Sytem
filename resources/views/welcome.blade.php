@@ -12,6 +12,7 @@
                             <a href="{{ route('dashboard') }}">Dashboard</a>
                         @else
                             <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
+                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
                         @endauth
                     </div>
                 </nav>

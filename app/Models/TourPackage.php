@@ -13,6 +13,7 @@ class TourPackage extends Model
     use HasFactory;
 
     protected $fillable = [
+        'destination_id',
         'name',
         'description',
         'location',
@@ -37,6 +38,16 @@ class TourPackage extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function destination(): BelongsTo
+    {
+        return $this->belongsTo(Destination::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     public function scopeActive(Builder $query)

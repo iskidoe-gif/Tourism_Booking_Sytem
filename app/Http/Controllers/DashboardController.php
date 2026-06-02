@@ -55,7 +55,11 @@ class DashboardController extends Controller
             ->paginate(9)
             ->withQueryString();
 
-        $data = array_merge($this->touristData($request), compact('packages'));
+        $data = compact('packages');
+
+        if ($request->user()) {
+            $data = array_merge($this->touristData($request), $data);
+        }
 
         if ($request->expectsJson()) {
             return response()->json($data);

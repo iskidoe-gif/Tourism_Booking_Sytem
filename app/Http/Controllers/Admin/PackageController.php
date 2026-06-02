@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Destination;
 use App\Models\TourPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,10 @@ class PackageController extends Controller
 
     public function create(): View
     {
-        return view('admin.packages.create', ['package' => new TourPackage()]);
+        return view('admin.packages.create', [
+            'package' => new TourPackage(),
+            'destinations' => Destination::orderBy('name')->get(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -48,7 +52,10 @@ class PackageController extends Controller
 
     public function edit(TourPackage $package): View
     {
-        return view('admin.packages.edit', compact('package'));
+        return view('admin.packages.edit', [
+            'package' => $package,
+            'destinations' => Destination::orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, TourPackage $package): RedirectResponse
@@ -81,6 +88,7 @@ class PackageController extends Controller
     private function validatePackage(Request $request, ?TourPackage $package = null): array
     {
         return $request->validate([
+            'destination_id' => ['nullable', 'exists:destinations,id'],
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

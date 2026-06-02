@@ -43,25 +43,37 @@
                         <span>Max guests: {{ $package->max_guests }}</span>
                     </div>
 
-                    <form class="form" method="POST" action="{{ route('bookings.store') }}">
-                        @csrf
-                        <input type="hidden" name="tour_package_id" value="{{ $package->id }}">
-                        <div class="row g-3 mb-3">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Tour date</label>
-                                <input type="date" name="tour_date" value="{{ old('tour_date', now()->toDateString()) }}" class="form-control">
+                    <div class="d-grid gap-2 mb-3">
+                        <a href="{{ route('packages.show', $package) }}" class="btn btn-outline-secondary w-100">View details</a>
+                    </div>
+
+                    @auth
+                        <form class="form" method="POST" action="{{ route('bookings.store') }}">
+                            @csrf
+                            <input type="hidden" name="tour_package_id" value="{{ $package->id }}">
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Tour date</label>
+                                    <input type="date" name="tour_date" value="{{ old('tour_date', now()->toDateString()) }}" class="form-control">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label">Guests</label>
+                                    <input type="number" min="1" name="num_guests" value="{{ old('num_guests', 1) }}" max="{{ $package->max_guests }}" class="form-control">
+                                </div>
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label">Guests</label>
-                                <input type="number" min="1" name="num_guests" value="{{ old('num_guests', 1) }}" max="{{ $package->max_guests }}" class="form-control">
+                            <div class="mb-3">
+                                <label class="form-label">Special requests</label>
+                                <textarea name="special_requests" rows="2" class="form-control">{{ old('special_requests') }}</textarea>
                             </div>
+                            <button class="btn btn-primary w-100">Book this tour</button>
+                        </form>
+                    @else
+                        <div class="card border-secondary p-3 text-center">
+                            <p class="mb-3 text-muted">Register or log in to book this tour.</p>
+                            <a href="{{ route('home', ['auth' => 'signin']) }}" class="btn btn-primary w-100 mb-2">Login to Book</a>
+                            <a href="{{ route('home', ['auth' => 'register']) }}" class="btn btn-outline-secondary w-100">Register</a>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Special requests</label>
-                            <textarea name="special_requests" rows="2" class="form-control">{{ old('special_requests') }}</textarea>
-                        </div>
-                        <button class="btn btn-primary w-100">Book this tour</button>
-                    </form>
+                    @endauth
                 </div>
             @endforeach
         </div>
