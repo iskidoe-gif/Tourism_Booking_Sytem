@@ -65,7 +65,7 @@ body {
     min-height: calc(100vh - 5rem);
     display: grid;
     place-items: center;
-    padding: 0;
+    padding: 8rem 0 0;
     position: relative;
 }
 
@@ -249,7 +249,7 @@ body {
 .content {
     width: min(100%, 72rem);
     margin: 0 auto;
-    padding: 2rem 1.5rem;
+    padding: 7rem 1.5rem 2rem;
 }
 
 .brand {
@@ -268,15 +268,21 @@ body {
 }
 
 .bolinao-nav {
-    position: relative;
-    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 2.25rem 4.5rem;
+    width: min(100%, 72rem);
+    padding: 1.25rem 1.5rem;
+    background: rgba(17, 24, 68, 0.96);
     font-size: 0.82rem;
     font-weight: 700;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
 .bolinao-brand,
@@ -816,6 +822,8 @@ body {
 }
 
 .navlink {
+    position: relative;
+    z-index: 9999;
     padding: 0.25rem 0.5rem;
     color: var(--palette-cream);
 }
