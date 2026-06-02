@@ -14,10 +14,9 @@ class Payment extends Model
         'booking_id',
         'amount',
         'method',
-        'transaction_reference',
+        'reference_number',
         'status',
         'paid_at',
-        'meta',
     ];
 
     protected function casts(): array
@@ -25,7 +24,6 @@ class Payment extends Model
         return [
             'amount' => 'decimal:2',
             'paid_at' => 'datetime',
-            'meta' => 'array',
         ];
     }
 

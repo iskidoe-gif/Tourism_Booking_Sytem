@@ -69,10 +69,9 @@ class PaymentController extends Controller
             'booking_id' => ['required', 'exists:bookings,id'],
             'amount' => ['sometimes', 'required', 'numeric', 'min:0'],
             'method' => ['sometimes', 'required', 'string', 'max:255'],
-            'transaction_reference' => ['nullable', 'string', 'max:255'],
+            'reference_number' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'required', 'in:pending,paid,refunded,failed'],
             'paid_at' => ['nullable', 'date'],
-            'meta' => ['nullable', 'array'],
         ]);
     }
 

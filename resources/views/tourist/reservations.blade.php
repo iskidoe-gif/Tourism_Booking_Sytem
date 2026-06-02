@@ -18,10 +18,10 @@
             <tbody>
                 @forelse($recentBookings as $booking)
                     <tr>
-                        <td class="td">{{ $booking->booking_code }}</td>
-                        <td class="td">{{ $booking->package?->title }}</td>
-                        <td class="td">{{ $booking->booking_date?->format('Y-m-d') }}</td>
-                        <td class="td">{{ $booking->guests }}</td>
+                        <td class="td">{{ $booking->booking_number }}</td>
+                        <td class="td">{{ $booking->package?->name }}</td>
+                        <td class="td">{{ $booking->tour_date?->format('Y-m-d') }}</td>
+                        <td class="td">{{ $booking->num_guests }}</td>
                         <td class="td">{{ $booking->status }}</td>
                     </tr>
                 @empty

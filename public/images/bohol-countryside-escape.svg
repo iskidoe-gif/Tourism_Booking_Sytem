@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f9d976"/>
+      <stop offset="100%" stop-color="#f39c12"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" rx="30" fill="url(#bg)"/>
+  <path d="M140 320 Q220 240 340 280 T560 300 Q630 320 700 280" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="500" cy="170" r="80" fill="#fff" opacity="0.9"/>
+  <path d="M420 200 Q500 120 580 200" fill="#f39c12" opacity="0.85"/>
+  <text x="50%" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" fill="#ffffff" font-weight="700">Bohol</text>
+</svg>

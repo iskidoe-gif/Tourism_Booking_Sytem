@@ -20,74 +20,65 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $adminAccount = Admin::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
-
-        User::factory()->create([
-            'name' => 'Tourist Creator',
-            'email' => 'creator@example.com',
-            'password' => 'password',
-            'role' => 'tourist',
-        ]);
-
-        User::factory()->create([
-            'name' => 'Tourist User',
-            'email' => 'tourist@example.com',
-            'password' => 'password',
-            'role' => 'tourist',
-        ]);
-
-        $packages = collect([
+        $adminAccount = Admin::updateOrCreate(
+            ['email' => 'admin@example.com'],
             [
-                'title' => 'Bohol Countryside Escape',
-                'destination' => 'Bohol',
-                'description' => 'Chocolate Hills, tarsiers, and river cruising.',
-                'price' => 4500,
-                'duration_days' => 2,
-                'max_guests' => 20,
-            ],
+                'name' => 'Admin User',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'creator@example.com'],
             [
-                'title' => 'Siargao Island Adventure',
-                'destination' => 'Siargao',
-                'description' => 'Surf lessons, island hopping, and lagoon stops.',
-                'price' => 6800,
-                'duration_days' => 3,
-                'max_guests' => 15,
-            ],
-        ])->map(function (array $package) use ($adminAccount) {
-            return TourPackage::create([
-                ...$package,
-                'slug' => Str::slug($package['title']),
-                'created_by' => $adminAccount->id,
-                'includes' => ['Guide', 'Van transfer', 'Lunch'],
-                'itinerary' => ['Day 1: Arrival', 'Day 2: Tour'],
-                'is_active' => true,
-            ]);
-        });
+                'name' => 'Tourist Creator',
+                'password' => bcrypt('password'),
+                'role' => 'tourist',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'tourist@example.com'],
+            [
+                'name' => 'Tourist User',
+                'password' => bcrypt('password'),
+                'role' => 'tourist',
+            ]
+        );
+
+        $this->call(TourPackageSeeder::class);
 
         $tourist = User::where('email', 'tourist@example.com')->first();
-        $booking = Booking::create([
-            'booking_code' => 'BK-' . now()->format('Ymd') . '-SEED1',
-            'user_id' => $tourist->id,
-            'tour_package_id' => $packages->first()->id,
-            'booking_date' => now()->addWeek()->toDateString(),
-            'guests' => 2,
-            'status' => 'approved',
-            'total_amount' => 9000,
-            'approved_by' => $adminAccount->id,
-            'approved_at' => now(),
-        ]);
+        $tourPackage = TourPackage::where('status', 'active')->first();
 
-        Payment::create([
-            'booking_id' => $booking->id,
-            'amount' => 9000,
-            'method' => 'gcash',
-            'transaction_reference' => 'TRX-SEED-001',
-            'status' => 'paid',
-            'paid_at' => now(),
-            'meta' => ['note' => 'Seeded payment'],
-        ]);
+        if (! $tourPackage) {
+            return;
+        }
+
+        $booking = Booking::updateOrCreate(
+            ['booking_number' => 'BK-' . now()->format('Ymd') . '-SEED1'],
+            [
+                'user_id' => $tourist->id,
+                'tour_package_id' => $tourPackage->id,
+                'tour_date' => now()->addWeek()->toDateString(),
+                'num_guests' => 2,
+                'status' => 'confirmed',
+                'total_price' => 9000,
+                'special_requests' => 'Seeded booking.',
+            ]
+        );
+
+        Payment::updateOrCreate(
+            ['reference_number' => 'TRX-SEED-001'],
+            [
+                'booking_id' => $booking->id,
+                'amount' => 9000,
+                'method' => 'gcash',
+                'status' => 'paid',
+                'reference_number' => 'TRX-SEED-001',
+                'paid_at' => now(),
+            ]
+        );
     }
 }

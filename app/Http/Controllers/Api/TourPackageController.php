@@ -21,8 +21,6 @@ class TourPackageController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $this->validatePackage($request);
-        $validated['slug'] = $this->uniqueSlug($validated['title']);
-        $validated['created_by'] = Auth::guard('admin')->id();
 
         $package = TourPackage::create($validated);
 
@@ -37,11 +35,6 @@ class TourPackageController extends Controller
     public function update(Request $request, TourPackage $package): JsonResponse
     {
         $validated = $this->validatePackage($request, $package->id);
-
-        if (array_key_exists('title', $validated)) {
-            $validated['slug'] = $this->uniqueSlug($validated['title'], $package->id);
-        }
-
         $package->update($validated);
 
         return response()->json(['data' => $package->refresh()]);
@@ -57,18 +50,15 @@ class TourPackageController extends Controller
     private function validatePackage(Request $request, ?int $ignoreId = null): array
     {
         return $request->validate([
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'destination' => ['sometimes', 'required', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'location' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'duration_days' => ['sometimes', 'required', 'integer', 'min:1'],
             'max_guests' => ['sometimes', 'required', 'integer', 'min:1'],
-            'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'includes' => ['nullable', 'array'],
-            'itinerary' => ['nullable', 'array'],
-            'image_url' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['sometimes', 'boolean'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'status' => ['sometimes', 'required', 'in:active,inactive'],
+            'rating' => ['nullable', 'numeric', 'between:0,5'],
         ]);
     }
 
