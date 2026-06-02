@@ -20,9 +20,18 @@
             <nav class="bolinao-nav" aria-label="Main navigation">
                 <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
                 <div class="bolinao-navlinks">
-                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
-                    <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Trips</x-nav-link>
-                    @if($touristUser)
+                    @if($adminUser)
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
+                        <x-nav-link :href="route('admin.bookings.index')" :active="request()->routeIs('admin.bookings.index')">Bookings</x-nav-link>
+                        <x-nav-link :href="route('admin.packages-stats')" :active="request()->routeIs('admin.packages-stats')">Packages</x-nav-link>
+                        <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.index')">Reports</x-nav-link>
+                        <form method="POST" action="{{ route('logout') }}" class="nav-form">
+                            @csrf
+                            <button class="navbtn">Logout</button>
+                        </form>
+                    @elseif($touristUser)
+                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
+                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Bookings</x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                         <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
                             <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
@@ -31,15 +40,9 @@
                             @csrf
                             <button class="navbtn">Logout</button>
                         </form>
-                    @elseif($adminUser)
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Admin</x-nav-link>
-                        <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">Packages</x-nav-link>
-                        <x-nav-link :href="route('admin.reports.bookings', 'csv')" :active="request()->routeIs('admin.reports.bookings')">Reports</x-nav-link>
-                        <form method="POST" action="{{ route('logout') }}" class="nav-form">
-                            @csrf
-                            <button class="navbtn">Logout</button>
-                        </form>
                     @else
+                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
+                        <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Bookings</x-nav-link>
                         <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
                         <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
                     @endif

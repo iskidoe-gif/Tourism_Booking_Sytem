@@ -88,9 +88,18 @@ Route::prefix('admin')
 
         Route::resource('destinations', \App\Http\Controllers\Admin\DestinationController::class)->except(['show']);
 
+        Route::get('/reports', function () {
+            return view('admin.reports');
+        })->name('reports.index');
+
         Route::get('/reports/bookings/{format?}', [ReportController::class, 'bookings'])
             ->whereIn('format', ['json', 'csv', 'xlsx', 'pdf'])
             ->name('reports.bookings');
 
         Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class)->only(['index', 'edit', 'update']);
+
+        Route::get('/bookings', [DashboardController::class, 'adminBookings'])->name('bookings.index');
+        Route::get('/packages-stats', [DashboardController::class, 'adminPackages'])->name('packages-stats');
+        Route::patch('/bookings/{booking}/status', [DashboardController::class, 'updateBookingStatus'])
+            ->name('bookings.status');
     });

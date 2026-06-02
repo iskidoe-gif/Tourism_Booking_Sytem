@@ -53,7 +53,7 @@ textarea {
 }
 
 .content {
-    padding-top: 7rem;
+    padding-top: 18rem;
     padding-bottom: 2rem;
 }
 
@@ -707,11 +707,7 @@ textarea {
 .navlink {
     position: relative;
     z-index: 9999;
-<<<<<<< Updated upstream
-    padding: 0.25rem 0.5rem;
-=======
     padding: 0.45rem 0.85rem;
->>>>>>> Stashed changes
     color: var(--palette-cream);
     border-radius: 9999px;
     transition: background 0.2s ease, color 0.2s ease;
@@ -1057,6 +1053,123 @@ textarea {
     font-size: 0.75rem;
     line-height: 1rem;
     text-transform: capitalize;
+}
+
+.status-pending {
+    border-color: #facc15;
+    background: rgba(250, 204, 21, 0.12);
+    color: #92400e;
+}
+
+.status-approved {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    color: #0c4a6e;
+}
+
+.status-declined {
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
+    color: #7f1d1d;
+}
+
+.status-completed {
+    border-color: #34d399;
+    background: rgba(52, 211, 153, 0.12);
+    color: #166534;
+}
+
+.booking-actions {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.booking-actions .btn {
+    width: auto;
+}
+
+.booking-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+}
+
+.booking-info {
+    flex: 1;
+}
+
+.booking-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-end;
+    white-space: nowrap;
+}
+
+.booking-approved-info,
+.booking-declined-info {
+    text-align: right;
+}
+
+.booking-approved-info .lead,
+.booking-declined-info .lead {
+    font-size: 0.85rem;
+}
+
+.package-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: start;
+}
+
+.package-info {
+    flex: 1;
+}
+
+.package-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.pagination-wrapper {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.report-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(234, 224, 207, 0.12);
+    border-radius: 0.75rem;
+    background: rgba(234, 224, 207, 0.04);
+}
+
+.report-option > div {
+    flex: 1;
+}
+
+.report-option strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.report-option .lead {
+    margin: 0;
+    color: rgba(234, 224, 207, 0.7);
+}
+
+.report-option .btn {
+    white-space: nowrap;
 }
 
 .login-hero {
@@ -1479,11 +1592,7 @@ textarea {
     min-height: calc(100vh - 5rem);
     display: grid;
     place-items: center;
-<<<<<<< Updated upstream
-    padding: 8rem 0 0;
-=======
     padding: 6rem 1rem 2rem;
->>>>>>> Stashed changes
 }
 
 .bolinao-card {

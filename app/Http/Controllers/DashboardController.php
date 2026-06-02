@@ -123,6 +123,58 @@ class DashboardController extends Controller
             ->with('success', 'Tour booked successfully.');
     }
 
+    public function adminBookings(Request $request): JsonResponse|View
+    {
+        $bookings = Booking::with(['user', 'package', 'payment', 'approver'])
+            ->latest()
+            ->paginate(20);
+
+        if ($request->expectsJson()) {
+            return response()->json(['data' => $bookings]);
+        }
+
+        return view('admin.bookings', ['bookings' => $bookings]);
+    }
+
+    public function adminPackages(Request $request): JsonResponse|View
+    {
+        $activePackages = TourPackage::where('status', 'active')->count();
+        $inactivePackages = TourPackage::where('status', '!=', 'active')->count();
+        $packages = TourPackage::latest()->paginate(20);
+
+        $data = [
+            'stats' => [
+                'active' => $activePackages,
+                'inactive' => $inactivePackages,
+                'total' => $activePackages + $inactivePackages,
+            ],
+            'packages' => $packages,
+        ];
+
+        if ($request->expectsJson()) {
+            return response()->json($data);
+        }
+
+        return view('admin.packages-stats', $data);
+    }
+
+    public function updateBookingStatus(Request $request, Booking $booking): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'in:approved,cancelled'],
+        ]);
+
+        $booking->update([
+            'status' => $validated['status'],
+            'approved_by' => Auth::guard('admin')->id() ?? $request->user()?->id,
+            'approved_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.bookings.index')
+            ->with('success', 'Booking status updated successfully.');
+    }
+
     private function touristData(Request $request): array
     {
         $user = $request->user();
@@ -152,8 +204,6 @@ class DashboardController extends Controller
     private function buildDashboardData(Request $request): array
     {
         $user = Auth::guard('admin')->user() ?? $request->user();
-        $bookingQuery = Booking::with(['user', 'package', 'payment'])->latest();
-        $bookings = $bookingQuery->take(5)->get();
         $bookingCountQuery = Booking::query();
         $paymentQuery = Payment::query();
 
@@ -165,12 +215,6 @@ class DashboardController extends Controller
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
             ],
-            'availablePackages' => TourPackage::query()
-                ->where('status', 'active')
-                ->latest()
-                ->get(),
-            'recentBookings' => $bookings,
-            'user' => $user,
         ];
     }
 
