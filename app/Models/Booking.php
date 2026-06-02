@@ -12,14 +12,14 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'booking_code',
+        'booking_number',
         'user_id',
         'tour_package_id',
-        'booking_date',
-        'guests',
+        'tour_date',
+        'num_guests',
         'status',
-        'total_amount',
-        'notes',
+        'total_price',
+        'special_requests',
         'approved_by',
         'approved_at',
     ];
@@ -27,10 +27,10 @@ class Booking extends Model
     protected function casts(): array
     {
         return [
-            'booking_date' => 'date',
+            'tour_date' => 'date',
             'approved_at' => 'datetime',
-            'guests' => 'integer',
-            'total_amount' => 'decimal:2',
+            'num_guests' => 'integer',
+            'total_price' => 'decimal:2',
         ];
     }
 

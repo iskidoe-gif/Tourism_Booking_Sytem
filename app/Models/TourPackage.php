@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,20 +13,15 @@ class TourPackage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'slug',
-        'destination',
+        'name',
         'description',
+        'location',
         'price',
         'duration_days',
         'max_guests',
-        'start_date',
-        'end_date',
-        'includes',
-        'itinerary',
-        'image_url',
-        'is_active',
-        'created_by',
+        'image',
+        'status',
+        'rating',
     ];
 
     protected function casts(): array
@@ -34,17 +30,18 @@ class TourPackage extends Model
             'price' => 'decimal:2',
             'duration_days' => 'integer',
             'max_guests' => 'integer',
-            'start_date' => 'date',
-            'end_date' => 'date',
-            'includes' => 'array',
-            'itinerary' => 'array',
-            'is_active' => 'boolean',
+            'rating' => 'decimal:2',
         ];
     }
 
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('status', 'active');
     }
 
     public function creator(): BelongsTo

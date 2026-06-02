@@ -23,11 +23,11 @@ class BookingController extends Controller
         $validated = $this->validateBooking($request);
         $package = TourPackage::findOrFail($validated['tour_package_id']);
 
-        $validated['booking_code'] = $this->bookingCode();
-        $validated['booking_date'] = $validated['booking_date'] ?? now()->toDateString();
-        $validated['guests'] = $validated['guests'] ?? 1;
+        $validated['booking_number'] = $this->bookingNumber();
+        $validated['tour_date'] = $validated['tour_date'] ?? now()->toDateString();
+        $validated['num_guests'] = $validated['num_guests'] ?? 1;
         $validated['status'] = $validated['status'] ?? 'pending';
-        $validated['total_amount'] = $validated['total_amount'] ?? ($package->price * $validated['guests']);
+        $validated['total_price'] = $validated['total_price'] ?? ($package->price * $validated['num_guests']);
         $validated['user_id'] = $validated['user_id'] ?? $request->user()?->id;
 
         if (! $validated['user_id']) {
@@ -49,8 +49,8 @@ class BookingController extends Controller
         $validated = $this->validateBooking($request);
         $package = TourPackage::findOrFail($validated['tour_package_id'] ?? $booking->tour_package_id);
 
-        if (! array_key_exists('total_amount', $validated)) {
-            $validated['total_amount'] = ($validated['guests'] ?? $booking->guests) * $package->price;
+        if (! array_key_exists('total_price', $validated)) {
+            $validated['total_price'] = ($validated['num_guests'] ?? $booking->num_guests) * $package->price;
         }
 
         $booking->update($validated);
@@ -70,21 +70,21 @@ class BookingController extends Controller
         return $request->validate([
             'user_id' => ['nullable', 'exists:users,id'],
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
-            'booking_date' => ['sometimes', 'required', 'date'],
-            'guests' => ['sometimes', 'required', 'integer', 'min:1'],
+            'tour_date' => ['sometimes', 'required', 'date'],
+            'num_guests' => ['sometimes', 'required', 'integer', 'min:1'],
             'status' => ['nullable', 'in:pending,approved,cancelled,completed'],
-            'total_amount' => ['nullable', 'numeric', 'min:0'],
-            'notes' => ['nullable', 'string'],
+            'total_price' => ['nullable', 'numeric', 'min:0'],
+            'special_requests' => ['nullable', 'string'],
             'approved_by' => ['nullable', 'exists:admins,id'],
             'approved_at' => ['nullable', 'date'],
         ]);
     }
 
-    private function bookingCode(): string
+    private function bookingNumber(): string
     {
         do {
             $code = 'BK-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
-        } while (Booking::where('booking_code', $code)->exists());
+        } while (Booking::where('booking_number', $code)->exists());
 
         return $code;
     }

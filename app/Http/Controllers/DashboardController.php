@@ -8,6 +8,7 @@ use App\Models\TourPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -15,7 +16,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): JsonResponse|View
     {
-        if ($request->user()?->role === 'admin') {
+        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
@@ -41,11 +42,20 @@ class DashboardController extends Controller
 
     public function packages(Request $request): JsonResponse|View
     {
-        if ($request->user()?->role === 'admin') {
+        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
-        $data = $this->touristData($request);
+        $packages = TourPackage::where('status', 'active')
+            ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
+                ->orWhere('location', 'like', "%{$request->search}%")
+                ->orWhere('description', 'like', "%{$request->search}%")
+            )
+            ->orderBy('updated_at', 'desc')
+            ->paginate(9)
+            ->withQueryString();
+
+        $data = array_merge($this->touristData($request), compact('packages'));
 
         if ($request->expectsJson()) {
             return response()->json($data);
@@ -56,7 +66,7 @@ class DashboardController extends Controller
 
     public function reservations(Request $request): JsonResponse|View
     {
-        if ($request->user()?->role === 'admin') {
+        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
 
@@ -73,24 +83,24 @@ class DashboardController extends Controller
     {
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
-            'booking_date' => ['required', 'date'],
-            'guests' => ['required', 'integer', 'min:1'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            'tour_date' => ['required', 'date'],
+            'num_guests' => ['required', 'integer', 'min:1'],
+            'special_requests' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $package = TourPackage::whereKey($validated['tour_package_id'])
-            ->where('is_active', true)
+            ->where('status', 'active')
             ->firstOrFail();
 
         $booking = Booking::create([
-            'booking_code' => $this->bookingCode(),
+            'booking_number' => $this->bookingNumber(),
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
-            'booking_date' => $validated['booking_date'],
-            'guests' => $validated['guests'],
+            'tour_date' => $validated['tour_date'],
+            'num_guests' => $validated['num_guests'],
             'status' => 'pending',
-            'total_amount' => $package->price * $validated['guests'],
-            'notes' => $validated['notes'] ?? null,
+            'total_price' => $package->price * $validated['num_guests'],
+            'special_requests' => $validated['special_requests'] ?? null,
         ]);
 
         if ($request->expectsJson()) {
@@ -116,14 +126,14 @@ class DashboardController extends Controller
 
         return [
             'stats' => [
-                'packages' => TourPackage::where('is_active', true)->count(),
+                'packages' => TourPackage::where('status', 'active')->count(),
                 'bookings' => $bookingQuery->count(),
                 'pending_bookings' => (clone $bookingQuery)->where('status', 'pending')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
             ],
             'availablePackages' => TourPackage::query()
-                ->where('is_active', true)
+                ->where('status', 'active')
                 ->latest()
                 ->get(),
             'recentBookings' => $bookings,
@@ -133,7 +143,7 @@ class DashboardController extends Controller
 
     private function buildDashboardData(Request $request): array
     {
-        $user = $request->user();
+        $user = Auth::guard('admin')->user() ?? $request->user();
         $bookingQuery = Booking::with(['user', 'package', 'payment'])->latest();
         $bookings = $bookingQuery->take(5)->get();
         $bookingCountQuery = Booking::query();
@@ -148,7 +158,7 @@ class DashboardController extends Controller
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
             ],
             'availablePackages' => TourPackage::query()
-                ->where('is_active', true)
+                ->where('status', 'active')
                 ->latest()
                 ->get(),
             'recentBookings' => $bookings,
@@ -156,11 +166,11 @@ class DashboardController extends Controller
         ];
     }
 
-    private function bookingCode(): string
+    private function bookingNumber(): string
     {
         do {
             $code = 'BK-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6));
-        } while (Booking::where('booking_code', $code)->exists());
+        } while (Booking::where('booking_number', $code)->exists());
 
         return $code;
     }

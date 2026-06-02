@@ -4,6 +4,7 @@
         <p class="lead">Manage bookings, review packages, and open reports from one place.</p>
 
         <div class="actions">
+            <a href="{{ route('admin.packages.index') }}" class="navbtn">Manage Packages</a>
             <a href="{{ route('admin.reports.bookings', 'csv') }}" class="navbtn">CSV Report</a>
             <a href="{{ route('admin.reports.bookings', 'xlsx') }}" class="navbtn">XLSX Report</a>
             <a href="{{ route('admin.reports.bookings', 'pdf') }}" class="navbtn">PDF Report</a>
@@ -36,8 +37,8 @@
                 @forelse($availablePackages as $package)
                     <div class="mini">
                         <div>
-                            <strong>{{ $package->title }}</strong>
-                            <p class="lead">{{ $package->destination }}</p>
+                            <strong>{{ $package->name }}</strong>
+                            <p class="lead">{{ $package->location }}</p>
                         </div>
                         <span class="price">PHP {{ number_format((float) $package->price, 2) }}</span>
                     </div>
@@ -53,8 +54,8 @@
                 @forelse($recentBookings as $booking)
                     <div class="mini">
                         <div>
-                            <strong>{{ $booking->booking_code }}</strong>
-                            <p class="lead">{{ $booking->package?->title }} | {{ $booking->booking_date?->format('Y-m-d') }}</p>
+                            <strong>{{ $booking->booking_number }}</strong>
+                            <p class="lead">{{ $booking->package?->name }} | {{ $booking->tour_date?->format('Y-m-d') }}</p>
                         </div>
                         <span class="status">{{ $booking->status }}</span>
                     </div>

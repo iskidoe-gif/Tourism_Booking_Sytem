@@ -23,25 +23,25 @@ class ReportController extends Controller
 
         $rows = $bookings->map(function (Booking $booking): array {
             return [
-                $booking->booking_code,
+                $booking->booking_number,
                 $booking->user?->name ?? '',
-                $booking->package?->title ?? '',
-                $booking->booking_date?->format('Y-m-d') ?? '',
-                $booking->guests,
+                $booking->package?->name ?? '',
+                $booking->tour_date?->format('Y-m-d') ?? '',
+                $booking->num_guests,
                 $booking->status,
-                $booking->total_amount,
+                $booking->total_price,
                 $booking->payment?->status ?? 'unpaid',
             ];
         })->all();
 
         $headers = [
-            'Booking Code',
+            'Booking Number',
             'Customer',
             'Package',
-            'Booking Date',
+            'Tour Date',
             'Guests',
             'Status',
-            'Total Amount',
+            'Total Price',
             'Payment Status',
         ];
 
@@ -73,7 +73,7 @@ class ReportController extends Controller
             return response()->json([
                 'summary' => [
                     'total_bookings' => $bookings->count(),
-                    'total_revenue' => $bookings->sum('total_amount'),
+                    'total_revenue' => $bookings->sum('total_price'),
                     'pending_bookings' => $bookings->where('status', 'pending')->count(),
                     'paid_payments' => $bookings->filter(fn (Booking $booking) => $booking->payment?->status === 'paid')->count(),
                 ],
