@@ -5,7 +5,7 @@
             <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
             <div class="bolinao-navlinks">
                 <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('packages.index') }}">Trips</a>
+                <a href="{{ route('packages.index') }}">Packages</a>
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>
                 @else

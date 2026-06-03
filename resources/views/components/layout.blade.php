@@ -31,7 +31,7 @@
                         </form>
                     @elseif($touristUser)
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
-                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Bookings</x-nav-link>
+                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Packages</x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                         <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
                             <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
