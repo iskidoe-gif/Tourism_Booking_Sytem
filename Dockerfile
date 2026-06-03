@@ -23,10 +23,11 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libsqlite3-dev \
     zip \
     unzip \
     git \
- && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+ && docker-php-ext-install pdo pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
@@ -38,6 +39,11 @@ WORKDIR /var/www/html
 
 # Copy application files
 COPY . .
+
+# Ensure SQLite database file exists (if using sqlite) and is writable
+RUN mkdir -p database \
+ && touch database/database.sqlite \
+ && chown -R www-data:www-data database/database.sqlite || true
 
 # Copy composer-installed vendor directory from builder
 COPY --from=composer_builder /app/vendor ./vendor
