@@ -2506,8 +2506,9 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     inset: 0;
     z-index: 9999;
     display: grid;
-    place-items: center;
-    padding: 3rem 1rem 1rem;
+    justify-items: center;
+    align-items: start;
+    padding: 6rem 1rem 1rem;
 }
 
 .auth-modal-backdrop {
@@ -2521,7 +2522,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     position: relative;
     z-index: 1;
     width: min(100%, 34rem);
-    max-height: min(88vh, calc(100vh - 4rem));
+    max-height: min(84vh, calc(100vh - 6rem));
     overflow-y: auto;
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 1.5rem;
