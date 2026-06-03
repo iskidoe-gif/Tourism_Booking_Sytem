@@ -33,4 +33,4 @@ php artisan migrate --force
 
 Notes:
 - This is the backend deployment guide. Use Render for the Laravel API/backend and Vercel only for frontend static assets.
-- This Dockerfile uses `php:8.1-apache` and a simple multi-stage build. For higher-performance production, consider using a dedicated PHP-FPM + Nginx setup or Laravel-specific platforms like Vapor.
+- This Dockerfile uses `php:8.2-apache` and a simple multi-stage build. For higher-performance production, consider using a dedicated PHP-FPM + Nginx setup or Laravel-specific platforms like Vapor.

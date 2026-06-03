@@ -15,7 +15,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # 3) Final image with Apache + PHP
-FROM php:8.1-apache
+FROM php:8.2-apache
 
 # System deps and PHP extensions
 RUN apt-get update && apt-get install -y \
