@@ -537,6 +537,12 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     margin-top: clamp(3rem, 5vw, 5rem);
 }
 
+<<<<<<< HEAD
+.featured-packages {
+    background: #050608;
+    margin-top: -3rem;
+    border-top: 1px solid rgba(234, 224, 207, 0.08);
+=======
 .homepage-slider {
     width: min(100%, 72rem);
     margin: 0 auto 4rem;
@@ -567,6 +573,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 
 .homepage-slider .featured-packages,
 .homepage-slider .customer-reviews-section {
+>>>>>>> 5dce7ada7d0a5f36b06261c86ccd7a9da1cae1ad
     padding: 5rem 1.5rem 3rem;
 }
 
@@ -651,8 +658,29 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     margin-top: 2rem;
 }
 
+/* Backdrop panel behind the grid to ensure readability */
+.package-card-grid {
+    background: #000 !important;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    position: relative;
+    z-index: 2;
+}
+
+.package-card-grid .package-card {
+    background: transparent !important;
+    border: none !important;
+}
+
 .package-card {
-    background: linear-gradient(180deg, rgba(8, 20, 60, 0.84), rgba(18, 32, 74, 0.95));
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-clip: padding-box;
+}
+
+.package-card {
+    background: #000 !important;
     border-radius: 1.2rem;
     overflow: hidden;
     color: var(--palette-cream);
@@ -660,12 +688,82 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     display: flex;
     flex-direction: column;
     border: 1px solid rgba(255,255,255,0.08);
+    opacity: 1 !important;
 }
 
 .package-card-media {
     height: 9.5rem;
     background-size: cover;
     background-position: center;
+}
+
+.package-card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.78));
+}
+
+/* Strong overrides to ensure readability over background image */
+.featured-packages {
+    position: relative;
+    background: #000 !important;
+}
+
+.featured-packages::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000 !important;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.featured-packages-inner {
+    position: relative;
+    z-index: 1;
+}
+
+/* Make cards and text fully opaque and higher contrast */
+.package-card {
+    background: rgba(0,0,0,0.96) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+}
+
+.package-card-media {
+    position: relative;
+}
+
+.package-card-media::after {
+    background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.85));
+}
+
+.package-card-title,
+.package-card-description,
+.package-card-meta,
+.package-card-price,
+.package-card-footer,
+.package-card-actions .btn {
+    color: #ffffff !important;
+}
+
+.package-card-description {
+    color: rgba(255,255,255,0.92) !important;
+}
+
+.package-card-meta {
+    color: rgba(255,255,255,0.85) !important;
+}
+
+.package-card-actions .btn.btn-secondary{
+    background: rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+.package-card-actions .btn.btn-primary{
+    background: #47577a !important;
+    color: #fff !important;
 }
 
 .package-card-body {
@@ -1406,8 +1504,10 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 
 .navlink.active {
     font-weight: 700;
+    color: #ffffff;
     text-decoration: underline;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0.4rem 1rem rgba(79, 111, 217, 0.2);
 }
 
 .navbtn {
@@ -1659,8 +1759,9 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 .packages-search-filter {
     padding: 1.1rem;
     border-radius: 1.25rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .packages-search-filter .form-row {
@@ -1672,11 +1773,12 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 
 .packages-search-filter .form-control,
 .packages-search-filter .form-select {
-    padding: 0.85rem 1rem;
+    padding: 0.95rem 1rem;
     border-radius: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.09);
     color: #f8fafc;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .packages-search-filter .form-select {
@@ -1790,6 +1892,15 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     gap: 0.6rem;
     padding: 1rem;
     flex: 1;
+}
+
+.package-card-meta,
+.package-card-description,
+.package-card-title,
+.package-card-footer,
+.package-card-price,
+.package-card-actions .btn {
+    color: #f8fafc;
 }
 
 .package-card-meta {
@@ -3109,6 +3220,17 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     padding: 4rem 0 5rem;
 }
 
+.packages-listing {
+    background: #050608;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.packages-listing-header {
+    position: relative;
+    z-index: 1;
+}
+
 .featured-packages-inner {
     padding: 0 1rem;
 }
@@ -3143,9 +3265,9 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     flex-direction: column;
     overflow: hidden;
     border-radius: 1.75rem;
-    background: rgba(12, 20, 45, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 1.5rem 2.5rem rgba(0, 0, 0, 0.24);
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 1.5rem 2.5rem rgba(0, 0, 0, 0.32);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -3178,7 +3300,9 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 .package-card-meta span {
     padding: 0.45rem 0.75rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-weight: 600;
 }
 
 .package-card-title {
