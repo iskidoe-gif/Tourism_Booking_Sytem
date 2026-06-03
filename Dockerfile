@@ -1,12 +1,12 @@
 ### Multi-stage Dockerfile for deploying Laravel app to Render
 
 # 1) Node builder for frontend assets
-FROM node:18 AS node_builder
+FROM node:24 AS node_builder
 WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY resources resources
-RUN npm ci --silent && npm run build
+RUN npm ci --silent --legacy-peer-deps && npm run build
 
 # 2) Composer builder for PHP dependencies
 FROM composer:2 AS composer_builder
