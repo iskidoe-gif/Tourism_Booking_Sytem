@@ -22,6 +22,26 @@ body {
     background: radial-gradient(circle at top, #1d2a5b 0%, #111844 45%, #081027 100%);
 }
 
+/* Fixed page background image (locked) so scrolling moves content only */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/images/bolinao-church.jpg') center center/cover no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    z-index: -9999;
+    pointer-events: none;
+}
+
+/* Prevent transform-based stacking contexts that can break fixed backgrounds or cause scaling */
+html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
+    transform: none !important;
+}
+
 :root {
     --palette-ink: #111844;
     --palette-primary: #4B5694;
@@ -33,6 +53,8 @@ body {
     min-height: 100vh;
     background: linear-gradient(180deg, rgba(17, 24, 68, 0.96) 0%, rgba(7, 12, 34, 0.98) 100%);
     color: var(--palette-cream);
+    position: relative;
+    transform: none;
 }
 
 .topbar {
@@ -64,34 +86,64 @@ body {
 }
 
 .bolinao-hero {
+    /* Completely lock the hero - no stacking context interference */
     min-height: 100vh;
+    width: 100vw;
     display: grid;
     place-items: center;
     padding: 0;
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 1;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    overflow: hidden;
+    margin: 0;
+}
+
+.bolinao-hero::before {
+    /* reserved for hero-specific overlays only (no background image here) */
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.bolinao-hero::after {
+    /* subtle overlay for the hero area only */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8,12,27,0.2) 0%, rgba(8,12,27,0.6) 100%);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .bolinao-card {
-    position: relative;
-    width: min(100%, 76rem);
-    margin: 0 auto;
+    position: fixed;
+    top: 14%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 64rem);
+    max-width: 64rem;
     padding: clamp(2rem, 3.5vw, 3rem);
     border-radius: 2rem;
-    background: linear-gradient(135deg, rgba(17, 24, 68, 0.92), rgba(56, 69, 118, 0.96));
-    box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.24);
+    background: rgba(12, 24, 58, 0.94);
+    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
     overflow: hidden;
-    min-height: 100vh;
+    min-height: auto;
+    border: 1px solid rgba(255,255,255,0.12);
+    z-index: 2;
 }
 
 .bolinao-card::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('/images/bolinao-church.jpg') center/cover no-repeat;
-    opacity: 0.14;
-    filter: saturate(0.8) brightness(0.85);
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 28%);
+    opacity: 0.65;
     pointer-events: none;
 }
 
@@ -99,7 +151,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(17, 24, 68, 0.08), rgba(17, 24, 68, 0.88));
+    background: linear-gradient(180deg, rgba(17, 24, 68, 0.1), rgba(17, 24, 68, 0.65));
     pointer-events: none;
 }
 
@@ -134,7 +186,7 @@ body {
 .bolinao-copy h1 {
     margin: 1rem 0 0;
     color: var(--palette-cream);
-    font-size: clamp(3rem, 6vw, 5rem);
+    font-size: clamp(3.5rem, 6vw, 6.5rem);
     line-height: 1;
     font-weight: 900;
 }
@@ -456,8 +508,9 @@ body {
 
 .featured-packages {
     background: linear-gradient(180deg, rgba(20, 28, 72, 0.4) 0%, rgba(17, 24, 68, 0.6) 100%);
-    margin-top: 2rem;
+    margin-top: calc(100vh + 1rem);
     border-top: 1px solid rgba(234, 224, 207, 0.08);
+    padding: 5rem 0 3rem;
 }
 
 .main-section {
@@ -469,6 +522,133 @@ body {
 .featured-packages-inner {
     width: min(100%, 72rem);
     margin: 0 auto;
+}
+
+.package-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: start;
+    margin-top: 0;
+}
+
+.package-card {
+    background: linear-gradient(180deg, rgba(8, 20, 60, 0.84), rgba(18, 32, 74, 0.95));
+    border-radius: 1.2rem;
+    overflow: hidden;
+    color: var(--palette-cream);
+    box-shadow: 0 1rem 2rem rgba(3,7,25,0.5);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.package-card-media {
+    height: 9.5rem;
+    background-size: cover;
+    background-position: center;
+}
+
+.package-card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.package-card-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--palette-cream);
+}
+
+.package-card-description {
+    color: rgba(234,224,207,0.85);
+    font-size: 0.95rem;
+    line-height: 1.35;
+}
+
+.package-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    color: rgba(234,224,207,0.75);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.package-card-meta span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.package-card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.package-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.package-card-price .price {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--palette-cream);
+}
+
+.package-card-price .price-note {
+    color: rgba(234,224,207,0.75);
+    font-size: 0.85rem;
+}
+
+.package-card .btn {
+    border-radius: 0.75rem;
+    padding: 0.7rem 1rem;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+/* Desktop -> mobile responsiveness */
+@media (max-width: 960px) {
+    .package-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 680px) {
+    .package-card-grid {
+        grid-template-columns: 1fr;
+        margin-top: 0;
+    }
+    .bolinao-card {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        width: min(100%, 92%);
+        margin-top: 2rem;
+        border-radius: 1.25rem;
+        padding: 1.25rem;
+        z-index: auto;
+    }
+    /* Disable fixed background on small screens for performance */
+    body::before,
+    .bolinao-hero::before,
+    .bolinao-hero::after {
+        background-attachment: scroll;
+        position: absolute;
+    }
 }
 
 .top-destinations-inner {
