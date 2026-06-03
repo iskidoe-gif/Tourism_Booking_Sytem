@@ -454,7 +454,19 @@ body {
     margin-top: clamp(3rem, 5vw, 5rem);
 }
 
+.featured-packages {
+    background: linear-gradient(180deg, rgba(20, 28, 72, 0.4) 0%, rgba(17, 24, 68, 0.6) 100%);
+    margin-top: 2rem;
+    border-top: 1px solid rgba(234, 224, 207, 0.08);
+}
+
 .main-section {
+    width: min(100%, 72rem);
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+}
+
+.featured-packages-inner {
     width: min(100%, 72rem);
     margin: 0 auto;
 }
@@ -466,22 +478,32 @@ body {
 
 .section-header {
     max-width: 46rem;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
 }
 
 .section-header p {
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.2em;
-    color: var(--palette-secondary);
-    font-size: 0.8rem;
-    font-weight: 700;
+    color: #6DB3F2;
+    font-size: 0.75rem;
+    font-weight: 800;
 }
 
 .section-header h2 {
-    margin: 0.6rem 0 0;
+    margin: 0.8rem 0 0.5rem;
     font-size: clamp(2rem, 4vw, 3rem);
-    line-height: 1.05;
+    line-height: 1.1;
+    font-weight: 800;
+    color: var(--palette-cream);
+}
+
+.section-header p:last-of-type {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: rgba(234, 224, 207, 0.8);
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .destinations-grid {
@@ -1334,6 +1356,25 @@ body {
     min-width: 12rem;
 }
 
+/* Unified search + filter header */
+.packages-search-filter .form-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    width: 100%;
+}
+
+.packages-search-filter .form-control {
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.6rem;
+}
+
+.packages-hero-cta {
+    margin-top: 1.25rem;
+    color: rgba(234,224,207,0.9);
+    font-weight: 600;
+}
+
 .packages-listing {
     padding: 2rem 0 3rem;
 }
@@ -1359,8 +1400,8 @@ body {
 
 .package-card-grid {
     display: grid;
-    gap: 1.75rem;
-    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    gap: 1.1rem;
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
     grid-auto-rows: 1fr;
 }
 
@@ -1376,17 +1417,23 @@ body {
 .package-card {
     display: flex;
     flex-direction: column;
-    min-height: 15rem;
-    border-radius: 0.85rem;
+    min-height: 16rem;
+    border-radius: 1rem;
     overflow: hidden;
-    border: 1px solid rgba(234, 224, 207, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 0.45rem 0.9rem rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(234, 224, 207, 0.12);
+    background: linear-gradient(135deg, rgba(75, 86, 148, 0.15) 0%, rgba(56, 69, 118, 0.12) 100%);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.package-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
 }
 
 .package-card-media {
     position: relative;
-    min-height: 120px;
+    min-height: 140px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -1416,8 +1463,8 @@ body {
 .package-card-body {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.45rem 0.75rem;
+    gap: 0.6rem;
+    padding: 1rem;
     flex: 1;
 }
 
@@ -1430,17 +1477,19 @@ body {
 }
 
 .package-card-title {
-    margin: 0;
+    margin: 0.2rem 0 0;
     color: var(--palette-cream);
-    font-size: 0.98rem;
-    line-height: 1.08;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    font-weight: 700;
 }
 
 .package-card-description {
     margin: 0;
     color: rgba(234, 224, 207, 0.78);
-    line-height: 1.4;
+    line-height: 1.35;
     min-height: 2.2rem;
+    font-size: 0.92rem;
 }
 
 /* Ensure any large arrow elements inserted by templates are compact and inline */
@@ -1466,9 +1515,17 @@ body {
 
 .package-card-rating {
     display: flex;
-    gap: 0.18rem;
+    gap: 0.25rem;
+    align-items: center;
     color: #f3c55b;
     font-size: 1rem;
+    margin: 0.3rem 0;
+}
+
+.package-card-rating .rating-text {
+    font-size: 0.85rem;
+    color: rgba(234, 224, 207, 0.8);
+    margin-left: 0.3rem;
 }
 
 .package-card-footer {
@@ -1476,6 +1533,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    padding-top: 0.5rem;
 }
 
 .package-card-price {
@@ -1486,27 +1544,85 @@ body {
 }
 
 .package-card-price .price {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
+    color: #6DB3F2;
 }
 
 .package-card-price .price-note {
     color: rgba(234, 224, 207, 0.7);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .package-card-actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-    gap: 0.5rem;
+    display: flex;
+    gap: 0.75rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .package-card-actions .btn {
-    width: 100%;
-    min-width: auto;
-    padding: 0.55rem 0.85rem;
-    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 0.6rem;
+    box-shadow: none;
+    flex: 1;
+    text-align: center;
+}
+
+.package-card-actions .btn-primary {
+    background: linear-gradient(135deg, #4B5694 0%, #5B6BA8 100%);
+    color: var(--palette-cream);
+    border: none;
+}
+
+.package-card-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #5B6BA8 0%, #6B7BC0 100%);
+}
+
+.package-card-actions .btn-secondary {
+    background: rgba(234, 224, 207, 0.1);
+    color: var(--palette-cream);
+    border: 1px solid rgba(234, 224, 207, 0.3);
+}
+
+.package-card-actions .btn-secondary:hover {
+    background: rgba(234, 224, 207, 0.15);
+}
+
+/* Pagination tweaks */
+.package-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+
+.package-pagination .pagination {
+    display: inline-flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.package-pagination .pagination li a,
+.package-pagination .pagination li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.5rem;
+    background: rgba(17,24,68,0.75);
+    color: var(--palette-cream);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.package-pagination .pagination li.active span {
+    background: linear-gradient(180deg,#f3c55b,#eab33b);
+    color: #111;
+    font-weight: 700;
 }
 
 .package-card-actions .btn + .btn {

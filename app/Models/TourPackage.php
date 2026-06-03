@@ -22,6 +22,7 @@ class TourPackage extends Model
         'duration_days',
         'max_guests',
         'image',
+        'category',
         'status',
         'rating',
     ];
@@ -87,15 +88,29 @@ class TourPackage extends Model
         return false;
     }
 
-    protected function casts(): array
+    public static function categoryLabels(): array
     {
         return [
-            'price' => 'decimal:2',
-            'duration_days' => 'integer',
-            'max_guests' => 'integer',
-            'rating' => 'decimal:2',
+            'natural' => 'Natural Attractions',
+            'cultural' => 'Cultural & Historical Sites',
+            'recreational' => 'Recreational & Adventure Spots',
+            'accommodation' => 'Accommodation & Hospitality',
+            'events' => 'Events & Festivals',
+            'ecotourism' => 'Ecotourism & Conservation Areas',
         ];
     }
+
+    public function getCategoryLabelAttribute(): string
+    {
+        return self::categoryLabels()[$this->category] ?? 'Uncategorized';
+    }
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'duration_days' => 'integer',
+        'max_guests' => 'integer',
+        'rating' => 'decimal:2',
+    ];
 
     public function bookings(): HasMany
     {

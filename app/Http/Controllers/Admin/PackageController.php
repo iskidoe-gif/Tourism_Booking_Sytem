@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PackageController extends Controller
 {
@@ -68,9 +69,9 @@ class PackageController extends Controller
     public function uploadImage(Request $request, TourPackage $package): JsonResponse
     {
         try {
-            @ini_set('upload_max_filesize', '1024M');
-            @ini_set('post_max_size', '1024M');
-            @ini_set('memory_limit', '1024M');
+            @ini_set('upload_max_filesize', '0');
+            @ini_set('post_max_size', '0');
+            @ini_set('memory_limit', '-1');
 
             $uploadLimit = ini_get('upload_max_filesize');
             $postLimit = ini_get('post_max_size');
@@ -98,8 +99,7 @@ class PackageController extends Controller
             }
 
             $validated = $request->validate([
-                // max is specified in kilobytes (1GB = 1048576 KB)
-                'image_file' => ['required', 'file', 'max:1048576'],
+                'image_file' => ['required', 'file'],
             ]);
 
             \Log::info('Upload image validation passed');
@@ -192,13 +192,14 @@ class PackageController extends Controller
 
         $tmpDir = 'uploads/tmp/' . $uploadId;
         try {
-            // ensure tmp dir exists
+            // ensure tmp dir exists on the local disk root
             if (! Storage::disk('local')->exists($tmpDir)) {
                 Storage::disk('local')->makeDirectory($tmpDir);
             }
             Storage::disk('local')->putFileAs($tmpDir, $request->file('chunk'), 'chunk_' . $index);
+            \Log::info('Chunk stored', ['upload_id' => $uploadId, 'chunk_index' => $index, 'tmp_dir' => Storage::disk('local')->path($tmpDir)]);
         } catch (\Throwable $e) {
-            \Log::error('Chunk store failed', ['error' => $e->getMessage()]);
+            \Log::error('Chunk store failed', ['error' => $e->getMessage(), 'upload_id' => $uploadId, 'chunk_index' => $index]);
             return response()->json(['error' => 'Could not store chunk'], 500);
         }
 
@@ -220,8 +221,9 @@ class PackageController extends Controller
         $total = (int) $validated['total_chunks'];
         $original = $validated['original_name'];
 
-        $tmpDir = storage_path('app/uploads/tmp/' . $uploadId);
+        $tmpDir = Storage::disk('local')->path('uploads/tmp/' . $uploadId);
         if (! is_dir($tmpDir)) {
+            \Log::warning('Chunk complete failed: tmp dir missing', ['upload_id' => $uploadId, 'tmp_dir' => $tmpDir]);
             return response()->json(['error' => 'Upload not found'], 404);
         }
 
@@ -250,10 +252,8 @@ class PackageController extends Controller
             $package->image = $name;
             $package->save();
 
-            // delete tmp chunks
-            $files = glob($tmpDir . DIRECTORY_SEPARATOR . 'chunk_*');
-            foreach ($files as $f) { @unlink($f); }
-            @rmdir($tmpDir);
+            // delete tmp chunks and cleanup directory
+            Storage::disk('local')->deleteDirectory('uploads/tmp/' . $uploadId);
 
             $url = asset('storage/' . ltrim($package->image, '/'));
             return response()->json(['url' => $url, 'path' => $package->image], 200);
@@ -316,6 +316,7 @@ class PackageController extends Controller
     {
         return $request->validate([
             'destination_id' => ['nullable', 'exists:destinations,id'],
+            'category' => ['nullable', Rule::in(['natural','cultural','recreational','accommodation','events','ecotourism'])],
             'name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -323,7 +324,7 @@ class PackageController extends Controller
             'duration_days' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'file', 'max:1048576'],
+            'image_file' => ['nullable', 'file'],
             'status' => ['required', 'in:active,inactive'],
             'rating' => ['nullable', 'numeric', 'between:0,5'],
         ]);

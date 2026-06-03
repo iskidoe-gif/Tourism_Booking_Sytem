@@ -10,7 +10,7 @@ use App\Http\Controllers\Tourist\ReservationController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [DashboardController::class, 'home'])->name('home');
 
 Route::middleware('guest')->group(function () {
     // Keep a lightweight GET route for legacy '/login' links.

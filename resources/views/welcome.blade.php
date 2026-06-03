@@ -36,49 +36,56 @@
                     </div>
                 </div>
 
-                <div class="bolinao-hero-visual" aria-hidden="true">
-                    <span class="visual-tag">Featured destination</span>
-                    <h2 class="visual-headline">Saint James Church</h2>
-                    <p class="visual-copy">Experience heritage, beach vistas, and coastal sunsets in Bolinao’s most iconic location.</p>
-                </div>
+                <div class="bolinao-hero-visual" aria-hidden="true"></div>
             </div>
         </div>
     </section>
 
-    <section class="top-destinations main-section" aria-label="Top destinations">
-        <div class="top-destinations-inner">
+    <section class="featured-packages main-section" aria-label="Featured high-rated packages">
+        <div class="featured-packages-inner">
             <div class="section-header">
-                <p>Most visited</p>
-                <h2>Top destinations in Bolinao</h2>
+                <p>Traveler Favorites</p>
+                <h2>Top-Rated Tour Packages</h2>
+                <p>Discover the most popular experiences loved by our guests</p>
             </div>
 
-            <div class="destinations-grid">
-                <article class="destination-card">
-                    <div class="destination-card-copy">
-                        <p class="destination-region">Beach escape</p>
-                        <h3>Patar White Beach</h3>
-                        <p>Soft sand, gentle waves, and a dramatic coastline make Patar one of the most iconic Bolinao beaches.</p>
-                    </div>
-                    <a href="{{ route('packages.index') }}" class="destination-link">View trips</a>
-                </article>
+            <div class="package-card-grid">
+                @forelse($topRatedPackages as $package)
+                    <article class="package-card">
+                        <div class="package-card-media" style="background-image: url('{{ $package->image_url }}');"></div>
+                        <div class="package-card-body">
+                            <div class="package-card-meta">
+                                <span>{{ $package->duration_days }} Day Tour</span>
+                                <span>{{ $package->location }}</span>
+                                <span>Max {{ $package->max_guests }} guests</span>
+                            </div>
+                            <h3 class="package-card-title">{{ $package->name }}</h3>
+                            <p class="package-card-description">{{ Str::limit($package->description, 110) }}</p>
+                            <div class="package-card-rating">
+                                @for($i = 1; $i <= 5; $i++)
+                                    {!! $i <= round($package->rating) ? '&#9733;' : '&#9734;' !!}
+                                @endfor
+                                <span class="rating-text">({{ number_format($package->rating, 1) }})</span>
+                            </div>
+                            <div class="package-card-footer">
+                                <div class="package-card-price">
+                                    <span class="price">&#8369;{{ number_format($package->price) }}</span>
+                                    <span class="price-note">/ person</span>
+                                </div>
+                                <div class="package-card-actions">
+                                    <a href="{{ route('packages.show', $package) }}" class="btn btn-secondary">View details</a>
+                                    <a href="{{ route('packages.index') }}" class="btn btn-primary">Browse more</a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <p style="grid-column: 1 / -1; text-align: center; padding: 2rem;">No top-rated packages available yet. Check back soon!</p>
+                @endforelse
+            </div>
 
-                <article class="destination-card">
-                    <div class="destination-card-copy">
-                        <p class="destination-region">Heritage & nature</p>
-                        <h3>Enchanted Cave</h3>
-                        <p>Swim in crystal-clear waters and explore a hidden cave pool beneath the lush coastal cliffs.</p>
-                    </div>
-                    <a href="{{ route('packages.index') }}" class="destination-link">View trips</a>
-                </article>
-
-                <article class="destination-card">
-                    <div class="destination-card-copy">
-                        <p class="destination-region">Culture</p>
-                        <h3>Saint James Church</h3>
-                        <p>A centuries-old stone church with stunning views, rich history, and a peaceful atmosphere.</p>
-                    </div>
-                    <a href="{{ route('packages.index') }}" class="destination-link">View trips</a>
-                </article>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ route('packages.index') }}" class="btn btn-primary">View All Packages</a>
             </div>
         </div>
     </section>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\Destination;
 use App\Models\Payment;
 use App\Models\TourPackage;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +30,17 @@ class DashboardController extends Controller
         return view('dashboard', $data);
     }
 
+    public function home(): View
+    {
+        $topRatedPackages = TourPackage::where('status', 'active')
+            ->where('rating', '>=', 4)
+            ->orderBy('rating', 'desc')
+            ->limit(3)
+            ->get();
+
+        return view('welcome', compact('topRatedPackages'));
+    }
+
     public function admin(Request $request): JsonResponse|View
     {
         $data = $this->buildDashboardData($request);
@@ -46,16 +58,46 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        $categoryMap = [
+            'natural' => ['label' => 'Natural Attractions', 'keywords' => ['beach','waterfall','falls','cave','river','rock','island','lagoon','spring','shore']],
+            'cultural' => ['label' => 'Cultural & Historical Sites', 'keywords' => ['church','heritage','museum','lighthouse','parish','histor','monument','temple']],
+            'recreational' => ['label' => 'Recreational & Adventure Spots', 'keywords' => ['island','diving','snorkel','camp','hike','hiking','island hopping','adventure','tour']],
+            'accommodation' => ['label' => 'Accommodation & Hospitality', 'keywords' => ['resort','hotel','inn','homestay','transient','guesthouse','lodg','villa']],
+            'events' => ['label' => 'Events & Festivals', 'keywords' => ['festival','event','parade','competition','celebration']],
+            'ecotourism' => ['label' => 'Ecotourism & Conservation Areas', 'keywords' => ['mangrove','park','reserve','ecolodge','protected','sanctuary']],
+        ];
+
         $packages = TourPackage::where('status', 'active')
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('location', 'like', "%{$request->search}%")
                 ->orWhere('description', 'like', "%{$request->search}%")
             )
+            ->when($request->destination, fn($q) => $q->where('destination_id', $request->destination))
+            ->when($request->category, function($q) use ($request, $categoryMap) {
+                // prefer explicit DB category if set, otherwise fallback to keyword match
+                $q->where(function($sub) use ($request, $categoryMap) {
+                    $sub->where('category', $request->category);
+                    if ($request->category && array_key_exists($request->category, $categoryMap)) {
+                        $keywords = $categoryMap[$request->category]['keywords'];
+                        $sub->orWhere(function($s2) use ($keywords) {
+                            foreach ($keywords as $k) {
+                                $s2->orWhere('name', 'like', "%{$k}%")
+                                   ->orWhere('description', 'like', "%{$k}%")
+                                   ->orWhere('location', 'like', "%{$k}%");
+                            }
+                        })->orWhereHas('destination', function($d) use ($keywords) {
+                            foreach ($keywords as $k) {
+                                $d->orWhere('name', 'like', "%{$k}%");
+                            }
+                        });
+                    }
+                });
+            })
             ->orderBy('updated_at', 'desc')
             ->paginate(6)
             ->withQueryString();
-
-        $data = compact('packages');
+        $destinations = Destination::orderBy('name')->get();
+        $data = compact('packages', 'destinations', 'categoryMap');
 
         if ($request->user()) {
             $data = array_merge($this->touristData($request), $data);

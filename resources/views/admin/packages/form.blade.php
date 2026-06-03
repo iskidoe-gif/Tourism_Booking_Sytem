@@ -61,6 +61,18 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-control">
+                        <option value="">None / Uncategorised</option>
+                        <option value="natural" {{ old('category', $package->category) === 'natural' ? 'selected' : '' }}>Natural Attractions</option>
+                        <option value="cultural" {{ old('category', $package->category) === 'cultural' ? 'selected' : '' }}>Cultural & Historical Sites</option>
+                        <option value="recreational" {{ old('category', $package->category) === 'recreational' ? 'selected' : '' }}>Recreational & Adventure Spots</option>
+                        <option value="accommodation" {{ old('category', $package->category) === 'accommodation' ? 'selected' : '' }}>Accommodation & Hospitality</option>
+                        <option value="events" {{ old('category', $package->category) === 'events' ? 'selected' : '' }}>Events & Festivals</option>
+                        <option value="ecotourism" {{ old('category', $package->category) === 'ecotourism' ? 'selected' : '' }}>Ecotourism & Conservation Areas</option>
+                    </select>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -187,8 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // if package exists, upload immediately to server
         const uploadUrl = input.dataset.uploadUrl;
         if (!uploadUrl) return;
-        // client-side size check removed — always allow and use chunking when needed
-        const MAX_CLIENT_UPLOAD = 0; // 0 => always allow; chunking used for large files
+        const MAX_CLIENT_UPLOAD = 1 * 1024 * 1024; // 1MB direct upload threshold
 
         const tokenInput = document.querySelector('input[name="_token"]');
         const csrf = tokenInput ? tokenInput.value : '';
@@ -203,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         async function doChunkedUpload(file, uploadUrl) {
-            const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+            const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB, keep each chunk below PHP upload_max_filesize defaults
             const total = Math.ceil(file.size / CHUNK_SIZE);
             const uploadId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
             const chunkUrl = uploadUrl.replace('/upload-image', '/upload-chunk');
