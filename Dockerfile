@@ -11,7 +11,11 @@ RUN npm ci --silent --legacy-peer-deps && npm run build
 # 2) Composer builder for PHP dependencies
 FROM composer:2 AS composer_builder
 WORKDIR /app
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
 COPY composer.json composer.lock ./
+COPY . .
+RUN cp .env.example .env || true
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # 3) Final image with Apache + PHP
