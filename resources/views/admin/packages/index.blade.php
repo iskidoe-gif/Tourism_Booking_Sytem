@@ -29,7 +29,7 @@
                     @forelse($packages as $package)
                         <tr>
                             <td class="td">
-                                <img src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}" alt="{{ $package->name }}" style="width:88px;height:56px;object-fit:cover;border-radius:6px;">
+                                <img src="{{ $package->image_url }}" alt="{{ $package->name }}" style="width:88px;height:56px;object-fit:cover;border-radius:6px;">
                             </td>
                             <td class="td">{{ $package->name }}</td>
                             <td class="td">{{ $package->location }}</td>

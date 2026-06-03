@@ -1,18 +1,18 @@
 <x-layout>
-    <div class="auth-panel">
+    <div class="auth-panel admin">
         <div class="auth-header">
             <div class="auth-badge admin">
                 <svg style="width: 32px; height: 32px;" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm-8-9a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1zm16 0a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1z" />
                 </svg>
             </div>
-            <h1 class="auth-title">Admin Portal</h1>
-            <p class="auth-lead">Access the management dashboard to oversee bookings and tour packages</p>
+            <h1 class="auth-title">Admin Login</h1>
+            <p class="auth-lead">Sign in with your admin account to manage bookings, packages, and reports.</p>
         </div>
 
         @if ($errors->any())
             <div class="alert alert-error">
-                <strong>Admin Login Failed</strong>
+                <strong>Admin login failed.</strong>
                 <div>Please verify your credentials and try again.</div>
             </div>
         @endif
@@ -41,9 +41,14 @@
             <div></div>
         </div>
 
+        @if (app()->isLocal())
+            <div class="auth-helper">
+                <p><strong>Seeded admin credentials:</strong> admin@tourph.com / password123</p>
+            </div>
+        @endif
+
         <div class="auth-links">
-            <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin" class="btn-secondary">Tourist Login</a>
-            <a href="{{ route('home') }}" data-auth-open data-auth-mode="register" class="btn-secondary">Create Tourist Account</a>
+            <a href="{{ route('home') }}" class="btn-secondary">Back to home</a>
         </div>
     </div>
 </x-layout>

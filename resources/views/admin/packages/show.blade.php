@@ -20,7 +20,7 @@
                 <div class="row g-4">
                     <div class="col-12 col-md-5">
                         <img
-                            src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}"
+                            src="{{ $package->image_url }}"
                             alt="{{ $package->name }}"
                             style="width:100%;max-height:320px;object-fit:cover;border-radius:8px;"
                         >
