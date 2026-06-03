@@ -10,6 +10,10 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 html,
 body {
     margin: 0;
@@ -161,6 +165,43 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     z-index: 1;
     width: min(100%, 38rem);
     margin: 0;
+}
+
+.hero-scroll {
+    margin-top: 2rem;
+}
+
+.hero-scroll-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1.2rem;
+    border-radius: 999px;
+    background: rgba(234, 224, 207, 0.12);
+    color: var(--palette-cream);
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hero-scroll-link:hover {
+    background: rgba(234, 224, 207, 0.18);
+    transform: translateY(-1px);
+}
+
+.hero-scroll-link svg {
+    color: var(--palette-cream);
+    transition: transform 0.2s ease;
+}
+
+.hero-scroll-link:hover svg {
+    transform: translateY(2px);
+}
+
+.section-scroll {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
 }
 
 .bolinao-kicker {
@@ -496,17 +537,105 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     margin-top: clamp(3rem, 5vw, 5rem);
 }
 
-.featured-packages {
+.homepage-slider {
+    width: min(100%, 72rem);
+    margin: 0 auto 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.slider-view {
+    overflow: hidden;
+}
+
+.slider-track {
+    display: flex;
+    width: 300%;
+    transition: transform 0.55s ease;
+}
+
+.slider-slide {
+    flex: 0 0 100%;
+    display: block;
+}
+
+
+.featured-packages,
+.customer-reviews-section {
     background: linear-gradient(180deg, rgba(20, 28, 72, 0.4) 0%, rgba(17, 24, 68, 0.6) 100%);
-    margin-top: -3rem;
-    border-top: 1px solid rgba(234, 224, 207, 0.08);
+}
+
+.homepage-slider .featured-packages,
+.homepage-slider .customer-reviews-section {
     padding: 5rem 1.5rem 3rem;
 }
 
-.main-section {
+.homepage-slider .section-header,
+.homepage-slider .reviews-header {
+    max-width: 46rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 840px) {
+}
+
+.reviews-container {
     width: min(100%, 72rem);
     margin: 0 auto;
-    padding: 3rem 1.5rem;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.review-card {
+    padding: 2rem;
+    border-radius: 1.2rem;
+    background: linear-gradient(180deg, rgba(8, 20, 60, 0.84), rgba(18, 32, 74, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1rem 2rem rgba(3, 7, 25, 0.5);
+}
+
+.review-stars {
+    font-size: 1.1rem;
+    color: #F4E9D1;
+    margin-bottom: 1rem;
+}
+
+.review-text {
+    margin: 0 0 1.5rem;
+    color: rgba(234, 224, 207, 0.9);
+    line-height: 1.75;
+}
+
+.review-author {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.review-avatar {
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--palette-cream);
+    font-weight: 700;
+}
+
+.review-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.review-info p {
+    margin: 0.35rem 0 0;
+    color: var(--palette-secondary);
 }
 
 .featured-packages-inner {
@@ -2082,7 +2211,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     }
 }
 
-..card {
+.card {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 1.5rem;
     background: rgba(12, 21, 55, 0.82);
@@ -2395,6 +2524,42 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     margin-top: 1rem;
     display: grid;
     gap: 0.75rem;
+}
+
+.card-sm {
+    border: 1px solid rgba(234, 224, 207, 0.12);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 1rem;
+}
+
+.text-sm {
+    font-size: 0.92rem;
+    line-height: 1.4;
+    margin-bottom: 0.35rem;
+}
+
+.text-secondary {
+    color: rgba(234, 224, 207, 0.78);
+}
+
+.muted {
+    color: rgba(234, 224, 207, 0.72);
+}
+
+.badge-warning {
+    background: rgba(250, 204, 21, 0.15);
+    color: #fbbf24;
+}
+
+.badge-success {
+    background: rgba(34, 197, 94, 0.16);
+    color: #a7f3d0;
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fecaca;
 }
 
 .mini {
