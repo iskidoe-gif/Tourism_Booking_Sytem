@@ -87,14 +87,7 @@
             <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
                     <label class="form-label">Upload image</label>
-                    @if($package->exists)
-                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" data-upload-url="{{ route('admin.packages.upload-image', $package) }}">
-                    @else
-                    <div class="alert alert-info alert-sm mb-3">
-                        <small><strong>Create the package first</strong>, then upload images.</small>
-                    </div>
-                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" disabled>
-                    @endif
+                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" @if($package->exists) data-upload-url="{{ route('admin.packages.upload-image', $package) }}" @endif>
                     <div class="mt-2">
                         @php
                             $previewPath = null;
