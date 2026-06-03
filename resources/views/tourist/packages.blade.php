@@ -53,7 +53,8 @@
                         <div class="package-card-body">
                             <div class="package-card-meta">
                                 <span>{{ $package->duration_days }} Day Tour</span>
-                                <span>{{ $package->destination?->name ?? 'Bolinao' }}</span>
+                                <span>{{ $package->location }}</span>
+                                <span>{{ $package->category_label }}</span>
                                 <span>Max {{ $package->max_guests }} guests</span>
                             </div>
                             <h3 class="package-card-title">{{ $package->name }}</h3>

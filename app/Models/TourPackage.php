@@ -132,6 +132,11 @@ class TourPackage extends Model
         return $query->where('status', 'active');
     }
 
+    public function scopeBolinao(Builder $query)
+    {
+        return $query->where('location', 'like', '%Bolinao%');
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'created_by');

@@ -8,15 +8,34 @@
             <a href="{{ route('admin.packages.create') }}" class="btn btn-primary">Add Package</a>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success mb-4">{{ session('success') }}</div>
-        @endif
+            <div class="packages-search-filter mb-4">
+                <form action="{{ route('admin.packages.index') }}" method="GET">
+                    <div class="form-row">
+                        <input
+                            type="search"
+                            name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Search packages by name, location, or description"
+                            class="form-control"
+                        />
 
-        <div class="tablewrap">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th class="th">Image</th>
+                        <select name="category" class="form-select">
+                            <option value="">All categories</option>
+                            @foreach($categories as $key => $label)
+                                <option value="{{ $key }}" @selected(request('category') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            @if(request('search') || request('category'))
+                                <a href="{{ route('admin.packages.index') }}" class="btn btn-outline-secondary">Clear</a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
+
                         <th class="th">Name</th>
                         <th class="th">Location</th>
                         <th class="th">Category</th>
@@ -38,7 +57,7 @@
                             <td class="td">PHP {{ number_format((float) $package->price, 2) }}</td>
                             <td class="td">{{ ucfirst($package->status) }}</td>
                             <td class="td">{{ number_format((float) $package->rating, 1) }}</td>
-                            <td class="td d-flex gap-2">
+                            <td class="td table-actions">
                                 <a href="{{ route('admin.packages.show', $package) }}" class="btn btn-sm btn-outline-secondary">View</a>
                                 <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 <form method="POST" action="{{ route('admin.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?');">

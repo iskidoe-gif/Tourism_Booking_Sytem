@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Tourist;
 
 use App\Http\Controllers\Controller;
 use App\Models\TourPackage;
-use App\Models\Destination;
 use Illuminate\Http\Request;
 
 class PackageController extends Controller
@@ -21,6 +20,7 @@ class PackageController extends Controller
         ];
 
         $packages = TourPackage::active()
+            ->bolinao()
             ->when($request->search, fn($q) =>
                 $q->where('name', 'like', "%{$request->search}%")
                   ->orWhere('location', 'like', "%{$request->search}%")

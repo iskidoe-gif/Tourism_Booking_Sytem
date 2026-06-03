@@ -36,6 +36,7 @@
                             <th class="th">Image</th>
                             <th class="th">Name</th>
                             <th class="th">Location</th>
+                            <th class="th">Category</th>
                             <th class="th">Price</th>
                             <th class="th">Status</th>
                             <th class="th">Rating</th>
@@ -50,10 +51,11 @@
                                 </td>
                                 <td class="td">{{ $package->name }}</td>
                                 <td class="td">{{ $package->location }}</td>
+                                <td class="td">{{ $package->category_label }}</td>
                                 <td class="td">PHP {{ number_format((float) $package->price, 2) }}</td>
                                 <td class="td">{{ ucfirst($package->status) }}</td>
                                 <td class="td">{{ number_format((float) $package->rating, 1) }}</td>
-                                <td class="td d-flex gap-2">
+                                <td class="td table-actions">
                                     <a href="{{ route('admin.packages.show', $package) }}" class="btn btn-sm btn-outline-secondary">View</a>
                                     <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                     <form method="POST" action="{{ route('admin.packages.destroy', $package) }}" onsubmit="return confirm('Delete this package?');">
@@ -65,7 +67,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="td empty">No packages found.</td>
+                                <td colspan="8" class="td empty">No packages found.</td>
                             </tr>
                         @endforelse
                     </tbody>

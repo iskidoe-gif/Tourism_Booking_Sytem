@@ -104,7 +104,6 @@
                     <label class="form-label">Upload image</label>
                     @if($package->exists)
                     <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" data-upload-url="{{ route('admin.packages.upload-image', $package) }}">
-                    <div class="form-text text-muted mb-2">Max upload size: {{ $maxUploadLabel }}.</div>
                     @else
                     <div class="alert alert-info alert-sm mb-3">
                         <small><strong>Create the package first</strong>, then upload images.</small>

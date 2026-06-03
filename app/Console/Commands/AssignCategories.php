@@ -69,7 +69,7 @@ class AssignCategories extends Command
                         'destination_id' => null,
                         'name' => 'Sample ' . $labels[$cat],
                         'description' => $labels[$cat] . ' sample package created automatically.',
-                        'location' => 'Various',
+                        'location' => 'Bolinao, Pangasinan',
                         'price' => 0.00,
                         'duration_days' => 1,
                         'max_guests' => 1,

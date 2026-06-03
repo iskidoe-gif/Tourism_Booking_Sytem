@@ -33,7 +33,8 @@ class DashboardController extends Controller
 
     public function home(): View
     {
-        $topRatedPackages = TourPackage::where('status', 'active')
+        $topRatedPackages = TourPackage::active()
+            ->bolinao()
             ->where('rating', '>=', 4)
             ->orderBy('rating', 'desc')
             ->limit(3)
@@ -73,7 +74,8 @@ class DashboardController extends Controller
             'ecotourism' => ['label' => 'Ecotourism & Conservation Areas', 'keywords' => ['mangrove','park','reserve','ecolodge','protected','sanctuary']],
         ];
 
-        $packages = TourPackage::where('status', 'active')
+        $packages = TourPackage::active()
+            ->bolinao()
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('location', 'like', "%{$request->search}%")
                 ->orWhere('description', 'like', "%{$request->search}%")
@@ -234,14 +236,15 @@ class DashboardController extends Controller
 
         return [
             'stats' => [
-                'packages' => TourPackage::where('status', 'active')->count(),
+                'packages' => TourPackage::active()->bolinao()->count(),
                 'bookings' => $bookingQuery->count(),
                 'pending_bookings' => (clone $bookingQuery)->where('status', 'pending')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
             ],
             'availablePackages' => TourPackage::query()
-                ->where('status', 'active')
+                ->active()
+                ->bolinao()
                 ->latest()
                 ->get(),
             'recentBookings' => $bookings,

@@ -17,6 +17,7 @@
             <div class="card-body">
                 <h4 class="fw-semibold">{{ $tourPackage->name }}</h4>
                 <p class="text-muted mb-2">&#128205; {{ $tourPackage->location }}</p>
+                <p class="text-muted mb-2">Category: {{ $tourPackage->category_label }}</p>
 
                 <div class="text-warning small mb-3">
                     @for($i = 1; $i <= 5; $i++)
@@ -115,6 +116,14 @@
                         <button class="btn btn-primary">Submit Review</button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+@elseif(auth()->check())
+    <div class="row mb-5">
+        <div class="col-12 col-lg-8">
+            <div class="alert alert-warning">
+                Only tourist or guest accounts may submit reviews. Admins cannot rate tour packages.
             </div>
         </div>
     </div>

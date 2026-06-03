@@ -12,7 +12,9 @@ class ReviewController extends Controller
 {
     public function store(Request $request, TourPackage $tourPackage): JsonResponse|RedirectResponse
     {
-        abort_unless($request->user()?->isTourist(), 403, 'Only tourists may submit reviews.');
+        $user = $request->user();
+
+        abort_unless($user && $user->isTourist(), 403, 'Only tourists may submit reviews.');
 
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'between:1,5'],
