@@ -97,9 +97,6 @@ Route::prefix('admin')
             ->whereIn('format', ['json', 'csv', 'xlsx', 'pdf'])
             ->name('reports.bookings');
 
-        Route::get('/reports/history/{report}', [ReportController::class, 'downloadHistory'])
-            ->name('reports.history.download');
-
         Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class)->only(['index', 'edit', 'update']);
 
         Route::get('/bookings', [DashboardController::class, 'adminBookings'])->name('bookings.index');

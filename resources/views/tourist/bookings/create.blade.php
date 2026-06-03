@@ -20,6 +20,12 @@
         <div class="card">
             <div class="card-header bg-white fw-semibold">Booking Details</div>
             <div class="card-body">
+                @if(auth()->user()?->email === 'guest@example.com')
+                    <div class="alert alert-warning">
+                        Guest accounts cannot confirm bookings. Please register a full account or log in with your own details before continuing.
+                    </div>
+                @endif
+
                 <form method="POST" action="{{ route('bookings.store') }}">
                     @csrf
                     <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">

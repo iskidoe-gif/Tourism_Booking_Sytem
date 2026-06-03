@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\ReportHistory;
 use App\Services\ReportExportService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,18 +17,7 @@ class ReportController extends Controller
 
     public function index(Request $request): Response
     {
-        if (! Schema::hasTable('report_histories')) {
-            $history = new LengthAwarePaginator([], 0, 10, 1, [
-                'path' => $request->url(),
-                'query' => $request->query(),
-            ]);
-
-            return response()->view('admin.reports', compact('history'));
-        }
-
-        $history = ReportHistory::latest()->paginate(10);
-
-        return response()->view('admin.reports', compact('history'));
+        return response()->view('admin.reports');
     }
 
     public function bookings(Request $request, string $format = 'json'): JsonResponse|Response
@@ -66,19 +51,24 @@ class ReportController extends Controller
         ];
 
         $format = strtolower($format);
-        Storage::disk('local')->ensureDirectoryExists('reports');
+
+        if (! Storage::disk('local')->exists('reports')) {
+            Storage::disk('local')->makeDirectory('reports');
+        }
 
         if ($format === 'csv') {
             $csv = $this->exporter->csv($headers, $rows);
             $filename = 'bookings-report-' . now()->format('YmdHis') . '.csv';
             $path = 'reports/' . $filename;
             Storage::disk('local')->put($path, $csv);
-            $this->recordExport($format, count($rows), $filename, $path, $bookings->sum('total_price'));
 
-            return response()->streamDownload(
-                fn () => print($csv),
-                $filename,
-                ['Content-Type' => 'text/csv; charset=UTF-8']
+            return response(
+                $csv,
+                200,
+                [
+                    'Content-Type' => 'text/csv; charset=UTF-8',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
             );
         }
 
@@ -88,9 +78,15 @@ class ReportController extends Controller
             $path = 'reports/' . $filename;
             Storage::disk('local')->put($path, file_get_contents($file));
             @unlink($file);
-            $this->recordExport($format, count($rows), $filename, $path, $bookings->sum('total_price'));
 
-            return response()->download(storage_path('app/' . $path), $filename);
+            return response(
+                Storage::disk('local')->get($path),
+                200,
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
+            );
         }
 
         if ($format === 'pdf') {
@@ -98,12 +94,14 @@ class ReportController extends Controller
             $filename = 'bookings-report-' . now()->format('YmdHis') . '.pdf';
             $path = 'reports/' . $filename;
             Storage::disk('local')->put($path, $pdf);
-            $this->recordExport($format, count($rows), $filename, $path, $bookings->sum('total_price'));
 
-            return response()->streamDownload(
-                fn () => print($pdf),
-                $filename,
-                ['Content-Type' => 'application/pdf']
+            return response(
+                Storage::disk('local')->get($path),
+                200,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
             );
         }
 
@@ -122,24 +120,4 @@ class ReportController extends Controller
         return response()->json(['message' => 'Unsupported report format.'], 422);
     }
 
-    public function downloadHistory(ReportHistory $report): Response
-    {
-        return response()->download(storage_path('app/' . $report->path), $report->filename);
-    }
-
-    private function recordExport(string $format, int $rowCount, string $filename, string $path, float $totalRevenue): void
-    {
-        if (! Schema::hasTable('report_histories')) {
-            return;
-        }
-
-        ReportHistory::create([
-            'format' => $format,
-            'filename' => $filename,
-            'path' => $path,
-            'row_count' => $rowCount,
-            'total_revenue' => $totalRevenue,
-            'generated_by' => Auth::guard('admin')->user()?->name ?? Auth::user()?->name ?? 'System',
-        ]);
-    }
 }

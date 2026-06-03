@@ -18,7 +18,7 @@
     <div class="topbar {{ request()->routeIs('home') ? 'home-topbar' : ($isAuthPage ? 'auth-topbar' : 'page-topbar') }}">
         <div class="frame">
             <nav class="bolinao-nav" aria-label="Main navigation">
-                <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
+                <span class="bolinao-brand" aria-current="page">Bolinao</span>
                 <div class="bolinao-navlinks">
                     @if($adminUser)
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
