@@ -8,6 +8,13 @@
                 <a href="{{ route('packages.index') }}">Packages</a>
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
+                        <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" class="nav-form">
+                        @csrf
+                        <button class="navbtn">Logout</button>
+                    </form>
                 @else
                     <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                 @endauth
