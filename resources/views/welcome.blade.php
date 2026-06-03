@@ -2,7 +2,7 @@
     
     <header class="bolinao-navbar-header">
         <nav class="bolinao-nav" aria-label="Main navigation">
-            <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
+            <span class="bolinao-brand" aria-current="page">Bolinao</span>
             <div class="bolinao-navlinks">
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('packages.index') }}">Packages</a>

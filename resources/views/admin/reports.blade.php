@@ -12,7 +12,7 @@
                     <strong>CSV Report</strong>
                     <p class="lead">Download as CSV format for spreadsheet applications.</p>
                 </div>
-                <a href="{{ route('admin.reports.bookings', 'csv') }}" class="btn btn-primary" download>
+                <a href="{{ route('admin.reports.bookings', ['format' => 'csv']) }}" class="btn btn-primary">
                     Download CSV
                 </a>
             </div>
@@ -22,7 +22,7 @@
                     <strong>XLSX Report</strong>
                     <p class="lead">Download as XLSX format (Excel spreadsheet).</p>
                 </div>
-                <a href="{{ route('admin.reports.bookings', 'xlsx') }}" class="btn btn-primary" download>
+                <a href="{{ route('admin.reports.bookings', ['format' => 'xlsx']) }}" class="btn btn-primary">
                     Download XLSX
                 </a>
             </div>
@@ -32,10 +32,11 @@
                     <strong>PDF Report</strong>
                     <p class="lead">Download as PDF format for printing and sharing.</p>
                 </div>
-                <a href="{{ route('admin.reports.bookings', 'pdf') }}" class="btn btn-primary" download>
+                <a href="{{ route('admin.reports.bookings', ['format' => 'pdf']) }}" class="btn btn-primary">
                     Download PDF
                 </a>
             </div>
         </div>
     </div>
+
 </x-layout>

@@ -135,6 +135,19 @@ class DashboardController extends Controller
 
     public function storeBooking(Request $request): JsonResponse|RedirectResponse
     {
+        if ($request->user()?->email === 'guest@example.com') {
+            $message = 'Guest users cannot complete bookings. Please register or log in with your account to continue.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 403);
+            }
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $message);
+        }
+
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
             'tour_date' => ['required', 'date', 'after:today'],
@@ -190,7 +203,21 @@ class DashboardController extends Controller
     {
         $activePackages = TourPackage::where('status', 'active')->count();
         $inactivePackages = TourPackage::where('status', '!=', 'active')->count();
-        $packages = TourPackage::latest()->paginate(20);
+
+        $query = TourPackage::latest()
+            ->when($request->search, function ($query) use ($request) {
+                $query->where(function ($sub) use ($request) {
+                    $sub->where('name', 'like', '%' . $request->search . '%')
+                        ->orWhere('location', 'like', '%' . $request->search . '%')
+                        ->orWhere('description', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->when($request->category, function ($query) use ($request) {
+                $query->where('category', $request->category);
+            });
+
+        $packages = $query->paginate(5)->withQueryString();
+        $categories = TourPackage::categoryLabels();
 
         $data = [
             'stats' => [
@@ -199,6 +226,7 @@ class DashboardController extends Controller
                 'total' => $activePackages + $inactivePackages,
             ],
             'packages' => $packages,
+            'categories' => $categories,
         ];
 
         if ($request->expectsJson()) {

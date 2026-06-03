@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Services\ReportExportService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportController extends Controller
 {
@@ -15,7 +15,12 @@ class ReportController extends Controller
     {
     }
 
-    public function bookings(Request $request, string $format = 'json'): JsonResponse|Response|BinaryFileResponse
+    public function index(Request $request): Response
+    {
+        return response()->view('admin.reports');
+    }
+
+    public function bookings(Request $request, string $format = 'json'): JsonResponse|Response
     {
         $bookings = Booking::with(['user', 'package', 'payment', 'approver'])
             ->latest()
@@ -26,7 +31,7 @@ class ReportController extends Controller
                 $booking->booking_number,
                 $booking->user?->name ?? '',
                 $booking->package?->name ?? '',
-                $booking->tour_date?->format('Y-m-d') ?? '',
+                optional($booking->tour_date)->format('Y-m-d') ?? '',
                 $booking->num_guests,
                 $booking->status,
                 $booking->total_price,
@@ -45,28 +50,59 @@ class ReportController extends Controller
             'Payment Status',
         ];
 
+        $format = strtolower($format);
+
+        if (! Storage::disk('local')->exists('reports')) {
+            Storage::disk('local')->makeDirectory('reports');
+        }
+
         if ($format === 'csv') {
             $csv = $this->exporter->csv($headers, $rows);
+            $filename = 'bookings-report-' . now()->format('YmdHis') . '.csv';
+            $path = 'reports/' . $filename;
+            Storage::disk('local')->put($path, $csv);
 
-            return response($csv, 200, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="bookings-report.csv"',
-            ]);
+            return response(
+                $csv,
+                200,
+                [
+                    'Content-Type' => 'text/csv; charset=UTF-8',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
+            );
         }
 
         if ($format === 'xlsx') {
             $file = $this->exporter->xlsx('Bookings', $headers, $rows);
+            $filename = 'bookings-report-' . now()->format('YmdHis') . '.xlsx';
+            $path = 'reports/' . $filename;
+            Storage::disk('local')->put($path, file_get_contents($file));
+            @unlink($file);
 
-            return response()->download($file, 'bookings-report.xlsx')->deleteFileAfterSend(true);
+            return response(
+                Storage::disk('local')->get($path),
+                200,
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
+            );
         }
 
         if ($format === 'pdf') {
             $pdf = $this->exporter->pdf('Bookings Report', $headers, $rows);
+            $filename = 'bookings-report-' . now()->format('YmdHis') . '.pdf';
+            $path = 'reports/' . $filename;
+            Storage::disk('local')->put($path, $pdf);
 
-            return response($pdf, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="bookings-report.pdf"',
-            ]);
+            return response(
+                Storage::disk('local')->get($path),
+                200,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                ]
+            );
         }
 
         if ($request->expectsJson() || $format === 'json') {
@@ -83,4 +119,5 @@ class ReportController extends Controller
 
         return response()->json(['message' => 'Unsupported report format.'], 422);
     }
+
 }

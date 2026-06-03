@@ -91,11 +91,9 @@ Route::prefix('admin')
 
         Route::resource('destinations', \App\Http\Controllers\Admin\DestinationController::class)->except(['show']);
 
-        Route::get('/reports', function () {
-            return view('admin.reports');
-        })->name('reports.index');
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
-        Route::get('/reports/bookings/{format?}', [ReportController::class, 'bookings'])
+        Route::get('/reports/bookings/{format}', [ReportController::class, 'bookings'])
             ->whereIn('format', ['json', 'csv', 'xlsx', 'pdf'])
             ->name('reports.bookings');
 
