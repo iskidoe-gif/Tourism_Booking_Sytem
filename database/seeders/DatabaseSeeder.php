@@ -62,6 +62,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call(TourPackageSeeder::class);
 
+        $this->call(ReviewSeeder::class);
+
         $tourist = User::where('email', 'tourist@example.com')->first();
         $tourPackage = TourPackage::where('status', 'active')->first();
 

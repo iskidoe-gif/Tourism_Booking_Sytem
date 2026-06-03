@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Destination;
 use App\Models\Payment;
+use App\Models\Review;
 use App\Models\TourPackage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -38,7 +39,12 @@ class DashboardController extends Controller
             ->limit(3)
             ->get();
 
-        return view('welcome', compact('topRatedPackages'));
+        $customerReviews = Review::with(['user', 'tourPackage'])
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+
+        return view('welcome', compact('topRatedPackages', 'customerReviews'));
     }
 
     public function admin(Request $request): JsonResponse|View

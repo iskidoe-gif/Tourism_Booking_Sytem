@@ -1,22 +1,23 @@
 <x-layout>
     
+    <header class="bolinao-navbar-header">
+        <nav class="bolinao-nav" aria-label="Main navigation">
+            <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
+            <div class="bolinao-navlinks">
+                <a href="{{ route('home') }}">Home</a>
+                <a href="{{ route('packages.index') }}">Trips</a>
+                @auth
+                    <a href="{{ route('dashboard') }}">Dashboard</a>
+                @else
+                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="signin">Login</a>
+                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
+                @endauth
+            </div>
+        </nav>
+    </header>
+
     <section class="bolinao-hero" aria-label="Bolinao tourism landing page">
         <div class="bolinao-card">
-            <header class="bolinao-hero-header">
-                <nav class="bolinao-nav" aria-label="Main navigation">
-                    <a href="{{ route('home') }}" class="bolinao-brand">Bolinao</a>
-                    <div class="bolinao-navlinks">
-                        <a href="{{ route('home') }}">Home</a>
-                        <a href="{{ route('packages.index') }}">Trips</a>
-                        @auth
-                            <a href="{{ route('dashboard') }}">Dashboard</a>
-                        @else
-                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="signin">Login</a>
-                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
-                        @endauth
-                    </div>
-                </nav>
-            </header>
             <div class="bolinao-hero-grid">
                 <div class="bolinao-copy">
                     <p class="bolinao-kicker">Heritage</p>
@@ -86,6 +87,42 @@
 
             <div style="text-align: center; margin-top: 2rem;">
                 <a href="{{ route('packages.index') }}" class="btn btn-primary">View All Packages</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="customer-reviews-section" aria-label="Customer reviews and testimonials">
+        <div class="reviews-container">
+            <div class="reviews-header">
+                <p>What Our Travelers Say</p>
+                <h2>Customer Reviews & Testimonials</h2>
+                <p class="reviews-header-desc">Hear from real travelers who've experienced the beauty and adventure of Bolinao with us</p>
+            </div>
+
+            <div class="reviews-grid">
+                @forelse($customerReviews as $review)
+                    <div class="review-card">
+                        <div class="review-stars">
+                            @for($i = 1; $i <= 5; $i++)
+                                {!! $i <= round($review->rating) ? '&#9733;' : '&#9734;' !!}
+                            @endfor
+                        </div>
+                        <p class="review-text">"{{ $review->comment }}"</p>
+                        <div class="review-author">
+                            <div class="review-avatar">
+                                {{ strtoupper(substr($review->user->name ?? 'Guest', 0, 1)) }}
+                            </div>
+                            <div class="review-info">
+                                <h4>{{ $review->user->name ?? 'Guest Traveler' }}</h4>
+                                <p>{{ $review->tourPackage->name ?? 'Tour Guest' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: rgba(234, 224, 207, 0.6);">
+                        <p>Reviews coming soon from our travelers!</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>

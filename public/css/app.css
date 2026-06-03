@@ -1809,27 +1809,40 @@ textarea {
     padding: 2rem 1.5rem;
 }
 
-.bolinao-hero {
-    min-height: 100vh;
-    width: 100vw;
-    display: grid;
-    place-items: center;
-    padding: 0;
+.bolinao-navbar-header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(12, 24, 58, 0.95) 0%, rgba(12, 24, 58, 0.85) 100%);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(234, 224, 207, 0.1);
+    padding: 1rem 0;
+    width: 100%;
+}
+
+.bolinao-hero {
+    height: 85vh;
+    width: 100vw;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 10;
     overflow: hidden;
     margin: 0;
+    margin-top: 0;
 }
 
 .bolinao-card {
-    position: fixed;
-    top: 14%;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
     width: min(100%, 64rem);
     max-width: 64rem;
     padding: 2.5rem 3.5rem;
@@ -1851,11 +1864,7 @@ textarea {
     pointer-events: none;
 }
 
-.bolinao-hero-header {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 1.5rem;
-}
+
 
 .bolinao-hero-grid {
     display: grid;
@@ -1874,7 +1883,7 @@ textarea {
 
 .featured-packages {
     background: linear-gradient(180deg, rgba(20, 28, 72, 0.4) 0%, rgba(17, 24, 68, 0.6) 100%);
-    margin-top: calc(100vh + 1rem) !important;
+    margin-top: 0;
     border-top: 1px solid rgba(234, 224, 207, 0.08);
     padding: 5rem 0 3rem;
     position: relative;
@@ -1899,8 +1908,9 @@ textarea {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    width: 100%;
-    padding: 0 0 1.5rem 0;
+    width: min(100%, 88rem);
+    margin: 0 auto;
+    padding: 0 1.5rem;
     background: transparent;
     font-size: 0.85rem;
     font-weight: 700;
@@ -1928,9 +1938,125 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.8rem;
+    gap: 1rem;
     margin-left: auto;
     flex-wrap: nowrap;
+}
+
+/* Customer Reviews Section */
+.customer-reviews-section {
+    background: linear-gradient(180deg, rgba(17, 24, 68, 0.6) 0%, rgba(20, 28, 72, 0.4) 100%);
+    padding: 5rem 0 3rem;
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    border-top: 1px solid rgba(234, 224, 207, 0.08);
+}
+
+.reviews-container {
+    width: min(100%, 88rem);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.reviews-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.reviews-header p {
+    color: var(--palette-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 0.5rem 0;
+}
+
+.reviews-header h2 {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    color: var(--palette-cream);
+    margin: 0 0 1rem 0;
+    font-weight: 800;
+}
+
+.reviews-header-desc {
+    color: rgba(234, 224, 207, 0.7);
+    font-size: 1rem;
+    max-width: 35rem;
+    margin: 0 auto;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.review-card {
+    background: rgba(234, 224, 207, 0.03);
+    border: 1px solid rgba(234, 224, 207, 0.1);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.review-card:hover {
+    background: rgba(234, 224, 207, 0.06);
+    border-color: rgba(234, 224, 207, 0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.2);
+}
+
+.review-stars {
+    color: #FFD700;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.2rem;
+}
+
+.review-text {
+    color: rgba(234, 224, 207, 0.85);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.review-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.review-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5B7FFF 0%, #7BA3FF 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.review-info h4 {
+    margin: 0;
+    color: var(--palette-cream);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.review-info p {
+    margin: 0.25rem 0 0 0;
+    color: rgba(234, 224, 207, 0.6);
+    font-size: 0.8rem;
 }
 
 .bolinao-copy {
@@ -1981,44 +2107,48 @@ textarea {
     justify-content: center;
     min-width: auto;
     min-height: auto;
-    padding: 0.55rem 1.25rem;
-    border-radius: 0.65rem;
-    border: 1px solid rgba(234, 224, 207, 0.2);
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.85rem;
+    border: none;
     text-decoration: none;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 700;
     white-space: nowrap;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+    letter-spacing: 0.3px;
+    cursor: pointer;
 }
 
 .bolinao-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.18);
-    opacity: 0.98;
+    transform: translateY(-2px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.25);
 }
 
 .bolinao-button-light {
-    background: linear-gradient(135deg, #4f6fd9 0%, #79a6ff 100%);
-    color: #f7fbff;
-    border: none;
-    box-shadow: 0 0.5rem 1rem rgba(42, 74, 189, 0.25);
+    background: linear-gradient(135deg, #5B7FFF 0%, #7BA3FF 100%);
+    color: #ffffff;
+    box-shadow: 0 0.5rem 1.25rem rgba(91, 127, 255, 0.4);
     font-weight: 700;
 }
 
 .bolinao-button-light:hover {
-    background: linear-gradient(135deg, #6c85ff 0%, #a9c2ff 100%);
+    background: linear-gradient(135deg, #7BA3FF 0%, #9BBFFF 100%);
+    box-shadow: 0 0.75rem 2rem rgba(91, 127, 255, 0.5);
 }
 
 .bolinao-button-outline {
-    background: rgba(79, 111, 217, 0.18);
-    color: #e8eeff;
-    border: 1px solid rgba(123, 168, 255, 0.4);
-    transition: background 0.2s ease, transform 0.2s ease;
+    background: rgba(234, 224, 207, 0.08);
+    color: #EAE0CF;
+    border: 1.5px solid rgba(234, 224, 207, 0.6);
+    transition: all 0.25s ease;
 }
 
 .bolinao-button-outline:hover {
-    background: rgba(123, 168, 255, 0.2);
-    transform: translateY(-1px);
+    background: rgba(234, 224, 207, 0.15);
+    border-color: rgba(234, 224, 207, 0.9);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.25rem rgba(234, 224, 207, 0.25);
 }
 
 .bolinao-socials {
