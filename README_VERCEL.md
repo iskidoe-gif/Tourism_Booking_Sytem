@@ -10,9 +10,9 @@ Steps
 2. In Vercel, create a new project and import this repository.
 
 3. In the project settings (or when prompted during import):
-   - Framework Preset: "Other" or leave blank.
-   - Build Command: `npm ci && npm run build`
-   - Output Directory: leave blank (we use `vercel.json` which sets distDir to `public`).
++   - Framework Preset: `Other` (or `Application` if Vercel asks for a preset for static builds).
++   - Build Command: `npm ci && npm run build`
++   - Output Directory: leave blank (we use `vercel.json` which sets `distDir` to `public`).
 
 4. Environment: No server env is required for static assets. If you need to embed API URLs, set `VITE_API_URL` in Vercel Environment Variables and reference it in your frontend code via `import.meta.env.VITE_API_URL`.
 
