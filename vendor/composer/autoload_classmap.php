@@ -6,6 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\AssignCategories' => $baseDir . '/app/Console/Commands/AssignCategories.php',
+    'App\\Console\\Commands\\CleanupUploadChunks' => $baseDir . '/app/Console/Commands/CleanupUploadChunks.php',
     'App\\Http\\Controllers\\Admin\\DestinationController' => $baseDir . '/app/Http/Controllers/Admin/DestinationController.php',
     'App\\Http\\Controllers\\Admin\\PackageController' => $baseDir . '/app/Http/Controllers/Admin/PackageController.php',
     'App\\Http\\Controllers\\Admin\\PaymentController' => $baseDir . '/app/Http/Controllers/Admin/PaymentController.php',
@@ -25,11 +27,13 @@ return array(
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\AdminMiddleware' => $baseDir . '/app/Http/Middleware/AdminMiddleware.php',
     'App\\Http\\Middleware\\EnsureAdmin' => $baseDir . '/app/Http/Middleware/EnsureAdmin.php',
+    'App\\Http\\Middleware\\EnsureUploadLimits' => $baseDir . '/app/Http/Middleware/EnsureUploadLimits.php',
     'App\\Http\\Middleware\\RedirectIfAuthenticated' => $baseDir . '/app/Http/Middleware/RedirectIfAuthenticated.php',
     'App\\Models\\Admin' => $baseDir . '/app/Models/Admin.php',
     'App\\Models\\Booking' => $baseDir . '/app/Models/Booking.php',
     'App\\Models\\Destination' => $baseDir . '/app/Models/Destination.php',
     'App\\Models\\Payment' => $baseDir . '/app/Models/Payment.php',
+    'App\\Models\\ReportHistory' => $baseDir . '/app/Models/ReportHistory.php',
     'App\\Models\\Review' => $baseDir . '/app/Models/Review.php',
     'App\\Models\\TourPackage' => $baseDir . '/app/Models/TourPackage.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
@@ -160,6 +164,8 @@ return array(
     'Database\\Factories\\AdminFactory' => $baseDir . '/database/factories/AdminFactory.php',
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
+    'Database\\Seeders\\DestinationSeeder' => $baseDir . '/database/seeders/DestinationSeeder.php',
+    'Database\\Seeders\\ReviewSeeder' => $baseDir . '/database/seeders/ReviewSeeder.php',
     'Database\\Seeders\\TourPackageSeeder' => $baseDir . '/database/seeders/TourPackageSeeder.php',
     'Database\\Seeders\\UserSeeder' => $baseDir . '/database/seeders/UserSeeder.php',
     'DateError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateError.php',

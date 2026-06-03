@@ -23,7 +23,10 @@ Copy the output and paste it into `APP_KEY` on Render.
 
 5) Set the Start Command or Health Check:
    - Render will use the Dockerfile; no custom start command is needed.
-   - To run migrations after deploy, configure a deploy hook or run manually via a one-off shell on Render:
+   - This repo now includes a startup entrypoint that runs migrations automatically on container start.
+   - If you do not want auto-migrations, set `RUN_MIGRATIONS=false` in Render environment variables.
+
+   - To run migrations manually after deploy, use a one-off shell on Render (paid plan only):
 
 ```bash
 php artisan migrate --force

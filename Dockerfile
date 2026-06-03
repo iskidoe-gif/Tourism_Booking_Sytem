@@ -56,8 +56,12 @@ COPY --from=composer_builder /app/vendor ./vendor
 # Copy built frontend assets from node builder (assumes Vite outputs to public/build)
 COPY --from=node_builder /app/public ./public
 
+# Copy entrypoint helper for safe startup migrations
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Permissions for storage and cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 EXPOSE 80
-CMD ["apache2-foreground"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
