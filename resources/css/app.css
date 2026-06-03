@@ -1880,7 +1880,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     padding: 0.15rem 0.5rem;
 }
 
-..package-pagination nav {
+.package-pagination nav {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -2550,10 +2550,11 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 .auth-modal {
     position: fixed;
     inset: 0;
-    z-index: 50;
+    z-index: 9999;
     display: grid;
-    place-items: center;
-    padding: 1rem;
+    justify-items: center;
+    align-items: start;
+    padding: 6rem 1rem 1rem;
 }
 
 .auth-modal-backdrop {
@@ -2567,7 +2568,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     position: relative;
     z-index: 1;
     width: min(100%, 34rem);
-    max-height: min(92vh, calc(100vh - 2rem));
+    max-height: min(84vh, calc(100vh - 6rem));
     overflow-y: auto;
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 1.5rem;
@@ -2578,7 +2579,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
 
 .auth-modal-register .auth-modal-panel {
     width: min(100%, 44rem);
-    max-height: min(92vh, calc(100vh - 2rem));
+    max-height: min(88vh, calc(100vh - 4rem));
     overflow-y: auto;
     padding: 2rem;
 }

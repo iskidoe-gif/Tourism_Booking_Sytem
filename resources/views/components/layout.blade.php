@@ -31,7 +31,7 @@
                         </form>
                     @elseif($touristUser)
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
-                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Bookings</x-nav-link>
+                        <x-nav-link :href="route('reservations.index')" :active="request()->routeIs('reservations.index')">Packages</x-nav-link>
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
                         <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
                             <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
@@ -43,8 +43,7 @@
                     @else
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Bookings</x-nav-link>
-                        <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
-                        <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
+                        <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                     @endif
                 </div>
             </nav>

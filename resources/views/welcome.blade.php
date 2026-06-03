@@ -5,12 +5,11 @@
             <span class="bolinao-brand" aria-current="page">Bolinao</span>
             <div class="bolinao-navlinks">
                 <a href="{{ route('home') }}">Home</a>
-                <a href="{{ route('packages.index') }}">Trips</a>
+                <a href="{{ route('packages.index') }}">Packages</a>
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>
                 @else
-                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="signin">Login</a>
-                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
+                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                 @endauth
             </div>
         </nav>
@@ -31,7 +30,7 @@
                         @auth
                             <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
                         @else
-                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="register">Book a Trip Now</a>
+                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Book a Trip Now</a>
                         @endauth
                         <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-outline">Browse Tour Packages</a>
                     </div>
@@ -173,6 +172,7 @@
 
                 <div class="auth-helper">
                     <p>Need admin access? <a href="{{ route('admin.login') }}">Sign in here</a>.</p>
+                    <p class="muted">Don't have an account? <a href="#" data-auth-open data-auth-mode="register">Create one now</a>.</p>
                 </div>
             </div>
 
@@ -213,7 +213,9 @@
 
                     <button type="submit" class="btn-primary">Create Account</button>
                 </form>
-
+                <div class="auth-helper">
+                    <p class="muted">Already have an account? <a href="#" data-auth-open data-auth-mode="signin">Sign in instead</a>.</p>
+                </div>
                 <form method="POST" action="{{ route('guest.login') }}" class="auth-form" style="margin-top:1rem">
                     @csrf
                     <button type="submit" class="btn-secondary">Continue as Guest</button>
