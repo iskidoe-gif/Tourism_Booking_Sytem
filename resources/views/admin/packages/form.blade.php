@@ -10,6 +10,28 @@
             </div>
         @endif
 
+        @php
+            function parsePhpSize(string $size): int
+            {
+                $size = trim($size);
+                $unit = strtolower(substr($size, -1));
+                $value = (int) $size;
+
+                return match ($unit) {
+                    'g' => $value * 1024 * 1024 * 1024,
+                    'm' => $value * 1024 * 1024,
+                    'k' => $value * 1024,
+                    default => $value,
+                };
+            }
+
+            $uploadLimit = parsePhpSize(ini_get('upload_max_filesize') ?: '2M');
+            $postLimit = parsePhpSize(ini_get('post_max_size') ?: '8M');
+            // cap at 1GB
+            $phpMaxUpload = min($uploadLimit, $postLimit, 1024 * 1024 * 1024);
+            $maxUploadLabel = number_format($phpMaxUpload / 1024 / 1024, 2) . ' MB';
+        @endphp
+
         <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
             @csrf
             @if($method === 'PUT')
@@ -39,6 +61,18 @@
                         @endforeach
                     </select>
                 </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-control">
+                        <option value="">None / Uncategorised</option>
+                        <option value="natural" {{ old('category', $package->category) === 'natural' ? 'selected' : '' }}>Natural Attractions</option>
+                        <option value="cultural" {{ old('category', $package->category) === 'cultural' ? 'selected' : '' }}>Cultural & Historical Sites</option>
+                        <option value="recreational" {{ old('category', $package->category) === 'recreational' ? 'selected' : '' }}>Recreational & Adventure Spots</option>
+                        <option value="accommodation" {{ old('category', $package->category) === 'accommodation' ? 'selected' : '' }}>Accommodation & Hospitality</option>
+                        <option value="events" {{ old('category', $package->category) === 'events' ? 'selected' : '' }}>Events & Festivals</option>
+                        <option value="ecotourism" {{ old('category', $package->category) === 'ecotourism' ? 'selected' : '' }}>Ecotourism & Conservation Areas</option>
+                    </select>
+                </div>
             </div>
 
             <div class="mb-3">
@@ -66,15 +100,41 @@
             </div>
 
             <div class="row g-3 mb-3">
-                <div class="col-12 col-md-6">
-                    <label class="form-label">Image path</label>
-                    <input type="text" name="image" value="{{ old('image', $package->image) }}" class="form-control" placeholder="images/your-image.png">
-                </div>
-                <div class="col-12 col-md-6">
+                    <div class="col-12 col-md-6">
                     <label class="form-label">Upload image</label>
-                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input">
+                    @if($package->exists)
+                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" data-upload-url="{{ route('admin.packages.upload-image', $package) }}">
+                    <div class="form-text text-muted mb-2">Max upload size: {{ $maxUploadLabel }}.</div>
+                    @else
+                    <div class="alert alert-info alert-sm mb-3">
+                        <small><strong>Create the package first</strong>, then upload images.</small>
+                    </div>
+                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" disabled>
+                    @endif
                     <div class="mt-2">
-                        <img id="image_preview" src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}" alt="Preview" style="max-width:160px; max-height:120px; object-fit:cover; border-radius:6px;">
+                        @php
+                            $previewPath = null;
+                            if ($package->image) {
+                                // check storage public disk first
+                                try {
+                                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($package->image)) {
+                                        $previewPath = asset('storage/' . ltrim($package->image, '/')) . '?v=' . \Illuminate\Support\Facades\Storage::disk('public')->lastModified($package->image);
+                                    } elseif (file_exists(public_path($package->image))) {
+                                        $previewPath = asset($package->image) . '?v=' . filemtime(public_path($package->image));
+                                    }
+                                } catch (\Throwable $_) {
+                                    $previewPath = null;
+                                }
+                            }
+                        @endphp
+                        <img id="image_preview" src="{{ $previewPath ?? asset('images/package-default.svg') }}" alt="Preview" style="max-width:160px; max-height:120px; object-fit:cover; border-radius:6px;">
+                        @if($package->image)
+                            <div class="mt-1" style="font-size:12px;">
+                                <strong>Saved image:</strong>
+                                <a id="image_debug_link" href="{{ $previewPath ?? asset($package->image) }}" target="_blank">Open image</a>
+                                <span class="text-muted"> ({{ $package->image }})</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="col-12 col-md-6">
@@ -101,11 +161,169 @@ document.addEventListener('DOMContentLoaded', function () {
     input.addEventListener('change', function (e) {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function (ev) {
-            preview.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
+
+        // immediate client-side preview (robust)
+        try {
+            const reader = new FileReader();
+            preview.onerror = function () {
+                const toast = document.getElementById('upload_toast');
+                if (toast) {
+                    toast.textContent = 'Preview image failed to load, using placeholder.';
+                    toast.style.display = 'block';
+                    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                }
+                preview.src = '{{ asset('images/package-default.svg') }}';
+            };
+
+            reader.onload = function (ev) {
+                try {
+                    preview.src = ev.target.result;
+                    preview.style.display = 'block';
+                    preview.style.maxWidth = '100%';
+                    preview.style.maxHeight = '160px';
+                    preview.style.objectFit = 'cover';
+                } catch (inner) {
+                    console.error('Preview render failed', inner);
+                }
+            };
+            reader.onerror = function (err) {
+                console.error('FileReader error', err);
+                const toast = document.getElementById('upload_toast');
+                if (toast) { toast.textContent = 'Preview failed: unable to read file'; toast.style.display = 'block'; setTimeout(()=>{ toast.style.display = 'none'; },2000); }
+            };
+            reader.readAsDataURL(file);
+        } catch (err) {
+            console.error('Preview setup failed', err);
+        }
+
+        // if package exists, upload immediately to server
+        const uploadUrl = input.dataset.uploadUrl;
+        if (!uploadUrl) return;
+        const MAX_CLIENT_UPLOAD = 1 * 1024 * 1024; // 1MB direct upload threshold
+
+        const tokenInput = document.querySelector('input[name="_token"]');
+        const csrf = tokenInput ? tokenInput.value : '';
+
+        async function doSimpleUpload(file, uploadUrl) {
+            const fd = new FormData();
+            fd.append('_token', csrf);
+            fd.append('image_file', file);
+            const res = await fetch(uploadUrl, { method: 'POST', body: fd, credentials: 'same-origin' });
+            const body = await res.text();
+            try { return { status: res.status, body: JSON.parse(body) }; } catch (e) { throw new Error('Invalid server response: ' + body); }
+        }
+
+        async function doChunkedUpload(file, uploadUrl) {
+            const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB, keep each chunk below PHP upload_max_filesize defaults
+            const total = Math.ceil(file.size / CHUNK_SIZE);
+            const uploadId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+            const chunkUrl = uploadUrl.replace('/upload-image', '/upload-chunk');
+            const completeUrl = uploadUrl.replace('/upload-image', '/complete-upload');
+
+            let uploadedBytes = 0;
+            for (let i = 0; i < total; i++) {
+                const start = i * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, file.size);
+                const blob = file.slice(start, end);
+                const fd = new FormData();
+                fd.append('_token', csrf);
+                fd.append('upload_id', uploadId);
+                fd.append('chunk_index', i);
+                fd.append('total_chunks', total);
+                fd.append('chunk', blob, file.name + '.part.' + i);
+
+                const res = await fetch(chunkUrl, { method: 'POST', body: fd, credentials: 'same-origin' });
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error('Chunk upload failed: ' + txt);
+                }
+                uploadedBytes += (end - start);
+                const toast = document.getElementById('upload_toast');
+                if (toast) {
+                    const percent = Math.round((uploadedBytes / file.size) * 100);
+                    toast.textContent = 'Uploading: ' + percent + '%';
+                    toast.style.display = 'block';
+                }
+            }
+
+            // finalize
+            const fd2 = new FormData();
+            fd2.append('_token', csrf);
+            fd2.append('upload_id', uploadId);
+            fd2.append('original_name', file.name);
+            fd2.append('total_chunks', total);
+            const finalRes = await fetch(completeUrl, { method: 'POST', body: fd2, credentials: 'same-origin' });
+            const finalText = await finalRes.text();
+            try { return { status: finalRes.status, body: JSON.parse(finalText) }; } catch (e) { throw new Error('Invalid server response: ' + finalText); }
+        }
+
+        (async function () {
+            try {
+                let result;
+                if (file.size > MAX_CLIENT_UPLOAD) {
+                    console.log('File exceeds server limit; using chunked upload', file.size);
+                    result = await doChunkedUpload(file, uploadUrl);
+                } else {
+                    result = await doSimpleUpload(file, uploadUrl);
+                }
+
+                const data = result.body;
+                if (result.status >= 200 && result.status < 300 && data.url) {
+                    const ts = data.timestamp || Date.now();
+                    preview.src = data.url + '?v=' + ts;
+                    const debugLink = document.getElementById('image_debug_link');
+                    if (debugLink) {
+                        debugLink.href = data.url + '?v=' + ts;
+                        debugLink.textContent = data.path;
+                    }
+                    const toast = document.getElementById('upload_toast');
+                    if (toast) {
+                        toast.textContent = 'Image uploaded: ' + data.path;
+                        toast.style.display = 'block';
+                        toast.style.opacity = '1';
+                        setTimeout(() => {
+                            toast.style.transition = 'opacity 300ms ease';
+                            toast.style.opacity = '0';
+                            setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; }, 350);
+                        }, 2500);
+                    }
+                } else {
+                    let errorMessage = (data && data.error) ? data.error : 'Upload failed';
+                    let extra = '';
+                    if (data && data.message) {
+                        extra = ' — ' + data.message;
+                    } else if (data && data.errors && data.errors.image_file) {
+                        extra = ' — ' + JSON.stringify(data.errors.image_file);
+                    }
+                    const toast = document.getElementById('upload_toast');
+                    if (toast) {
+                        toast.textContent = 'Upload failed: ' + errorMessage + extra;
+                        toast.style.display = 'block';
+                        toast.style.opacity = '1';
+                        setTimeout(() => {
+                            toast.style.transition = 'opacity 300ms ease';
+                            toast.style.opacity = '0';
+                            setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; }, 350);
+                        }, 2500);
+                    }
+                    console.error('Upload failed', result.status, data);
+                }
+            } catch (err) {
+                console.error('Upload error', err);
+                const toast = document.getElementById('upload_toast');
+                if (toast) {
+                    toast.textContent = 'Image upload failed: ' + err.message;
+                    toast.style.display = 'block';
+                    toast.style.opacity = '1';
+                    setTimeout(() => {
+                        toast.style.transition = 'opacity 300ms ease';
+                        toast.style.opacity = '0';
+                        setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; }, 350);
+                    }, 2500);
+                }
+            }
+        })();
     });
 });
 </script>
+<div id="upload_toast" role="status" aria-live="polite" style="position:fixed;right:20px;top:20px;display:none;z-index:1100;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.2);font-size:13px;"></div>

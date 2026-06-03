@@ -11,12 +11,7 @@
                 <p class="visual-copy">
                     Search tours by destination, package name, or experience. Choose from beachfront escapes, culture tours, and island adventures.
                 </p>
-                <form action="{{ route('packages.index') }}" method="GET" class="packages-search">
-                    <label for="search" class="sr-only">Search tours by destination or title</label>
-                    <input id="search" name="search" type="search" value="{{ request('search') }}"
-                           placeholder="eg. Patar Beach, Church..." class="form-control" />
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </form>
+                <div class="packages-hero-cta">Search tours below</div>
             </div>
         </div>
     </section>
@@ -27,6 +22,22 @@
                 <h2 class="section-title">Browse Tour Packages</h2>
                 <p class="section-copy">Handpicked Bolinao trips in one place.</p>
             </div>
+            <form action="{{ route('packages.index') }}" method="GET" class="packages-search-filter">
+                <div class="form-row">
+                    <label for="search" class="sr-only">Search tours</label>
+                    <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by package, location or keyword" class="form-control" />
+
+                    <label for="category" class="sr-only">Category</label>
+                    <select id="category" name="category" class="form-control">
+                        <option value="">All categories</option>
+                        @foreach($categoryMap as $key => $cat)
+                            <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
             @if(request('search'))
                 <div class="search-summary">Showing results for “{{ request('search') }}”</div>
             @endif
@@ -38,12 +49,7 @@
             <div class="package-card-grid">
                 @foreach($packages as $package)
                     <article class="package-card">
-                        @php
-                            $imageUrl = $package->image
-                                ? (str_starts_with($package->image, 'http') ? $package->image : asset($package->image))
-                                : asset('images/package-default.svg');
-                        @endphp
-                        <div class="package-card-media" style="background-image: url('{{ $imageUrl }}');"></div>
+                        <div class="package-card-media" style="background-image: url('{{ $package->image_url }}');"></div>
                         <div class="package-card-body">
                             <div class="package-card-meta">
                                 <span>{{ $package->duration_days }} Day Tour</span>

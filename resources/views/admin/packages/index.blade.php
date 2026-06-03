@@ -19,6 +19,7 @@
                         <th class="th">Image</th>
                         <th class="th">Name</th>
                         <th class="th">Location</th>
+                        <th class="th">Category</th>
                         <th class="th">Price</th>
                         <th class="th">Status</th>
                         <th class="th">Rating</th>
@@ -29,10 +30,11 @@
                     @forelse($packages as $package)
                         <tr>
                             <td class="td">
-                                <img src="{{ $package->image ? asset($package->image) : asset('images/package-default.svg') }}" alt="{{ $package->name }}" style="width:88px;height:56px;object-fit:cover;border-radius:6px;">
+                                <img src="{{ $package->image_url }}" alt="{{ $package->name }}" style="width:88px;height:56px;object-fit:cover;border-radius:6px;">
                             </td>
                             <td class="td">{{ $package->name }}</td>
                             <td class="td">{{ $package->location }}</td>
+                            <td class="td">{{ $package->category_label }}</td>
                             <td class="td">PHP {{ number_format((float) $package->price, 2) }}</td>
                             <td class="td">{{ ucfirst($package->status) }}</td>
                             <td class="td">{{ number_format((float) $package->rating, 1) }}</td>
@@ -48,7 +50,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="td empty">No tour packages found.</td>
+                            <td colspan="8" class="td empty">No tour packages found.</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -5,6 +5,11 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Increase upload limits for admin file uploads on local dev (raise to 1GB).
+ini_set('upload_max_filesize', '1024M');
+ini_set('post_max_size', '1024M');
+ini_set('memory_limit', '1024M');
+
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;

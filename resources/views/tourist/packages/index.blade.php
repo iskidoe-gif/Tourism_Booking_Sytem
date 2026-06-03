@@ -12,12 +12,7 @@
             <p class="visual-copy">
                 Search tours by destination, package name, or experience. Discover beachfront escapes, heritage walks, and island hopping adventures.
             </p>
-            <form action="{{ route('packages.index') }}" method="GET" class="packages-search">
-                <label for="search" class="sr-only">Search tours by destination or title</label>
-                <input id="search" name="search" type="search" value="{{ request('search') }}"
-                       placeholder="eg. Patar Beach, Church..." class="form-control" />
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
+            <div class="packages-hero-cta">Search tours below</div>
         </div>
     </div>
 </section>
@@ -28,6 +23,22 @@
             <h2 class="section-title">Browse Tour Packages</h2>
             <p class="section-copy">Choose from curated Bolinao packages designed for couples, families, and small groups.</p>
         </div>
+        <form action="{{ route('packages.index') }}" method="GET" class="packages-search-filter">
+            <div class="form-row">
+                <label for="search" class="sr-only">Search tours</label>
+                <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by package, location or keyword" class="form-control" />
+
+                <label for="category" class="sr-only">Category</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="">All categories</option>
+                    @foreach($categoryMap as $key => $cat)
+                        <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
+                    @endforeach
+                </select>
+
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
         @if(request('search'))
             <div class="search-summary">Showing results for “{{ request('search') }}”</div>
         @endif
@@ -39,13 +50,11 @@
         <div class="package-card-grid">
             @foreach($packages as $package)
                 <article class="package-card">
-                    <div class="package-card-media" style="background-image: url('{{ asset('images/bolinao-church.jpg') }}');">
-                        <div class="package-card-badge">{{ $package->destination?->name ?? 'Bolinao' }}</div>
-                    </div>
+                    <div class="package-card-media" style="background-image: url('{{ $package->image_url }}');"></div>
                     <div class="package-card-body">
                         <div class="package-card-meta">
                             <span>{{ $package->duration_days }} Day Tour</span>
-                            <span>{{ $package->destination?->location ?? 'Pangasinan' }}</span>
+                            <span>{{ $package->location }}</span>
                             <span>Max {{ $package->max_guests }} guests</span>
                         </div>
                         <h3 class="package-card-title">{{ $package->name }}</h3>

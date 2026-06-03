@@ -92,7 +92,7 @@
     </div>
 </div>
 
-@if(auth()->check())
+@if(auth()->check() && auth()->user()->isTourist())
     <div class="row mb-5">
         <div class="col-12 col-lg-8">
             <div class="card">

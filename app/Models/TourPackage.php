@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class TourPackage extends Model
 {
@@ -21,19 +22,95 @@ class TourPackage extends Model
         'duration_days',
         'max_guests',
         'image',
+        'category',
         'status',
         'rating',
     ];
 
-    protected function casts(): array
+    public function getImageUrlAttribute(): string
+    {
+        if (! $this->image) {
+            return asset('images/package-default.svg');
+        }
+
+        if (str_starts_with($this->image, 'http')) {
+            return $this->image;
+        }
+
+        // If image already refers to a public path
+        if (file_exists(public_path($this->image))) {
+            return asset($this->image);
+        }
+
+        // If image is stored in the public disk (storage/app/public)
+        if (Storage::disk('public')->exists($this->image)) {
+            return asset('storage/' . ltrim($this->image, '/'));
+        }
+
+        // If only filename was saved (e.g., "photo.jpg"), check common locations
+        if (file_exists(public_path('images/' . $this->image))) {
+            return asset('images/' . $this->image);
+        }
+
+        if (Storage::disk('public')->exists('images/' . $this->image)) {
+            return asset('storage/images/' . ltrim($this->image, '/'));
+        }
+
+        return asset('images/package-default.svg');
+    }
+
+    public function getHasImageAttribute(): bool
+    {
+        if (! $this->image) {
+            return false;
+        }
+
+        if (str_starts_with($this->image, 'http')) {
+            return true;
+        }
+
+        if (file_exists(public_path($this->image))) {
+            return true;
+        }
+
+        if (Storage::disk('public')->exists($this->image)) {
+            return true;
+        }
+
+        if (file_exists(public_path('images/' . $this->image))) {
+            return true;
+        }
+
+        if (Storage::disk('public')->exists('images/' . $this->image)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function categoryLabels(): array
     {
         return [
-            'price' => 'decimal:2',
-            'duration_days' => 'integer',
-            'max_guests' => 'integer',
-            'rating' => 'decimal:2',
+            'natural' => 'Natural Attractions',
+            'cultural' => 'Cultural & Historical Sites',
+            'recreational' => 'Recreational & Adventure Spots',
+            'accommodation' => 'Accommodation & Hospitality',
+            'events' => 'Events & Festivals',
+            'ecotourism' => 'Ecotourism & Conservation Areas',
         ];
     }
+
+    public function getCategoryLabelAttribute(): string
+    {
+        return self::categoryLabels()[$this->category] ?? 'Uncategorized';
+    }
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'duration_days' => 'integer',
+        'max_guests' => 'integer',
+        'rating' => 'decimal:2',
+    ];
 
     public function bookings(): HasMany
     {

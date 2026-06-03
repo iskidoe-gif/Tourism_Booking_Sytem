@@ -10,7 +10,7 @@ use App\Http\Controllers\Tourist\ReservationController;
 use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+Route::get('/', [DashboardController::class, 'home'])->name('home');
 
 Route::middleware('guest')->group(function () {
     // Keep a lightweight GET route for legacy '/login' links.
@@ -81,6 +81,9 @@ Route::prefix('admin')
         Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
         Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
         Route::post('/packages', [PackageController::class, 'store'])->name('packages.store');
+        Route::post('/packages/{package}/upload-image', [PackageController::class, 'uploadImage'])->name('packages.upload-image');
+        Route::post('/packages/{package}/upload-chunk', [PackageController::class, 'uploadChunk'])->name('packages.upload-chunk');
+        Route::post('/packages/{package}/complete-upload', [PackageController::class, 'completeUpload'])->name('packages.complete-upload');
         Route::get('/packages/{package}', [PackageController::class, 'show'])->name('packages.show');
         Route::get('/packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit');
         Route::put('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
