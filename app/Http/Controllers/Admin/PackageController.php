@@ -29,7 +29,7 @@ class PackageController extends Controller
             ->when($request->category, function ($query) use ($request) {
                 $query->where('category', $request->category);
             })
-            ->paginate(15)
+            ->paginate(5)
             ->withQueryString();
 
         $categories = TourPackage::categoryLabels();
@@ -302,7 +302,7 @@ class PackageController extends Controller
             }
         }
 
-        unset($data['image_file']);
+        unset($data['image_file'], $data['rating']);
 
         if ($request->hasFile('image_file') && $request->file('image_file')->isValid()) {
             $file = $request->file('image_file');
@@ -340,7 +340,6 @@ class PackageController extends Controller
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'file'],
             'status' => ['required', 'in:active,inactive'],
-            'rating' => ['nullable', 'numeric', 'between:0,5'],
         ]);
     }
 

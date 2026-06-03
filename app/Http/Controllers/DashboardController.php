@@ -190,7 +190,21 @@ class DashboardController extends Controller
     {
         $activePackages = TourPackage::where('status', 'active')->count();
         $inactivePackages = TourPackage::where('status', '!=', 'active')->count();
-        $packages = TourPackage::latest()->paginate(20);
+
+        $query = TourPackage::latest()
+            ->when($request->search, function ($query) use ($request) {
+                $query->where(function ($sub) use ($request) {
+                    $sub->where('name', 'like', '%' . $request->search . '%')
+                        ->orWhere('location', 'like', '%' . $request->search . '%')
+                        ->orWhere('description', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->when($request->category, function ($query) use ($request) {
+                $query->where('category', $request->category);
+            });
+
+        $packages = $query->paginate(5)->withQueryString();
+        $categories = TourPackage::categoryLabels();
 
         $data = [
             'stats' => [
@@ -199,6 +213,7 @@ class DashboardController extends Controller
                 'total' => $activePackages + $inactivePackages,
             ],
             'packages' => $packages,
+            'categories' => $categories,
         ];
 
         if ($request->expectsJson()) {

@@ -26,11 +26,38 @@
 
     <div class="section">
         <div class="card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="subtitle">All Packages</h2>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="subtitle">All Packages</h2>
+                </div>
+                <form action="{{ route('admin.packages-stats') }}" method="GET" class="packages-search-filter mb-4">
+                    <div class="form-row">
+                        <input
+                            type="search"
+                            name="search"
+                            value="{{ request('search') }}"
+                            placeholder="Search packages by name, location, or description"
+                            class="form-control"
+                        />
+
+                        <select name="category" class="form-select">
+                            <option value="">All categories</option>
+                            @foreach($categories as $key => $label)
+                                <option value="{{ $key }}" @selected(request('category') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                            @if(request('search') || request('category'))
+                                <a href="{{ route('admin.packages-stats') }}" class="btn btn-outline-secondary">Clear</a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="tablewrap">
-                <table class="table">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th class="th">Image</th>
@@ -73,7 +100,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-4">{{ $packages->links() }}</div>
+            <div class="package-pagination mt-4">{{ $packages->links() }}</div>
         </div>
     </div>
 </x-layout>

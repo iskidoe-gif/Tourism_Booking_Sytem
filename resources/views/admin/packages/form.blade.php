@@ -51,17 +51,6 @@
 
             <div class="row g-3 mb-3">
                 <div class="col-12 col-md-6">
-                    <label class="form-label">Destination</label>
-                    <select name="destination_id" class="form-control">
-                        <option value="">No destination selected</option>
-                        @foreach($destinations as $destination)
-                            <option value="{{ $destination->id }}" {{ old('destination_id', $package->destination_id) == $destination->id ? 'selected' : '' }}>
-                                {{ $destination->name }} — {{ $destination->location }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 col-md-6">
                     <label class="form-label">Category</label>
                     <select name="category" class="form-control">
                         <option value="">None / Uncategorised</option>
@@ -92,10 +81,6 @@
                 <div class="col-12 col-md-3">
                     <label class="form-label">Max guests</label>
                     <input type="number" name="max_guests" value="{{ old('max_guests', $package->max_guests) }}" class="form-control">
-                </div>
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Rating</label>
-                    <input type="number" step="0.1" min="0" max="5" name="rating" value="{{ old('rating', $package->rating) }}" class="form-control">
                 </div>
             </div>
 
