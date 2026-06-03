@@ -522,6 +522,27 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     margin-top: 2rem;
 }
 
+/* Backdrop panel behind the grid to ensure readability */
+.package-card-grid {
+    background: #000 !important;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    position: relative;
+    z-index: 2;
+}
+
+.package-card-grid .package-card {
+    background: transparent !important;
+    border: none !important;
+}
+
+.package-card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-clip: padding-box;
+}
+
 .package-card {
     background: #000 !important;
     border-radius: 1.2rem;
