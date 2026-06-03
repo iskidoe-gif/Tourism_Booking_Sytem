@@ -14,7 +14,8 @@ Steps
 +   - Build Command: `npm ci && npm run build`
 +   - Output Directory: leave blank (we use `vercel.json` which sets `distDir` to `public`).
 
-4. Environment: No server env is required for static assets. If you need to embed API URLs, set `VITE_API_URL` in Vercel Environment Variables and reference it in your frontend code via `import.meta.env.VITE_API_URL`.
+4. Environment: No server env is required for static assets. If the frontend needs to call the backend API, set `VITE_API_URL` in Vercel Environment Variables and reference it in your frontend code via `import.meta.env.VITE_API_URL`.
+   - Example: `https://your-backend-service.onrender.com`
 
 5. Deploy. Vercel will run the build and serve the `public` folder. Your assets will be available under `/build` and other static paths.
 
