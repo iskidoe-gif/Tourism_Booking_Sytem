@@ -19,6 +19,11 @@
         <div class="frame">
             <nav class="bolinao-nav" aria-label="Main navigation">
                 <span class="bolinao-brand" aria-current="page">Bolinao</span>
+                <button type="button" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" data-nav-toggle>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <div class="bolinao-navlinks">
                     @if($adminUser)
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
@@ -112,6 +117,10 @@
                     <p>Need admin access? <a href="{{ route('admin.login') }}">Sign in here</a>.</p>
                     <p class="muted">Don't have an account? <a href="#" data-auth-open data-auth-mode="register">Create one now</a>.</p>
                 </div>
+                <form method="POST" action="{{ route('guest.login') }}" class="auth-form" style="margin-top:1rem">
+                    @csrf
+                    <button type="submit" class="btn-secondary">Continue as Guest</button>
+                </form>
             </div>
 
             <div class="auth-pane" data-auth-pane="register">
@@ -154,10 +163,6 @@
                 <div class="auth-helper">
                     <p class="muted">Already have an account? <a href="#" data-auth-open data-auth-mode="signin">Sign in instead</a>.</p>
                 </div>
-                <form method="POST" action="{{ route('guest.login') }}" class="auth-form" style="margin-top:1rem">
-                    @csrf
-                    <button type="submit" class="btn-secondary">Continue as Guest</button>
-                </form>
             </div>
         </section>
     </div>

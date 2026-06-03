@@ -56,7 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (signin) signin.classList.add('active');
         setModalTitle('signin');
     };
-    
+
+    const nav = document.querySelector('.bolinao-nav');
+    const navToggle = document.querySelector('[data-nav-toggle]');
+
+    if (navToggle && nav) {
+        navToggle.addEventListener('click', () => {
+            const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', String(!expanded));
+            nav.classList.toggle('open');
+        });
+    }
 
     const openFromQuery = () => {
         const params = new URLSearchParams(window.location.search);
