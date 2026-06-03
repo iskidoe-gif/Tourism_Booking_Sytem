@@ -10,11 +10,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const triggers = document.querySelectorAll('[data-auth-open]');
     const closers = modal.querySelectorAll('[data-auth-close]');
 
+    const modalTitle = modal.querySelector('#auth-modal-title');
+
+    const setModalTitle = (mode) => {
+        if (!modalTitle) {
+            return;
+        }
+
+        if (mode === 'register') {
+            modalTitle.textContent = 'Create your Bolinao account';
+        } else {
+            modalTitle.textContent = 'Log in to your account';
+        }
+    };
+
     const openModal = (mode = 'signin') => {
         modal.hidden = false;
         document.body.style.overflow = 'hidden';
 
         modal.classList.toggle('auth-modal-register', mode === 'register');
+        setModalTitle(mode);
 
         const panes = modal.querySelectorAll('.auth-pane');
         panes.forEach((p) => {
@@ -39,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panes.forEach((p) => p.classList.remove('active'));
         const signin = modal.querySelector('[data-auth-pane="signin"]');
         if (signin) signin.classList.add('active');
+        setModalTitle('signin');
     };
     
 

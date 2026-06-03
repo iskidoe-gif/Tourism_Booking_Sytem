@@ -43,8 +43,7 @@
                     @else
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Bookings</x-nav-link>
-                        <a href="{{ route('home') }}" data-auth-open data-auth-mode="signin">Login</a>
-                        <a href="{{ route('home') }}" class="bolinao-button bolinao-button-outline" data-auth-open data-auth-mode="register">Register</a>
+                        <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                     @endif
                 </div>
             </nav>
