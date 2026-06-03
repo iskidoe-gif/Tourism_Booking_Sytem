@@ -4,13 +4,23 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\TourPackage;
+use App\Models\Destination;
 
 class TourPackageSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get destinations (they should be seeded first)
+        $patar = Destination::where('name', 'Patar White Beach')->first();
+        $enchanted = Destination::where('name', 'Enchanted Cave')->first();
+        $stJames = Destination::where('name', 'Saint James Church')->first();
+        $cape = Destination::where('name', 'Cape Bolinao Lighthouse')->first();
+        $hundred = Destination::where('name', 'Hundred Islands')->first();
+        $poro = Destination::where('name', 'Poro Point Lighthouse')->first();
+
         $packages = [
             [
+                'destination_id' => $stJames?->id ?? 3,
                 'name'          => 'Bolinao Church & Cape Tour',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Visit the historic Bolinao Church, Cape Bolinao Lighthouse, and the scenic seaside cliffs of the northwest coast.',
@@ -22,6 +32,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $patar?->id ?? 1,
                 'name'          => 'Patar Beach Sunrise Escape',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Relax on Patar Beach, swim in clear waters, and catch the sunrise over the famous white sand shore.',
@@ -33,6 +44,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $enchanted?->id ?? 2,
                 'name'          => 'Enchanted Cave & Shell Museum',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Swim in the Enchanted Cave and explore the Shell Museum with its world-class seashell collection.',
@@ -44,8 +56,9 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $hundred?->id ?? 5,
                 'name'          => 'Hundred Islands & Island Hopping',
-                'location'      => 'Bolinao, Pangasinan',
+                'location'      => 'Alaminos, Pangasinan',
                 'description'   => 'Boat transfers to the Hundred Islands, snorkeling, and island hopping around the scenic Pangasinan archipelago.',
                 'price'         => 3600.00,
                 'duration_days' => 1,
@@ -55,8 +68,9 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $poro?->id ?? 6,
                 'name'          => 'Poro Point Lighthouse Adventure',
-                'location'      => 'Bolinao, Pangasinan',
+                'location'      => 'San Fernando, La Union',
                 'description'   => 'Explore the iconic Poro Point Lighthouse with panoramic coastal views and colonial architecture.',
                 'price'         => 1900.00,
                 'duration_days' => 1,
@@ -66,6 +80,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $patar?->id ?? 1,
                 'name'          => 'Bolinao Waterfall Trekking',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Adventure through lush forests to discover hidden waterfalls and natural pools in Bolinao.',
@@ -77,6 +92,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $patar?->id ?? 1,
                 'name'          => 'Coastal Village Tour & Fishing Experience',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Experience authentic local life with traditional fishing methods and visits to charming coastal villages.',
@@ -88,6 +104,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $patar?->id ?? 1,
                 'name'          => 'Bolinao Sunset Cruise & Dinner',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Romantic sunset cruise along the Bolinao coast with fresh seafood dinner and live entertainment.',
@@ -99,8 +116,9 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $hundred?->id ?? 5,
                 'name'          => 'Island Camping & Stargazing',
-                'location'      => 'Hundred Islands, Pangasinan',
+                'location'      => 'Alaminos, Pangasinan',
                 'description'   => 'Overnight camping on pristine island with bonfire, stargazing, and beach activities.',
                 'price'         => 4500.00,
                 'duration_days' => 2,
@@ -110,6 +128,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $enchanted?->id ?? 2,
                 'name'          => 'Marine Life Discovery & Diving',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Guided snorkeling and diving tours to explore coral reefs and diverse marine life around Bolinao.',
@@ -121,6 +140,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $stJames?->id ?? 3,
                 'name'          => 'Heritage & Culture Museum Tour',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Deep dive into Bolinao\'s rich history with guided tours of museums and historical landmarks.',
@@ -132,6 +152,7 @@ class TourPackageSeeder extends Seeder
                 'status'        => 'active',
             ],
             [
+                'destination_id' => $patar?->id ?? 1,
                 'name'          => 'Wellness Retreat & Beach Spa',
                 'location'      => 'Bolinao, Pangasinan',
                 'description'   => 'Relaxing spa treatments, yoga sessions, and wellness activities on the beach with ocean views.',

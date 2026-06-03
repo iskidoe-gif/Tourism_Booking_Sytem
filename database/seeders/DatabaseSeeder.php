@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Booking;
 use App\Models\Admin;
+use App\Models\Destination;
 use App\Models\Payment;
 use App\Models\TourPackage;
 use App\Models\User;
@@ -20,6 +21,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed destinations first
+        $this->call(DestinationSeeder::class);
+
         $adminAccount = Admin::updateOrCreate(
             ['email' => 'admin@tourph.com'],
             [
