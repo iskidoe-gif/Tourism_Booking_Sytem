@@ -1855,7 +1855,7 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
     padding: 0.15rem 0.5rem;
 }
 
-..package-pagination nav {
+.package-pagination nav {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
