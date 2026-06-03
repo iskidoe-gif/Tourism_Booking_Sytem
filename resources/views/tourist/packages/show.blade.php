@@ -45,7 +45,7 @@
                     </a>
                 @else
                     @if(Route::has('login'))
-                        <a href="{{ route('home') }}" class="btn btn-primary w-100" data-auth-open data-auth-mode="signin">
+                        <a href="#" class="btn btn-primary w-100" data-auth-open data-auth-mode="signin">
                             Login to Book
                         </a>
                     @endif

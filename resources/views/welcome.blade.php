@@ -9,7 +9,7 @@
                 @auth
                     <a href="{{ route('dashboard') }}">Dashboard</a>
                 @else
-                    <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
+                    <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                 @endauth
             </div>
         </nav>
@@ -30,7 +30,7 @@
                         @auth
                             <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
                         @else
-                            <a href="{{ route('home') }}" class="bolinao-button bolinao-button-light" data-auth-open>Book a Trip Now</a>
+                            <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Book a Trip Now</a>
                         @endauth
                         <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-outline">Browse Tour Packages</a>
                     </div>
@@ -126,101 +126,4 @@
         </div>
     </section>
 
-    <div class="auth-modal" data-auth-modal hidden>
-        <div class="auth-modal-backdrop" data-auth-close></div>
-
-        <section class="auth-modal-panel" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-            <button type="button" class="auth-modal-close" data-auth-close aria-label="Close authentication form">&times;</button>
-
-            <div class="auth-modal-heading">
-                <p>Bolinao Account</p>
-                <h2 id="auth-modal-title">Log in to your account</h2>
-            </div>
-
-            <div class="auth-pane active" data-auth-pane="signin">
-                @if ($errors->any() && ! old('name') && ! old('password_confirmation'))
-                    <div class="alert alert-error">
-                        <strong>Login Failed</strong>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('login.store') }}" class="auth-form">
-                    @csrf
-
-                    <div class="auth-group">
-                        <label for="modal-login-email">Email Address</label>
-                        <input id="modal-login-email" name="email" type="email" value="{{ old('email') }}" placeholder="you@example.com" class="auth-input" required />
-                    </div>
-
-                    <div class="auth-group">
-                        <label for="modal-login-password">Password</label>
-                        <input id="modal-login-password" name="password" type="password" placeholder="Password" class="auth-input" required />
-                    </div>
-
-                    <label class="remember-row">
-                        <input name="remember" type="checkbox" value="1">
-                        <span>Remember me</span>
-                    </label>
-
-                    <button type="submit" class="btn-primary">Sign In</button>
-                </form>
-
-                <div class="auth-helper">
-                    <p>Need admin access? <a href="{{ route('admin.login') }}">Sign in here</a>.</p>
-                    <p class="muted">Don't have an account? <a href="#" data-auth-open data-auth-mode="register">Create one now</a>.</p>
-                </div>
-            </div>
-
-            <div class="auth-pane" data-auth-pane="register">
-                @if ($errors->any() && (old('name') || old('password_confirmation')))
-                    <div class="alert alert-error">
-                        <strong>Registration Error</strong>
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('register') }}" class="auth-form">
-                    @csrf
-
-                    <div class="auth-group">
-                        <label for="modal-register-name">Full name</label>
-                        <input id="modal-register-name" name="name" type="text" value="{{ old('name') }}" placeholder="Your name" class="auth-input" required />
-                    </div>
-
-                    <div class="auth-group">
-                        <label for="modal-register-email">Email Address</label>
-                        <input id="modal-register-email" name="email" type="email" value="{{ old('email') }}" placeholder="you@example.com" class="auth-input" required />
-                    </div>
-
-                    <div class="auth-group">
-                        <label for="modal-register-password">Password</label>
-                        <input id="modal-register-password" name="password" type="password" placeholder="Password" class="auth-input" required />
-                    </div>
-
-                    <div class="auth-group">
-                        <label for="modal-register-password-confirm">Confirm Password</label>
-                        <input id="modal-register-password-confirm" name="password_confirmation" type="password" placeholder="Confirm Password" class="auth-input" required />
-                    </div>
-
-                    <button type="submit" class="btn-primary">Create Account</button>
-                </form>
-                <div class="auth-helper">
-                    <p class="muted">Already have an account? <a href="#" data-auth-open data-auth-mode="signin">Sign in instead</a>.</p>
-                </div>
-                <form method="POST" action="{{ route('guest.login') }}" class="auth-form" style="margin-top:1rem">
-                    @csrf
-                    <button type="submit" class="btn-secondary">Continue as Guest</button>
-                </form>
-            </div>
-        </section>
-    </div>
 </x-layout>

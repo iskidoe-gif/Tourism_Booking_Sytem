@@ -72,9 +72,9 @@
                                 <div class="package-card-actions">
                                     <a href="{{ route('packages.show', $package) }}" class="btn btn-secondary">View details</a>
                                     @if($touristUser)
-                                        <a href="{{ route('packages.show', $package) }}" class="btn btn-primary">Book now</a>
+                                        <a href="{{ route('packages.show', $package) }}" class="btn btn-primary">Book Now!</a>
                                     @else
-                                        <a href="{{ route('home') }}" class="btn btn-primary" data-auth-open>Login / Register to Book</a>
+                                        <a href="#" class="btn btn-primary" data-auth-open>Book Now!</a>
                                     @endif
                                 </div>
                             </div>

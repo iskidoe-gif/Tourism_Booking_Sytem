@@ -75,7 +75,7 @@
                                 @if($touristUser)
                                     <a href="{{ route('packages.show', $package) }}" class="btn btn-primary">Book now</a>
                                 @else
-                                    <a href="{{ route('home') }}" class="btn btn-primary" data-auth-open>Login / Register to Book</a>
+                                    <a href="#" class="btn btn-primary" data-auth-open>Login / Register to Book</a>
                                 @endif
                             </div>
                         </div>
