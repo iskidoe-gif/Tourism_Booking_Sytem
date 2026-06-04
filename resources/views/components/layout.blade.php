@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Tourism Booking System') }}</title>
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    {{-- Provide runtime API URL for non-built frontend (useful on free Render plan without Vite build) --}}
+    <script>
+        window.__API_URL__ = "{{ env('VITE_API_URL', env('APP_URL')) }}";
+    </script>
     <script src="{{ asset('js/app.js') }}" defer></script>
 </head>
 @php
