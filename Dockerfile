@@ -1,4 +1,4 @@
-### Multi-stage Dockerfile for deploying Laravel app to Render
+### Multi-stage Dockerfile for deploying Laravel app to Railway
 
 # 1) Node builder for frontend assets
 FROM node:24 AS node_builder
@@ -34,12 +34,22 @@ RUN apt-get update && apt-get install -y \
     git \
  && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-# Disable default MPM modules and enable only mpm_prefork
-RUN a2dismod mpm_event mpm_worker || true
+# Disable ALL MPM modules first
+RUN a2dismod mpm_event mpm_worker mpm_prefork || true
+
+# Enable only mpm_prefork
 RUN a2enmod mpm_prefork
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
+
+# Remove conflicting Apache configs
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load || true
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf || true
+
+# Ensure only mpm_prefork is loaded
+RUN ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
+RUN ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
 
 # Ensure Apache serves from the Laravel `public` directory
 RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
