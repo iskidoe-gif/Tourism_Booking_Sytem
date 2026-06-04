@@ -36,6 +36,9 @@ RUN apk add --no-cache \
     git \
  && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip
 
+# Create supervisor log directory
+RUN mkdir -p /var/log/supervisor
+
 # Nginx configuration for Laravel
 RUN mkdir -p /etc/nginx/http.d
 COPY <<'EOF' /etc/nginx/http.d/default.conf
