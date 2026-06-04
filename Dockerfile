@@ -48,7 +48,8 @@ RUN mkdir -p \
 RUN mkdir -p /etc/nginx/http.d
 COPY <<'EOF' /etc/nginx/http.d/default.conf
 server {
-    listen 80;
+    listen 0.0.0.0:80;
+    listen [::]:80;
     root /var/www/html/public;
     index index.php index.html;
 
