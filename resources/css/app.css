@@ -521,7 +521,7 @@ input:focus, textarea:focus, select:focus {
 /* Packages page: two-column layout (sidebar + grid) similar to the provided mock */
 .packages-container {
     display: grid;
-    grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
+    grid-template-columns: minmax(14rem, 16rem) minmax(0, 1fr);
     gap: 2rem;
     align-items: start;
     max-width: min(100%, 100rem);
@@ -1158,7 +1158,7 @@ input:focus, textarea:focus, select:focus {
 /* Explicit package listing styles for the tourist packages page */
 .packages-listing .package-card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
     gap: 1.25rem;
     align-items: stretch;
 }
@@ -1175,7 +1175,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .packages-listing .package-card-media {
-    height: 190px;
+    min-height: 160px;
+    height: auto;
+    aspect-ratio: 16 / 9;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -3805,8 +3807,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .packages-listing .package-card-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr));
+    gap: 1.25rem;
 }
 
 .packages-listing .package-card {
