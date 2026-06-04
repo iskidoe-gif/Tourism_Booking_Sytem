@@ -34,6 +34,10 @@ RUN apt-get update && apt-get install -y \
     git \
  && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip
 
+# Disable default MPM modules and enable only mpm_prefork
+RUN a2dismod mpm_event mpm_worker || true
+RUN a2enmod mpm_prefork
+
 # Enable Apache rewrite
 RUN a2enmod rewrite
 
@@ -65,3 +69,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 80
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
