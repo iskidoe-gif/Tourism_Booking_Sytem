@@ -19,38 +19,37 @@
     <section class="packages-listing">
         <div class="packages-container">
             <aside class="packages-sidebar">
-                <h3>Search</h3>
-                <form action="{{ route('packages.index') }}" method="GET" class="packages-search-filter">
-                    <div style="display:flex;flex-direction:column;gap:0.6rem;">
-                        <label for="search">Destination</label>
-                        <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Choose destination..." class="form-control" />
+                <form action="{{ route('packages.index') }}" method="GET">
+                    <div class="sidebar-panel">
+                        <h3>Search tour packages</h3>
+                        <div class="form-group">
+                            <label for="search">Search tours</label>
+                            <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by name, location, or experience" class="form-control" />
+                        </div>
 
-                        <label for="category">Category</label>
-                        <select id="category" name="category" class="form-control">
-                            <option value="">All categories</option>
-                            @foreach($categoryMap as $key => $cat)
-                                <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
-                            @endforeach
-                        </select>
-
-                        <label for="date">Date</label>
-                        <input id="date" name="date" type="text" placeholder="From - To" class="form-control" />
-
-                        <div class="search-cta">
-                            <button type="submit" class="btn" style="width:100%;">Search</button>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" class="form-control">
+                                <option value="">All categories</option>
+                                @foreach($categoryMap as $key => $cat)
+                                    <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
-                </form>
 
-                <hr style="margin:1rem 0; border:none; border-top:1px solid rgba(6,20,12,0.04)">
-                <h3>Advanced Search</h3>
-                <div style="font-size:0.9rem;color:#335a45">
-                    <label><input type="checkbox" name="discounted" {{ request('discounted') ? 'checked' : '' }}> Only Discounted</label>
-                    <div style="margin-top:0.6rem">Duration</div>
-                    <label><input type="checkbox" name="dur_all" checked> All</label>
-                    <label><input type="checkbox" name="dur_1"> 1 Day</label>
-                    <label><input type="checkbox" name="dur_2"> 2-4 Days</label>
-                </div>
+                    <div class="sidebar-panel sidebar-panel-alt">
+                        <h3>Duration filters</h3>
+                        <p class="small-copy">Refine your results by trip length.</p>
+                        <div class="filter-group">
+                            <label class="filter-checkbox"><input type="checkbox" name="dur_all" checked> All</label>
+                            <label class="filter-checkbox"><input type="checkbox" name="dur_1" {{ request('dur_1') ? 'checked' : '' }}> 1 Day</label>
+                            <label class="filter-checkbox"><input type="checkbox" name="dur_2" {{ request('dur_2') ? 'checked' : '' }}> 2-4 Days</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
             </aside>
 
             <main class="packages-main">
@@ -106,3 +105,4 @@
         </div>
     </section>
 </x-layout>
+

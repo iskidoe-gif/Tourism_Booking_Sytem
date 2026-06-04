@@ -135,8 +135,8 @@ class DashboardController extends Controller
 
     public function storeBooking(Request $request): JsonResponse|RedirectResponse
     {
-        if ($request->user()?->email === 'guest@example.com') {
-            $message = 'Guest users cannot complete bookings. Please register or log in with your account to continue.';
+        if ($request->user()?->isGuest()) {
+            $message = 'Guest accounts can only browse tours. Please register or sign in to book.';
 
             if ($request->expectsJson()) {
                 return response()->json(['message' => $message], 403);

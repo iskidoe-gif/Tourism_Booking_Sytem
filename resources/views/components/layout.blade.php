@@ -19,11 +19,6 @@
         <div class="frame">
             <nav class="bolinao-nav" aria-label="Main navigation">
                 <span class="bolinao-brand" aria-current="page">Bolinao</span>
-                <button type="button" class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" data-nav-toggle>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
                 <div class="bolinao-navlinks">
                     @if($adminUser)
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
@@ -120,6 +115,7 @@
                 <form method="POST" action="{{ route('guest.login') }}" class="auth-form" style="margin-top:1rem">
                     @csrf
                     <button type="submit" class="btn-secondary">Continue as Guest</button>
+                    <p class="muted small mt-2">Guest access is view-only. Register or sign in with your account to make bookings.</p>
                 </form>
             </div>
 

@@ -10,9 +10,9 @@
             <span class="visual-tag">Explore Bolinao&apos;s Natural Beauty</span>
             <h1 class="visual-headline">Find your next tour in Bolinao</h1>
             <p class="visual-copy">
-                Search tours by destination, package name, or experience. Discover beachfront escapes, heritage walks, and island hopping adventures.
+                Discover curated packages, unique experiences, and local adventures across Bolinao.
             </p>
-            <div class="packages-hero-cta">Search tours below</div>
+            <div class="packages-hero-cta">Explore tours below</div>
         </div>
     </div>
 </section>
@@ -21,10 +21,10 @@
     <div class="packages-container">
         <aside class="packages-sidebar">
             <h3>Search</h3>
-            <form action="{{ route('packages.index') }}" method="GET" class="packages-search-filter">
+            <form action="{{ route('packages.index') }}" method="GET">
                 <div style="display:flex;flex-direction:column;gap:0.6rem;">
-                    <label for="search">Destination</label>
-                    <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Choose destination..." class="form-control" />
+                    <label for="search">Search tours</label>
+                    <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search tours by name, location, or experience" class="form-control" />
 
                     <label for="category">Category</label>
                     <select id="category" name="category" class="form-control">
@@ -33,9 +33,6 @@
                             <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
                         @endforeach
                     </select>
-
-                    <label for="date">Date</label>
-                    <input id="date" name="date" type="text" placeholder="From - To" class="form-control" />
 
                     <div class="search-cta">
                         <button type="submit" class="btn" style="width:100%;">Search</button>
@@ -46,7 +43,7 @@
             <hr style="margin:1rem 0; border:none; border-top:1px solid rgba(6,20,12,0.04)">
             <h3>Advanced Search</h3>
             <div style="font-size:0.9rem;color:#335a45">
-                <label><input type="checkbox" name="discounted" {{ request('discounted') ? 'checked' : '' }}> Only Discounted</label>
+
                 <div style="margin-top:0.6rem">Duration</div>
                 <label><input type="checkbox" name="dur_all" checked> All</label>
                 <label><input type="checkbox" name="dur_1"> 1 Day</label>
@@ -60,7 +57,6 @@
                     <h2 class="section-title">Browse Tour Packages</h2>
                     <p class="section-copy">Choose from curated Bolinao packages designed for couples, families, and small groups.</p>
                 </div>
-                <div style="color:#4b6b5a">@if(request('search')) Showing results for “{{ request('search') }}” @endif</div>
             </div>
 
             @if($packages->isEmpty())
@@ -109,3 +105,4 @@
     </section>
 
 </x-layout>
+

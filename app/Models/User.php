@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->role === 'tourist';
     }
 
+    public function isGuest(): bool
+    {
+        return $this->email === 'guest@example.com';
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class);

@@ -18,6 +18,12 @@ class BookingController extends Controller
 
     public function store(Request $request, TourPackage $tourPackage)
     {
+        if (auth()->user()?->isGuest()) {
+            return redirect()
+                ->route('packages.show', $tourPackage)
+                ->with('error', 'Guest accounts can only browse tours. Please create a tourist account or sign in to book.');
+        }
+
         $validated = $request->validate([
             'tour_date'        => 'required|date|after:today',
             'num_guests'       => "required|integer|min:1|max:{$tourPackage->max_guests}",

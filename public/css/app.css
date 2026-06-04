@@ -73,77 +73,133 @@ textarea {
 
 .packages-hero {
     padding: 2.5rem 0 1rem;
+    display: flex;
+    justify-content: center;
 }
 
 .packages-hero-card {
-    /* Pagination Styling */
-    .pagination {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 0.5rem;
-        justify-content: center;
-        padding: 0.5rem 0;
-        list-style: none;
-        margin: 0;
-        white-space: nowrap;
-    }
+    position: relative;
+    overflow: hidden;
+    width: min(100%, 88rem);
+    padding: clamp(2rem, 3vw, 3rem);
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 22, 38, 0.94);
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.26);
+}
 
-    .pagination li {
-        display: inline-block;
-    }
+.packages-hero-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(234, 224, 207, 0.12), transparent 23%),
+        radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.08), transparent 18%);
+    pointer-events: none;
+}
 
-    .pagination a,
-    .pagination span {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 2rem;
-        height: 2rem;
-        padding: 0.15rem 0.5rem;
-        border: 1px solid rgba(234, 224, 207, 0.12);
-        border-radius: 0.35rem;
-        background: rgba(17, 24, 68, 0.82);
-        color: var(--palette-cream);
-        font-weight: 500;
-        font-size: 0.85rem;
-        text-decoration: none;
-        transition: all 0.12s ease;
-    }
+.packages-hero-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 44rem;
+}
 
-    .pagination a:hover {
-        border-color: rgba(234, 224, 207, 0.28);
-        background: rgba(17, 24, 68, 0.94);
-    }
+.packages-hero-copy .visual-tag {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background: rgba(248, 244, 232, 0.12);
+    color: #f8fafc;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
 
-    .pagination .active span {
-        background: linear-gradient(90deg, var(--palette-cream) 0%, var(--palette-secondary) 100%);
-        color: var(--palette-ink);
-        border-color: var(--palette-secondary);
-        padding: 0.05rem 0.5rem;
-        min-width: auto;
-    }
+.packages-hero-copy .visual-headline {
+    margin: 0;
+    font-size: clamp(2.25rem, 4vw, 3.75rem);
+    line-height: 1.02;
+    color: var(--palette-cream);
+}
 
-    .pagination .disabled span {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+.packages-hero-copy .visual-copy {
+    margin: 1.25rem 0 0;
+    max-width: 38rem;
+    color: rgba(248, 250, 252, 0.84);
+    font-size: 1rem;
+    line-height: 1.75;
+}
 
-    .pagination .disabled span:hover {
-        background: rgba(17, 24, 68, 0.82);
-        border-color: rgba(234, 224, 207, 0.12);
-    }
-
-    /* Make prev/next compact and inline (less-than / greater-than) */
-    .pagination li a[rel="prev"],
-    .pagination li a[rel="next"] {
-        min-width: 2.2rem;
-        height: 2rem;
-        padding: 0.05rem 0.5rem;
-        font-size: 0.95rem;
-    }
+.packages-search {
+    display: flex;
     flex-wrap: wrap;
     gap: 0.9rem;
     margin-top: 2rem;
+}
+
+.pagination {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    justify-content: center;
+    padding: 0.5rem 0;
+    list-style: none;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.pagination li {
+    display: inline-block;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid rgba(234, 224, 207, 0.12);
+    border-radius: 0.35rem;
+    background: rgba(17, 24, 68, 0.82);
+    color: var(--palette-cream);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.12s ease;
+}
+
+.pagination a:hover {
+    border-color: rgba(234, 224, 207, 0.28);
+    background: rgba(17, 24, 68, 0.94);
+}
+
+.pagination .active span {
+    background: linear-gradient(90deg, var(--palette-cream) 0%, var(--palette-secondary) 100%);
+    color: var(--palette-ink);
+    border-color: var(--palette-secondary);
+    padding: 0.05rem 0.5rem;
+    min-width: auto;
+}
+
+.pagination .disabled span {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pagination .disabled span:hover {
+    background: rgba(17, 24, 68, 0.82);
+    border-color: rgba(234, 224, 207, 0.12);
+}
+
+.pagination li a[rel="prev"],
+.pagination li a[rel="next"] {
+    min-width: 2.2rem;
+    height: 2rem;
+    padding: 0.05rem 0.5rem;
+    font-size: 0.95rem;
 }
 
 .packages-search .form-control {
@@ -156,8 +212,161 @@ textarea {
     min-width: 12rem;
 }
 
+.packages-sidebar {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 1.35rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(11, 59, 42, 0.08);
+    box-shadow: 0 1.5rem 3.5rem rgba(11, 59, 42, 0.08);
+}
+
+.packages-sidebar h3 {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.01em;
+    color: #0b3b2a;
+}
+
+.sidebar-panel + .sidebar-panel {
+    margin-top: 1.5rem;
+}
+
+.sidebar-panel .form-group {
+    display: grid;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.filter-group {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+}
+
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #1d4330;
+    font-size: 0.95rem;
+}
+
+.filter-checkbox input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #4b6a42;
+}
+
+.packages-sidebar .btn {
+    width: 100%;
+}
+
+.packages-sidebar .small-copy {
+    margin: 0.35rem 0 0;
+    color: #4a5f51;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.packages-container {
+    display: grid;
+    grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+    max-width: min(100%, 100rem);
+    margin: 0 auto;
+}
+
+.packages-main {
+    width: 100%;
+}
+
+@media (max-width: 1280px) {
+    .package-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .packages-container {
+        grid-template-columns: minmax(18rem, 22rem) 1fr;
+    }
+}
+
+@media (max-width: 940px) {
+    .packages-container {
+        grid-template-columns: 1fr;
+    }
+}
+
 .packages-listing {
     padding: 2rem 0 3rem;
+    background: rgba(8, 15, 28, 0.2);
+    border-top: none;
+    border-bottom: none;
+}
+
+.packages-listing .packages-container {
+    background: rgba(12, 22, 38, 0.94);
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.packages-listing .packages-sidebar {
+    background: rgba(10, 20, 35, 0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+}
+
+.packages-listing .packages-sidebar h3 {
+    color: #f8fafc;
+}
+
+.packages-listing .packages-sidebar label,
+.packages-listing .packages-sidebar .form-control {
+    color: #f8fafc;
+}
+
+.packages-listing .packages-listing-header,
+.packages-listing .packages-header-row {
+    color: #f8fafc;
+}
+
+.packages-listing .packages-listing-header .section-copy {
+    color: rgba(226,232,240,0.78);
+}
+
+.packages-listing .packages-main {
+    width: 100%;
+}
+
+.packages-listing .package-card-media::after {
+    background: none;
+}
+
+.packages-listing .package-card {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.packages-listing .package-card-title {
+    color: #f8fafc;
+}
+
+.packages-listing .package-card-description {
+    color: rgba(226,232,240,0.84);
+}
+
+.packages-listing .package-card-meta {
+    color: rgba(226,232,240,0.74);
+}
+
+.packages-listing .package-card-actions .btn-secondary {
+    background: rgba(255,255,255,0.12);
+    color: #f8fafc;
+}
+
+.packages-listing .package-card-actions .btn:not(.btn-secondary) {
+    background: #0b7a4a;
 }
 
 .packages-listing-header {
@@ -182,7 +391,7 @@ textarea {
 .package-card-grid {
     display: grid;
     gap: 1.75rem;
-    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(26rem, 100%), 1fr));
     grid-auto-rows: 1fr;
 }
 
@@ -199,16 +408,17 @@ textarea {
     display: flex;
     flex-direction: column;
     min-height: 15rem;
-    border-radius: 0.85rem;
+    border-radius: 1rem;
     overflow: hidden;
-    border: 1px solid rgba(234, 224, 207, 0.08);
-    background: rgba(255, 255, 255, 0.04);
-    box-shadow: 0 0.45rem 0.9rem rgba(0, 0, 0, 0.10);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    color: #0f172a;
 }
 
 .package-card-media {
     position: relative;
-    min-height: 120px;
+    min-height: 150px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -218,7 +428,7 @@ textarea {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(17, 24, 68, 0.15), rgba(17, 24, 68, 0.82));
+    background: linear-gradient(180deg, rgba(17, 24, 68, 0.08), rgba(17, 24, 68, 0.5));
 }
 
 .package-card-badge {
@@ -226,10 +436,10 @@ textarea {
     left: 1rem;
     top: 1rem;
     display: inline-flex;
-    padding: 0.55rem 0.9rem;
+    padding: 0.45rem 0.8rem;
     border-radius: 999px;
-    background: rgba(234, 224, 207, 0.14);
-    color: var(--palette-cream);
+    background: rgba(75, 86, 148, 0.95);
+    color: #fff;
     font-weight: 700;
     font-size: 0.8rem;
     z-index: 1;
@@ -238,8 +448,8 @@ textarea {
 .package-card-body {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.45rem 0.75rem;
+    gap: 0.55rem;
+    padding: 1rem;
     flex: 1;
 }
 
@@ -247,24 +457,24 @@ textarea {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    color: rgba(234, 224, 207, 0.72);
-    font-size: 0.9rem;
+    color: #64748b;
+    font-size: 0.88rem;
 }
 
 .package-card-title {
     margin: 0;
-    color: var(--palette-cream);
-    font-size: 0.98rem;
-    line-height: 1.08;
+    color: #0f172a;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    font-weight: 700;
 }
 
 .package-card-description {
     margin: 0;
-    color: rgba(234, 224, 207, 0.78);
-    line-height: 1.4;
+    color: #475569;
+    line-height: 1.5;
     min-height: 2.2rem;
 }
-
 /* Ensure any large arrow elements inserted by templates are compact and inline */
 .package-pagination .big-arrow,
 .package-card-grid .big-arrow,
@@ -304,17 +514,18 @@ textarea {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-    color: var(--palette-cream);
+    color: #0b3b2a;
 }
 
 .package-card-price .price {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 700;
+    color: #164e63;
 }
 
 .package-card-price .price-note {
-    color: rgba(234, 224, 207, 0.7);
-    font-size: 0.95rem;
+    color: #475569;
+    font-size: 0.9rem;
 }
 
 .package-card-actions {
@@ -1772,7 +1983,17 @@ textarea {
 }
 
 .home-topbar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 120;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    background: rgba(7, 14, 38, 0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .home-shell .content {
@@ -1781,14 +2002,9 @@ textarea {
     padding: 0;
 }
 
-.home-topbar {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
-}
-
 .home-topbar .frame {
-    padding: 0;
+    padding: 0 1rem;
+    width: 100%;
 }
 
 .page-shell {

@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (signin) signin.classList.add('active');
         setModalTitle('signin');
     };
-    
 
     const openFromQuery = () => {
         const params = new URLSearchParams(window.location.search);
@@ -65,6 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
             params.delete('auth');
             const url = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
             window.history.replaceState({}, document.title, url);
+        }
+    };
+
+    const openOnError = () => {
+        const errorPanel = modal.querySelector('.auth-pane .alert-error');
+        if (errorPanel) {
+            const pane = errorPanel.closest('.auth-pane');
+            const mode = pane?.getAttribute('data-auth-pane') || 'signin';
+            openModal(mode);
         }
     };
 
@@ -87,4 +95,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     openFromQuery();
+    openOnError();
 });

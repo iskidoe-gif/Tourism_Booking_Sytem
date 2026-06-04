@@ -161,7 +161,7 @@ class AuthController extends Controller
 
     public function guestLogin(Request $request): JsonResponse|RedirectResponse
     {
-        $user = User::firstOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'guest@example.com'],
             [
                 'name' => 'Guest User',
