@@ -16,10 +16,21 @@ php artisan key:generate --show
 
 Copy the output and paste it into `APP_KEY` on Render.
 
-4) Add a managed database in Render and set DB_* variables accordingly.
-   - Use Render's managed MySQL service. Do not use SQLite in production on Render because the app filesystem is ephemeral.
-   - If you want SQLite only, keep the backend local or host it on a server with persistent disk storage instead of Render.
-   - Set `DB_CONNECTION=mysql`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` in Render.
+4) Add a managed PostgreSQL database in Render and set DB variables accordingly.
+   - Render provides a managed Postgres service (Postgres is the supported option here).
+   - Do not use SQLite in production on Render because the app filesystem is ephemeral.
+   - You can either set the individual `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` variables, or set the single `DB_URL` (Render's connection string). Example `DB_URL` format:
+
+```text
+postgres://username:password@host:5432/databasename
+```
+
+   - Recommended: set `DB_CONNECTION=pgsql` and `DB_SSLMODE=require` if your Render DB requires SSL.
+
+7) Auto-seeding on free plan
+   - If you're on Render's free plan and want demo data automatically created during first startup, set `RUN_SEEDS=true` in the Web Service environment.
+   - The container will run `php artisan db:seed --class=DatabaseSeeder --force` (with safe retries). Seeders in this project are idempotent (`updateOrCreate`), so re-deploys won't duplicate data.
+   - To disable automatic seeding, leave `RUN_SEEDS=false` (default).
 
 5) Set the Start Command or Health Check:
    - Render will use the Dockerfile; no custom start command is needed.
@@ -35,5 +46,6 @@ php artisan migrate --force
 6) Deploy and monitor build logs. If the backend fails, check `Dockerfile`, `composer.lock`, and whether the managed database credentials are correct.
 
 Notes:
-- This is the backend deployment guide. Use Render for the Laravel API/backend and Vercel only for frontend static assets.
+- This is the backend deployment guide for Render (Postgres).
+- The `Dockerfile` already installs `pdo_pgsql` so Postgres connections will work at runtime.
 - This Dockerfile uses `php:8.2-apache` and a simple multi-stage build. For higher-performance production, consider using a dedicated PHP-FPM + Nginx setup or Laravel-specific platforms like Vapor.
