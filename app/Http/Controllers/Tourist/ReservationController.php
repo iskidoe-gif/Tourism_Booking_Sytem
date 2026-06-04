@@ -11,7 +11,7 @@ class ReservationController extends Controller
 {
     public function index()
     {
-        $bookings = Booking::with(['tourPackage', 'payment', 'review'])
+        $bookings = Booking::with(['package', 'payment'])
             ->where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
@@ -22,7 +22,7 @@ class ReservationController extends Controller
     public function show(Booking $booking)
     {
         abort_if($booking->user_id !== Auth::id(), 403);
-        $booking->load(['tourPackage', 'payment', 'review']);
+        $booking->load(['package', 'payment']);
         return view('tourist.reservations.show', compact('booking'));
     }
 
