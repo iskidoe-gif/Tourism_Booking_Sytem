@@ -18,41 +18,76 @@ COPY . .
 RUN cp .env.example .env || true
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
-# 3) Final image with Apache + PHP
-FROM php:8.2-apache
+# 3) Final image with PHP-FPM + Nginx + Supervisor
+FROM php:8.2-fpm-alpine
 
 # System deps and PHP extensions
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
     libzip-dev \
     libpng-dev \
-    libonig-dev \
+    oniguruma-dev \
     libxml2-dev \
-    libsqlite3-dev \
+    sqlite-dev \
     libpq-dev \
     zip \
     unzip \
     git \
  && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip
 
-# Disable ALL MPM modules first
-RUN a2dismod mpm_event mpm_worker mpm_prefork || true
+# Nginx configuration for Laravel
+RUN mkdir -p /etc/nginx/http.d
+COPY <<'EOF' /etc/nginx/http.d/default.conf
+server {
+    listen 80;
+    root /var/www/html/public;
+    index index.php index.html;
 
-# Enable only mpm_prefork
-RUN a2enmod mpm_prefork
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
 
-# Enable Apache rewrite
-RUN a2enmod rewrite
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
 
-# Remove conflicting Apache configs
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load || true
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.conf || true
+    location ~ /\.ht {
+        deny all;
+    }
+}
+EOF
 
-# Ensure only mpm_prefork is loaded
-RUN ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load
-RUN ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
+# Supervisor configuration to manage PHP-FPM and Nginx
+RUN mkdir -p /etc/supervisor/conf.d
+COPY <<'EOF' /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
 
-# Ensure Apache serves from the Laravel `public` directory
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
+[program:php-fpm]
+command=php-fpm
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+
+[program:nginx]
+command=nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+EOF
 
 WORKDIR /var/www/html
 
