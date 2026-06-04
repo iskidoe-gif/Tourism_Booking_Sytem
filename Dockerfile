@@ -102,6 +102,10 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . .
 
+# Create .env file from example and generate APP_KEY
+RUN cp .env.example .env && \
+    php artisan key:generate --force || true
+
 # Ensure SQLite database file exists (if using sqlite) and is writable
 RUN mkdir -p database \
  && touch database/database.sqlite \
