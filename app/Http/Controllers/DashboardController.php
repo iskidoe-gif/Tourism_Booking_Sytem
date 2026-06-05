@@ -86,6 +86,10 @@ class DashboardController extends Controller
             $selectedDuration = '2_4';
         }
 
+        $capacity = $request->filled('capacity') && $request->integer('capacity') > 0
+            ? $request->integer('capacity')
+            : null;
+
         $packages = TourPackage::active()
             ->bolinao()
             ->when($request->search, fn($q) => $q->where(function($sub) use ($request) {
@@ -120,11 +124,12 @@ class DashboardController extends Controller
                     $q->whereBetween('duration_days', [2, 4]);
                 }
             })
+            ->when($capacity, fn($q) => $q->where('max_guests', '>=', $capacity))
             ->orderBy('updated_at', 'desc')
             ->paginate(6)
             ->withQueryString();
         $destinations = Destination::orderBy('name')->get();
-        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration');
+        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity');
 
         if ($request->user()) {
             $data = array_merge($this->touristData($request), $data);

@@ -46,6 +46,11 @@
                     </select>
                 </div>
 
+                <div class="form-group packages-search-field packages-capacity-field">
+                    <label for="capacity">Capacity</label>
+                    <input id="capacity" name="capacity" type="number" min="1" step="1" value="{{ old('capacity', $capacity ?? '') }}" placeholder="Guests" aria-label="Minimum guest capacity" class="form-control" />
+                </div>
+
                 <div class="form-group duration-group packages-search-field">
                     <span class="duration-title">Duration</span>
                     <div class="duration-filter">
@@ -89,6 +94,8 @@
                                 <div class="package-card-meta">
                                     <span>{{ $package->duration_days }} Day Tour</span>
                                     <span>·</span>
+                                    <span>Up to {{ $package->max_guests }} guests</span>
+                                    <span>&middot;</span>
                                     <span>{{ $package->location }}</span>
                                 </div>
                                 <h3 class="package-card-title">{{ $package->name }}</h3>

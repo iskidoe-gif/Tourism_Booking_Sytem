@@ -2873,10 +2873,10 @@ body.packages-shell .packages-search-panel h3 {
 }
 
 body.packages-shell .packages-search-panel .packages-search-form {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: minmax(250px, 2fr) minmax(170px, 1fr) minmax(150px, 0.85fr) minmax(280px, 1.35fr) auto !important;
     align-items: end !important;
     gap: 15px !important;
-    flex-wrap: wrap !important;
 }
 
 body.packages-shell .packages-search-panel .form-group {
@@ -2922,16 +2922,20 @@ body.packages-shell .packages-search-panel .form-control {
     width: 100% !important;
     height: 42px !important;
     min-height: 42px !important;
-    padding: 0 1rem !important;
+    padding: 0 0.85rem !important;
     border-radius: 0.65rem !important;
     border: 1px solid rgba(180, 194, 226, 0.36) !important;
     background-color: rgba(11, 18, 40, 0.9) !important;
     color: #f8fafc !important;
-    font-size: clamp(1rem, 1.25vw, 1.28rem) !important;
+    font-size: 1rem !important;
 }
 
 body.packages-shell .packages-search-panel input.form-control {
     padding-left: 3.25rem !important;
+}
+
+body.packages-shell .packages-search-panel .packages-capacity-field input.form-control {
+    padding-left: 1rem !important;
 }
 
 body.packages-shell .packages-search-panel .duration-option {
@@ -2974,7 +2978,6 @@ body.packages-shell .packages-search-panel .packages-search-submit {
         padding: 1.25rem !important;
     }
 
-    body.packages-shell .packages-search-panel .packages-search-form,
     body.packages-shell .packages-search-panel .duration-filter {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -2985,14 +2988,14 @@ body.packages-shell .packages-search-panel .packages-search-submit {
     }
 }
 
-/* Actual /packages page: force the search controls into one row on desktop. */
+/* Actual /packages page: keep search controls aligned without crowding. */
 body.packages-shell .packages-search-panel > form.search-form,
 body.packages-shell .packages-search-panel .search-form.packages-search-form {
-    display: flex !important;
-    flex-direction: row !important;
+    display: grid !important;
+    grid-template-columns: minmax(320px, 2fr) minmax(220px, 1fr) minmax(180px, 0.85fr) minmax(340px, 1.35fr) 110px !important;
+    grid-template-areas: "search category capacity duration submit" !important;
     align-items: flex-end !important;
-    gap: 15px !important;
-    flex-wrap: nowrap !important;
+    gap: 16px !important;
 }
 
 body.packages-shell .packages-search-panel .search-form .form-group {
@@ -3000,15 +3003,20 @@ body.packages-shell .packages-search-panel .search-form .form-group {
 }
 
 body.packages-shell .packages-search-panel .search-form .packages-search-field-wide {
-    flex: 1 1 42% !important;
+    grid-area: search !important;
 }
 
-body.packages-shell .packages-search-panel .search-form > .form-group:not(.packages-search-field-wide):not(.duration-group) {
-    flex: 0 1 24% !important;
+body.packages-shell .packages-search-panel .search-form > .form-group:not(.packages-search-field-wide):not(.packages-capacity-field):not(.duration-group) {
+    grid-area: category !important;
+}
+
+body.packages-shell .packages-search-panel .search-form .packages-capacity-field {
+    grid-area: capacity !important;
+    min-width: 160px !important;
 }
 
 body.packages-shell .packages-search-panel .search-form .duration-group {
-    flex: 0 1 24% !important;
+    grid-area: duration !important;
 }
 
 body.packages-shell .packages-search-panel .search-form .duration-filter {
@@ -3016,21 +3024,62 @@ body.packages-shell .packages-search-panel .search-form .duration-filter {
     flex-direction: row !important;
     align-items: center !important;
     gap: 10px !important;
-    white-space: nowrap !important;
+    flex-wrap: wrap !important;
+    white-space: normal !important;
 }
 
 body.packages-shell .packages-search-panel .search-form .search-btn {
-    flex: 0 0 auto !important;
+    grid-area: submit !important;
+    justify-self: start !important;
     height: 42px !important;
     min-height: 42px !important;
+    min-width: 110px !important;
     padding: 0 25px !important;
     white-space: nowrap !important;
+    width: auto !important;
+}
+
+@media (max-width: 1420px) {
+    body.packages-shell .packages-search-panel > form.search-form,
+    body.packages-shell .packages-search-panel .search-form.packages-search-form {
+        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "search search search search search category category category capacity capacity capacity capacity"
+            "duration duration duration duration duration duration duration duration submit submit submit submit" !important;
+    }
+
+    body.packages-shell .packages-search-panel .search-form .duration-filter {
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 980px) {
+    body.packages-shell .packages-search-panel > form.search-form,
+    body.packages-shell .packages-search-panel .search-form.packages-search-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "search search"
+            "category capacity"
+            "duration duration"
+            "submit submit" !important;
+    }
 }
 
 @media (max-width: 760px) {
     body.packages-shell .packages-search-panel > form.search-form,
     body.packages-shell .packages-search-panel .search-form.packages-search-form {
-        flex-wrap: wrap !important;
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "search"
+            "category"
+            "capacity"
+            "duration"
+            "submit" !important;
+    }
+
+    body.packages-shell .packages-search-panel .search-form .search-btn {
+        justify-self: stretch !important;
+        width: 100% !important;
     }
 }
 
@@ -3189,10 +3238,38 @@ body.packages-shell .packages-listing .packages-search-panel {
 
 body.packages-shell .packages-search-panel > form.search-form,
 body.packages-shell .packages-search-panel .search-form.packages-search-form {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
+    display: grid !important;
+    grid-template-columns: minmax(360px, 2fr) minmax(220px, 1fr) minmax(180px, 1fr) 120px !important;
+    grid-template-areas:
+        "search search category capacity"
+        "duration duration duration submit" !important;
     align-items: flex-end !important;
+    gap: 16px !important;
+}
+
+@media (max-width: 980px) {
+    body.packages-shell .packages-search-panel > form.search-form,
+    body.packages-shell .packages-search-panel .search-form.packages-search-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-areas:
+            "search search"
+            "category capacity"
+            "duration duration"
+            "submit submit" !important;
+    }
+}
+
+@media (max-width: 680px) {
+    body.packages-shell .packages-search-panel > form.search-form,
+    body.packages-shell .packages-search-panel .search-form.packages-search-form {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "search"
+            "category"
+            "capacity"
+            "duration"
+            "submit" !important;
+    }
 }
 
 .package-detail-page {
