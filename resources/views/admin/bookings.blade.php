@@ -28,6 +28,10 @@
                             <strong>{{ $booking->booking_number }}</strong>
                             <p class="lead">Tourist: {{ $booking->user?->name ?? 'Guest' }}</p>
                             <p class="lead">{{ $booking->package?->name }} | Tour Date: {{ $booking->tour_date?->format('Y-m-d') }}</p>
+                            <p class="lead">
+                                📅 Check-in: {{ $booking->check_in_date?->format('M d, Y') ?? 'Not set' }} 
+                                | Check-out: {{ $booking->check_out_date?->format('M d, Y') ?? 'Not set' }}
+                            </p>
                             <p class="lead">Guests: {{ $booking->num_guests }} | Price: PHP {{ number_format((float) $booking->total_price, 2) }}</p>
                             @if($booking->special_requests)
                                 <p class="lead"><strong>Requests:</strong> {{ $booking->special_requests }}</p>
