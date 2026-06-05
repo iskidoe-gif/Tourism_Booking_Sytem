@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'home'])->name('home');
 
+// Health check endpoint for Docker/Railway
+Route::get('/health', function () {
+    return response()->json(['status' => 'healthy'], 200);
+})->name('health');
+
 Route::middleware('guest')->group(function () {
     // Keep a lightweight GET route for legacy '/login' links.
     Route::get('/login', function () { return redirect()->route('home', ['auth' => 'signin']); })->name('login');

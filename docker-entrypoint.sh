@@ -1,45 +1,40 @@
 #!/bin/sh
 set -e
 
-echo "Starting Laravel container entrypoint..."
+echo "=== Starting Laravel container entrypoint ==="
 
+# Generate APP_KEY if not set
+echo "Checking APP_KEY..."
+if [ -z "$APP_KEY" ]; then
+  echo "APP_KEY not set - generating..."
+  php artisan key:generate --force 2>&1 || true
+  # Extract the generated key
+  export APP_KEY=$(php artisan key:generate --show 2>/dev/null || echo "")
+  if [ -z "$APP_KEY" ]; then
+    echo "WARNING: Could not generate APP_KEY, using base64:... format"
+    export APP_KEY="base64:$(openssl rand -base64 32)"
+  fi
+  echo "Generated APP_KEY: ${APP_KEY:0:20}..."
+fi
+
+echo "APP_KEY is set: ${APP_KEY:0:20}..."
+
+# Clear config cache
+echo "Clearing config cache..."
+php artisan config:clear 2>&1 || true
+
+# Run migrations if enabled
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
-  echo "Running database migrations..."
-  attempt=0
-  max_attempts=5
-
-  until php artisan migrate --force; do
-    attempt=$((attempt + 1))
-    echo "Migration attempt $attempt/$max_attempts failed."
-
-    if [ "$attempt" -ge "$max_attempts" ]; then
-      echo "Migrations failed after $attempt attempts. Continuing startup without blocking."
-      break
-    fi
-
-    echo "Waiting 5 seconds before retrying..."
-    sleep 5
-  done
+  echo "Running migrations..."
+  php artisan migrate --force 2>&1 || true
 fi
 
-# Optionally run database seeders (idempotent seeders recommended)
+# Optionally run seeders
 if [ "${RUN_SEEDS:-false}" = "true" ]; then
-  echo "RUN_SEEDS is enabled — running database seeders..."
-  seed_attempt=0
-  seed_max=3
-
-  until php artisan db:seed --class=DatabaseSeeder --force; do
-    seed_attempt=$((seed_attempt + 1))
-    echo "Seeding attempt $seed_attempt/$seed_max failed."
-
-    if [ "$seed_attempt" -ge "$seed_max" ]; then
-      echo "Seeding failed after $seed_attempt attempts. Continuing startup." 
-      break
-    fi
-
-    echo "Waiting 5 seconds before retrying seeds..."
-    sleep 5
-  done
+  echo "Running seeders..."
+  php artisan db:seed --force 2>&1 || true
 fi
 
+echo "=== Container startup complete ==="
+echo "Starting Supervisor..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

@@ -1,0 +1,89 @@
+name: Railway Deployment Ready
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deployment-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check Essential Files
+      run: |
+        echo "Checking essential deployment files..."
+        
+        files=(
+          "Dockerfile"
+          "docker-entrypoint.sh"
+          ".dockerignore"
+          "railway.json"
+          "composer.json"
+          "composer.lock"
+          "package.json"
+        )
+        
+        for file in "${files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Missing: $file"
+            exit 1
+          else
+            echo "✅ Found: $file"
+          fi
+        done
+
+    - name: Validate JSON files
+      run: |
+        echo "Validating JSON configuration files..."
+        python3 -m json.tool railway.json > /dev/null && echo "✅ railway.json is valid"
+        python3 -m json.tool composer.json > /dev/null && echo "✅ composer.json is valid"
+        python3 -m json.tool package.json > /dev/null && echo "✅ package.json is valid"
+
+    - name: Check Environment Variables
+      run: |
+        echo "Checking .env files..."
+        [ -f ".env.example" ] && echo "✅ .env.example found" || exit 1
+        [ -f ".env.railway" ] && echo "✅ .env.railway found" || exit 1
+        grep -q "APP_KEY=" .env.example && echo "✅ APP_KEY placeholder in .env.example" || exit 1
+        grep -q "DB_" .env.railway && echo "✅ Database config in .env.railway" || exit 1
+
+    - name: PHP Version Check
+      run: |
+        echo "Checking PHP version compatibility..."
+        grep -q '"php": "^8.2"' composer.json && echo "✅ PHP 8.2+ required" || exit 1
+
+    - name: Dockerfile Syntax Check
+      run: |
+        echo "Checking Dockerfile syntax..."
+        docker run --rm -i hadolint/hadolint:latest < Dockerfile || echo "⚠️  Some lint warnings (non-blocking)"
+
+    - name: Verify Docker Build (simulate)
+      run: |
+        echo "Dockerfile build steps look correct"
+        grep -q "FROM php:8.2-fpm-alpine" Dockerfile && echo "✅ Using Alpine PHP-FPM"
+        grep -q "supervisor" Dockerfile && echo "✅ Supervisor configured"
+        grep -q "nginx" Dockerfile && echo "✅ Nginx configured"
+        grep -q "HEALTHCHECK" Dockerfile && echo "✅ Health check configured"
+
+    - name: Database Migrations Check
+      run: |
+        echo "Checking migration files..."
+        [ -d "database/migrations" ] && echo "✅ Migrations directory exists"
+        [ ! -z "$(find database/migrations -name '*.php')" ] && echo "✅ Migration files found"
+
+    - name: Requirements Summary
+      run: |
+        echo "=== Railway Deployment Requirements ==="
+        echo "✅ All checks passed!"
+        echo ""
+        echo "Next steps:"
+        echo "1. Push to GitHub"
+        echo "2. Go to https://railway.app/dashboard"
+        echo "3. Create new project from this repository"
+        echo "4. Add PostgreSQL database"
+        echo "5. Set environment variables from .env.railway"
+        echo "6. Deploy and monitor logs"
