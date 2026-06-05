@@ -35,7 +35,12 @@ test('a tour can be booked in demo mode', function () {
     $response = $this->actingAs($user)->post(route('bookings.store'), [
         'tour_package_id' => $package->id,
         'tour_date' => now()->addDays(3)->format('Y-m-d'),
-        'num_guests' => 2,
+        'num_adults' => 2,
+        'num_children' => 0,
+        'num_seniors' => 0,
+        'guest_name' => 'Test Tourist',
+        'guest_email' => 'tourist.test@example.com',
+        'guest_phone' => '09171234567',
         'special_requests' => 'Vegetarian meals',
     ]);
 
@@ -88,4 +93,31 @@ test('package search filters by category and duration', function () {
         ->assertOk()
         ->assertSeeText('Bolinao Heritage Weekend')
         ->assertDontSeeText('Bolinao Beach Day Tour');
+});
+
+test('package details page renders the tour information', function () {
+    $user = User::create([
+        'name' => 'Details Tourist',
+        'email' => 'details.tourist@example.com',
+        'password' => bcrypt('password'),
+        'role' => 'tourist',
+    ]);
+
+    $package = TourPackage::create([
+        'name' => 'Bolinao Lighthouse Tour',
+        'description' => 'A scenic heritage tour with coastal views.',
+        'location' => 'Bolinao, Pangasinan',
+        'price' => 1800,
+        'duration_days' => 1,
+        'max_guests' => 5,
+        'category' => 'cultural',
+        'status' => 'active',
+        'rating' => 4.7,
+    ]);
+
+    $this->actingAs($user)->get(route('packages.show', $package))
+        ->assertOk()
+        ->assertSeeText('Bolinao Lighthouse Tour')
+        ->assertSeeText('Reserve This Tour', false)
+        ->assertSeeText('Trip overview');
 });

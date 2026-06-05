@@ -1,142 +1,160 @@
 <x-layout :title="$tourPackage->name">
+    <section class="package-detail-page">
+        <div class="package-detail-hero">
+            <a href="{{ route('packages.index') }}" class="package-detail-back">Back to packages</a>
 
-<div class="row g-4">
-    <div class="col-md-7">
-        @if($tourPackage->image)
-            @php($imageUrl = str_starts_with($tourPackage->image, 'http') ? $tourPackage->image : asset($tourPackage->image))
-            <img src="{{ $imageUrl }}"
-                 class="img-fluid rounded border" alt="{{ $tourPackage->name }}">
-        @else
-            <div class="bg-light border rounded d-flex align-items-center justify-content-center"
-                 style="height:360px;font-size:72px">&#127958;</div>
-        @endif
-    </div>
-
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="fw-semibold">{{ $tourPackage->name }}</h4>
-                <p class="text-muted mb-2">&#128205; {{ $tourPackage->location }}</p>
-                <p class="text-muted mb-2">Category: {{ $tourPackage->category_label }}</p>
-
-                <div class="text-warning small mb-3">
-                    @for($i = 1; $i <= 5; $i++)
-                        {{ $i <= round($tourPackage->rating) ? '★' : '☆' }}
-                    @endfor
-                    <span class="text-muted">({{ number_format($tourPackage->rating, 1) }})</span>
+            <div class="package-detail-grid">
+                <div class="package-detail-media">
+                    @if($tourPackage->image)
+                        <img src="{{ $tourPackage->image_url }}" alt="{{ $tourPackage->name }}">
+                    @else
+                        <div class="package-detail-placeholder" aria-hidden="true">Bolinao</div>
+                    @endif
+                    <span class="package-detail-badge">{{ $tourPackage->category_label }}</span>
                 </div>
 
-                <p>{{ $tourPackage->description }}</p>
+                <aside class="package-detail-summary">
+                    <p class="package-detail-kicker">Tour package</p>
+                    <h1>{{ $tourPackage->name }}</h1>
 
-                <dl class="row small mb-4">
-                    <dt class="col-5 text-muted">Destination</dt>
-                    <dd class="col-7">{{ $tourPackage->destination?->name ?? 'N/A' }}</dd>
-                    <dt class="col-5 text-muted">Duration</dt>
-                    <dd class="col-7">{{ $tourPackage->duration_days }} day(s)</dd>
-                    <dt class="col-5 text-muted">Max Guests</dt>
-                    <dd class="col-7">{{ $tourPackage->max_guests }}</dd>
-                    <dt class="col-5 text-muted">Price</dt>
-                    <dd class="col-7 fw-semibold text-success">₱{{ number_format($tourPackage->price, 2) }} / person</dd>
-                </dl>
+                    <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->rating, 1) }} out of 5">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span>{!! $i <= round($tourPackage->rating) ? '&#9733;' : '&#9734;' !!}</span>
+                        @endfor
+                        <strong>{{ number_format($tourPackage->rating, 1) }}</strong>
+                    </div>
 
-                @auth
-                    @if(auth()->user()->isGuest())
-                        <button type="button" class="btn btn-primary w-100" data-auth-open data-auth-mode="register">
-                            Register to Book
-                        </button>
-                        <p class="text-muted small mt-2">Guest accounts can browse tours only. Create a tourist account to make a booking.</p>
-                    @elseif(auth()->user()->isTourist())
-                        <a href="{{ route('bookings.create', $tourPackage) }}" class="btn btn-primary w-100">
-                            Reserve This Tour
-                        </a>
-                    @else
-                        <a href="#" class="btn btn-primary w-100" data-auth-open data-auth-mode="signin">
-                            Sign in with a tourist account to book
-                        </a>
-                    @endif
-                @else
-                    @if(Route::has('login'))
-                        <a href="#" class="btn btn-primary w-100" data-auth-open data-auth-mode="signin">
-                            Login to Book
-                        </a>
-                    @endif
-                @endauth
+                    <p class="package-detail-location">{{ $tourPackage->location }}</p>
+                    <p class="package-detail-description">{{ $tourPackage->description }}</p>
+
+                    <div class="package-detail-price">
+                        <span>Price per person</span>
+                        <strong>&#8369;{{ number_format($tourPackage->price, 2) }}</strong>
+                    </div>
+
+                    <div class="package-detail-actions">
+                        @auth
+                            @if(auth()->user()->isGuest())
+                                <button type="button" class="package-detail-primary" data-auth-open data-auth-mode="register">
+                                    Register to Book
+                                </button>
+                                <p>Guest accounts can browse tours only. Create a tourist account to make a booking.</p>
+                            @elseif(auth()->user()->isTourist())
+                                <a href="{{ route('bookings.create', $tourPackage) }}" class="package-detail-primary">
+                                    Reserve This Tour
+                                </a>
+                            @else
+                                <a href="#" class="package-detail-primary" data-auth-open data-auth-mode="signin">
+                                    Sign in as Tourist
+                                </a>
+                            @endif
+                        @else
+                            <a href="#" class="package-detail-primary" data-auth-open data-auth-mode="signin">
+                                Login to Book
+                            </a>
+                        @endauth
+                    </div>
+                </aside>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row mt-5">
-    <div class="col-12 col-lg-8">
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="mb-3">Reviews</h5>
+        <div class="package-detail-content">
+            <section class="package-detail-panel package-detail-overview">
+                <div class="package-detail-section-heading">
+                    <p>Trip overview</p>
+                    <h2>What to expect</h2>
+                </div>
+
+                <div class="package-detail-stats">
+                    <div>
+                        <span>Destination</span>
+                        <strong>{{ $tourPackage->destination?->name ?? 'Bolinao' }}</strong>
+                    </div>
+                    <div>
+                        <span>Duration</span>
+                        <strong>{{ $tourPackage->duration_days }} day{{ $tourPackage->duration_days === 1 ? '' : 's' }}</strong>
+                    </div>
+                    <div>
+                        <span>Max guests</span>
+                        <strong>{{ $tourPackage->max_guests }}</strong>
+                    </div>
+                    <div>
+                        <span>Category</span>
+                        <strong>{{ $tourPackage->category_label }}</strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="package-detail-panel package-detail-reviews">
+                <div class="package-detail-section-heading">
+                    <p>Traveler feedback</p>
+                    <h2>Reviews</h2>
+                </div>
 
                 @if($tourPackage->reviews->isEmpty())
-                    <p class="text-muted">No reviews yet. Be the first to share your experience.</p>
+                    <div class="package-detail-empty">
+                        No reviews yet. Be the first to share your experience.
+                    </div>
                 @else
-                    @foreach($tourPackage->reviews as $review)
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <strong>{{ $review->user->name }}</strong>
-                                    <span class="text-muted small">· {{ $review->created_at->diffForHumans() }}</span>
+                    <div class="package-detail-review-list">
+                        @foreach($tourPackage->reviews as $review)
+                            <article class="package-detail-review">
+                                <div class="package-detail-review-top">
+                                    <div>
+                                        <strong>{{ $review->user->name }}</strong>
+                                        <span>{{ $review->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <div class="package-detail-review-stars">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <span>{!! $i <= $review->rating ? '&#9733;' : '&#9734;' !!}</span>
+                                        @endfor
+                                    </div>
                                 </div>
-                                <div class="text-warning small">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        {{ $i <= $review->rating ? '★' : '☆' }}
-                                    @endfor
-                                </div>
-                            </div>
-                            <p class="mb-2">{{ $review->comment }}</p>
-                            @if(auth()->id() === $review->user_id)
-                                <form action="{{ route('reviews.destroy', $review) }}" method="POST" class="text-end">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                </form>
-                            @endif
-                        </div>
-                    @endforeach
+                                <p>{{ $review->comment }}</p>
+                                @if(auth()->id() === $review->user_id)
+                                    <form action="{{ route('reviews.destroy', $review) }}" method="POST" class="package-detail-delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit">Delete review</button>
+                                    </form>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
                 @endif
-            </div>
-        </div>
-    </div>
-</div>
+            </section>
 
-@if(auth()->check() && auth()->user()->isTourist())
-    <div class="row mb-5">
-        <div class="col-12 col-lg-8">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="mb-3">Submit a Review</h5>
+            @if(auth()->check() && auth()->user()->isTourist())
+                <section class="package-detail-panel package-detail-review-form">
+                    <div class="package-detail-section-heading">
+                        <p>Your experience</p>
+                        <h2>Submit a review</h2>
+                    </div>
+
                     <form action="{{ route('reviews.store', $tourPackage) }}" method="POST">
                         @csrf
-                        <div class="mb-3">
-                            <label class="form-label">Rating</label>
-                            <select name="rating" class="form-control">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>{{ $i }} star{{ $i === 1 ? '' : 's' }}</option>
-                                @endfor
-                            </select>
+                        <div class="package-detail-form-grid">
+                            <label>
+                                <span>Rating</span>
+                                <select name="rating">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>{{ $i }} star{{ $i === 1 ? '' : 's' }}</option>
+                                    @endfor
+                                </select>
+                            </label>
+                            <label>
+                                <span>Comment</span>
+                                <textarea name="comment" rows="4">{{ old('comment') }}</textarea>
+                            </label>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Comment</label>
-                            <textarea name="comment" rows="4" class="form-control">{{ old('comment') }}</textarea>
-                        </div>
-                        <button class="btn btn-primary">Submit Review</button>
+                        <button type="submit" class="package-detail-primary package-detail-submit">Submit Review</button>
                     </form>
+                </section>
+            @elseif(auth()->check())
+                <div class="package-detail-note">
+                    Only tourist accounts may submit reviews. Admins cannot rate tour packages.
                 </div>
-            </div>
+            @endif
         </div>
-    </div>
-@elseif(auth()->check())
-    <div class="row mb-5">
-        <div class="col-12 col-lg-8">
-            <div class="alert alert-warning">
-                Only tourist accounts may submit reviews. Admins cannot rate tour packages.
-            </div>
-        </div>
-    </div>
-@endif
+    </section>
 </x-layout>
