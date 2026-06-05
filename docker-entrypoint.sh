@@ -42,4 +42,4 @@ if [ "${RUN_SEEDS:-false}" = "true" ]; then
   done
 fi
 
-exec apache2-foreground
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

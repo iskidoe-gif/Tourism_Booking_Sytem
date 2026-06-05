@@ -262,6 +262,42 @@ class DashboardController extends Controller
         $bookings = $bookingQuery->get();
         $paymentQuery = Payment::whereIn('booking_id', Booking::where('user_id', $user->id)->select('id'));
 
+        // Get top-rated packages
+        $topRatedPackages = TourPackage::active()
+            ->bolinao()
+            ->orderBy('rating', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Get recent reviews from the user
+        $userReviews = Review::where('user_id', $user->id)
+            ->with(['tourPackage'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        // Get recent reviews from all users (for recommendations)
+        $communityReviews = Review::with(['user', 'tourPackage'])
+            ->where('rating', '>=', 4)
+            ->latest()
+            ->limit(6)
+            ->get();
+
+        // Get booking breakdown by status
+        $bookingsByStatus = [
+            'approved' => (clone $bookingQuery)->where('status', 'approved')->count(),
+            'pending' => (clone $bookingQuery)->where('status', 'pending')->count(),
+            'cancelled' => (clone $bookingQuery)->where('status', 'cancelled')->count(),
+        ];
+
+        // Get most booked destinations
+        $topDestinations = TourPackage::active()
+            ->bolinao()
+            ->withCount('bookings')
+            ->orderBy('bookings_count', 'desc')
+            ->limit(5)
+            ->get();
+
         return [
             'stats' => [
                 'packages' => TourPackage::active()->bolinao()->count(),
@@ -269,13 +305,18 @@ class DashboardController extends Controller
                 'pending_bookings' => (clone $bookingQuery)->where('status', 'pending')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
+                'bookingsByStatus' => $bookingsByStatus,
             ],
             'availablePackages' => TourPackage::query()
                 ->active()
                 ->bolinao()
                 ->latest()
                 ->get(),
+            'topRatedPackages' => $topRatedPackages,
             'recentBookings' => $bookings,
+            'userReviews' => $userReviews,
+            'communityReviews' => $communityReviews,
+            'topDestinations' => $topDestinations,
             'user' => $user,
         ];
     }
@@ -286,6 +327,68 @@ class DashboardController extends Controller
         $bookingCountQuery = Booking::query();
         $paymentQuery = Payment::query();
 
+        // Get recent bookings with details
+        $recentBookings = Booking::with(['user', 'package', 'payment'])
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        // Get top packages by booking count
+        $topPackages = TourPackage::withCount('bookings')
+            ->orderBy('bookings_count', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Get top destinations by bookings
+        $topDestinations = Destination::withCount(['tourPackages' => function($q) {
+            $q->withCount('bookings');
+        }])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        // Get monthly booking data (last 6 months)
+        $monthlyBookings = Booking::selectRaw('MONTH(created_at) as month, COUNT(*) as count, SUM(total_price) as revenue')
+            ->whereRaw('YEAR(created_at) = YEAR(NOW())')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        // Get booking status breakdown
+        $bookingsByStatus = [
+            'pending' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
+            'approved' => (clone $bookingCountQuery)->where('status', 'approved')->count(),
+            'cancelled' => (clone $bookingCountQuery)->where('status', 'cancelled')->count(),
+        ];
+
+        // Get payment breakdown
+        $paymentsByStatus = [
+            'paid' => (clone $paymentQuery)->where('status', 'paid')->count(),
+            'pending' => (clone $paymentQuery)->where('status', 'pending')->count(),
+            'failed' => (clone $paymentQuery)->where('status', 'failed')->count(),
+        ];
+
+        // Get recent reviews
+        $recentReviews = Review::with(['user', 'tourPackage'])
+            ->latest()
+            ->limit(8)
+            ->get();
+
+        // Get average ratings by package
+        $packageRatings = TourPackage::withCount('reviews')
+            ->with('reviews')
+            ->orderBy('rating', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Calculate customer satisfaction
+        $avgRating = Review::avg('rating') ?? 0;
+        $totalReviews = Review::count();
+
+        // Get active users count
+        $activeUsers = Booking::distinct('user_id')->count('user_id');
+
         return [
             'stats' => [
                 'packages' => TourPackage::count(),
@@ -293,7 +396,18 @@ class DashboardController extends Controller
                 'pending_bookings' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
+                'bookingsByStatus' => $bookingsByStatus,
+                'paymentsByStatus' => $paymentsByStatus,
+                'avgRating' => round($avgRating, 2),
+                'totalReviews' => $totalReviews,
+                'activeUsers' => $activeUsers,
             ],
+            'recentBookings' => $recentBookings,
+            'topPackages' => $topPackages,
+            'topDestinations' => $topDestinations,
+            'monthlyBookings' => $monthlyBookings,
+            'recentReviews' => $recentReviews,
+            'packageRatings' => $packageRatings,
         ];
     }
 
@@ -304,5 +418,162 @@ class DashboardController extends Controller
         } while (Booking::where('booking_number', $code)->exists());
 
         return $code;
+    }
+
+    // Enhanced Booking Management Methods
+
+    public function showBooking(Booking $booking): View
+    {
+        $this->authorizeBookingAccess($booking);
+
+        return view('bookings.show', [
+            'booking' => $booking->load(['user', 'package', 'payment', 'approver']),
+            'remainingDays' => $booking->remaining_days,
+        ]);
+    }
+
+    public function cancelBooking(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        $this->authorizeBookingAccess($booking);
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+            'confirm' => ['required', 'boolean'],
+        ]);
+
+        if (!$validated['confirm']) {
+            return back()->with('error', 'Cancellation not confirmed.');
+        }
+
+        if (!$booking->canBeCancelled()) {
+            return back()->with('error', 'This booking cannot be cancelled.');
+        }
+
+        $bookingService = new \App\Services\BookingService();
+        $bookingService->cancelBooking(
+            $booking,
+            $validated['reason'] ?? 'User requested cancellation'
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Booking cancelled successfully.']);
+        }
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Booking cancelled successfully. Refund will be processed.');
+    }
+
+    public function addNote(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        $this->authorizeBookingAccess($booking);
+
+        $validated = $request->validate([
+            'note' => ['required', 'string', 'max:1000'],
+            'type' => ['required', 'in:internal,admin'],
+        ]);
+
+        $bookingService = new \App\Services\BookingService();
+
+        if ($validated['type'] === 'internal') {
+            $bookingService->addInternalNote($booking, $validated['note']);
+        } else {
+            $userName = $request->user()?->name ?? 'System';
+            $bookingService->addAdminNote($booking, $validated['note'], $userName);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Note added successfully.']);
+        }
+
+        return back()->with('success', 'Note added successfully.');
+    }
+
+    public function updateGuests(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        $this->authorizeBookingAccess($booking);
+
+        $validated = $request->validate([
+            'guests.*.name' => ['required', 'string', 'max:100'],
+            'guests.*.email' => ['nullable', 'email'],
+            'guests.*.phone' => ['nullable', 'string'],
+            'guests.*.age' => ['nullable', 'integer', 'min:1', 'max:150'],
+        ]);
+
+        $bookingService = new \App\Services\BookingService();
+        $bookingService->updateGuestDetails($booking, $validated['guests'] ?? []);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Guest details updated.']);
+        }
+
+        return back()->with('success', 'Guest details updated successfully.');
+    }
+
+    public function applyDiscount(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        if (!Auth::guard('admin')->check() && $request->user()?->role !== 'admin') {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'discount_code' => ['required', 'string'],
+            'discount_amount' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $bookingService = new \App\Services\BookingService();
+        $bookingService->applyDiscount(
+            $booking,
+            $validated['discount_amount'],
+            $validated['discount_code']
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Discount applied.', 'booking' => $booking]);
+        }
+
+        return back()->with('success', 'Discount applied successfully.');
+    }
+
+    public function confirmBooking(Request $request, Booking $booking): RedirectResponse|JsonResponse
+    {
+        if (!Auth::guard('admin')->check() && $request->user()?->role !== 'admin') {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $bookingService = new \App\Services\BookingService();
+        $bookingService->confirmBooking($booking, $validated['admin_notes'] ?? '');
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Booking confirmed.']);
+        }
+
+        return back()->with('success', 'Booking confirmed successfully.');
+    }
+
+    public function exportBooking(Booking $booking)
+    {
+        $this->authorizeBookingAccess($booking);
+
+        // Generate PDF or download as file
+        $html = view('bookings.pdf', ['booking' => $booking->load(['user', 'package', 'payment'])])->render();
+
+        return response($html)
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('Content-Disposition', "attachment; filename=\"Booking_{$booking->booking_number}.pdf\"");
+    }
+
+    private function authorizeBookingAccess(Booking $booking): void
+    {
+        $user = auth()->user();
+        $isAdmin = Auth::guard('admin')->check() || $user?->role === 'admin';
+        $isOwner = $user?->id === $booking->user_id;
+
+        if (!$isAdmin && !$isOwner) {
+            abort(403, 'Unauthorized access to booking.');
+        }
     }
 }
