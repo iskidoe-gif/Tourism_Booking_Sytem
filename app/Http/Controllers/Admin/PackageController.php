@@ -388,7 +388,7 @@ class PackageController extends Controller
             'duration_days' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'file'],
+            // image_file is handled separately in preparePackageData, don't validate here
             'status' => ['required', 'in:active,inactive'],
         ]);
     }
