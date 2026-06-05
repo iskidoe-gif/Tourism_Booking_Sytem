@@ -169,7 +169,8 @@ class DashboardController extends Controller
 
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
-            'tour_date' => ['required', 'date', 'after:today'],
+            'check_in_date' => ['required', 'date', 'after_or_equal:today'],
+            'check_out_date' => ['required', 'date', 'after:check_in_date'],
             'num_adults' => ['required', 'integer', 'min:0'],
             'num_children' => ['required', 'integer', 'min:0'],
             'num_seniors' => ['required', 'integer', 'min:0'],
@@ -214,7 +215,9 @@ class DashboardController extends Controller
         $booking = $bookingService->createBooking([
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
-            'tour_date' => $validated['tour_date'],
+            'tour_date' => $validated['check_in_date'],
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
             'num_guests' => $totalGuests,
             'num_adults' => $validated['num_adults'],
             'num_children' => $validated['num_children'],

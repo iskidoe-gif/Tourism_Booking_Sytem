@@ -108,15 +108,27 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Travel Date</label>
-                                    <input type="date" name="tour_date"
-                                           class="form-control @error('tour_date') is-invalid @enderror"
-                                           value="{{ old('tour_date') }}"
-                                           min="{{ now()->addDay()->format('Y-m-d') }}">
-                                    @error('tour_date')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="row g-3 mb-3">
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Check-in Date</label>
+                                        <input type="date" name="check_in_date"
+                                               class="form-control @error('check_in_date') is-invalid @enderror"
+                                               value="{{ old('check_in_date') }}"
+                                               min="{{ now()->format('Y-m-d') }}">
+                                        @error('check_in_date')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label class="form-label">Check-out Date</label>
+                                        <input type="date" name="check_out_date"
+                                               class="form-control @error('check_out_date') is-invalid @enderror"
+                                               value="{{ old('check_out_date') }}"
+                                               min="{{ old('check_in_date', now()->addDay()->format('Y-m-d')) }}">
+                                        @error('check_out_date')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">

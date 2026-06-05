@@ -66,6 +66,14 @@ Route::delete('/reservations/{booking}', [ReservationController::class, 'cancel'
     ->middleware('auth')
     ->name('reservations.cancel');
 
+Route::post('/reservations/{booking}/check-in', [ReservationController::class, 'checkIn'])
+    ->middleware('auth')
+    ->name('reservations.check-in');
+
+Route::post('/reservations/{booking}/check-out', [ReservationController::class, 'checkOut'])
+    ->middleware('auth')
+    ->name('reservations.check-out');
+
 Route::post('/bookings', [DashboardController::class, 'storeBooking'])
     ->middleware('auth')
     ->name('bookings.store');
