@@ -236,7 +236,8 @@ class Booking extends Model
         return match($this->status) {
             'pending' => '#ffc107',
             'confirmed', 'approved' => '#81c784',
-            'cancelled' => '#ef5350',
+            'declined' => '#dc3545',
+            'cancelled' => '#6c757d',
             'completed' => '#64b5f6',
             default => '#9e9e9e',
         };

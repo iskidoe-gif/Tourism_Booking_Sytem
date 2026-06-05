@@ -63,10 +63,6 @@ class DashboardController extends Controller
 
     public function packages(Request $request): JsonResponse|View|RedirectResponse
     {
-        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
         $categoryMap = [
             'natural' => ['label' => 'Natural Attractions', 'keywords' => ['beach','waterfall','falls','cave','river','rock','island','lagoon','spring','shore']],
             'cultural' => ['label' => 'Cultural & Historical Sites', 'keywords' => ['church','heritage','museum','lighthouse','parish','histor','monument','temple']],
@@ -75,6 +71,7 @@ class DashboardController extends Controller
             'events' => ['label' => 'Events & Festivals', 'keywords' => ['festival','event','parade','competition','celebration']],
             'ecotourism' => ['label' => 'Ecotourism & Conservation Areas', 'keywords' => ['mangrove','park','reserve','ecolodge','protected','sanctuary']],
         ];
+
         $selectedDuration = $request->input('duration', 'all');
 
         if (! in_array($selectedDuration, ['all', '1', '2_4'], true)) {
@@ -101,7 +98,6 @@ class DashboardController extends Controller
             )
             ->when($request->destination, fn($q) => $q->where('destination_id', $request->destination))
             ->when($request->category && array_key_exists($request->category, $categoryMap), function($q) use ($request, $categoryMap) {
-                // prefer explicit DB category if set, otherwise fallback to keyword match
                 $q->where(function($sub) use ($request, $categoryMap) {
                     $sub->where('category', $request->category);
                     $keywords = $categoryMap[$request->category]['keywords'];
@@ -126,10 +122,14 @@ class DashboardController extends Controller
                 }
             })
             ->when($capacity, fn($q) => $q->where('max_guests', '>=', $capacity))
+            ->when($request->type, fn($q) => $q->where('type', $request->type))
+            ->when($request->max_price, fn($q) => $q->where('price', '<=', $request->max_price))
             ->orderBy('updated_at', 'desc')
             ->paginate(6)
             ->withQueryString();
+
         $destinations = Destination::orderBy('name')->get();
+
         $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity');
 
         if ($request->user()) {
@@ -265,9 +265,14 @@ class DashboardController extends Controller
 
     public function adminBookings(Request $request): JsonResponse|View
     {
-        $bookings = Booking::with(['user', 'package', 'payment', 'approver'])
-            ->latest()
-            ->paginate(20);
+        $query = Booking::with(['user', 'package', 'payment', 'approver'])
+            ->latest();
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $bookings = $query->paginate(20)->appends($request->query());
 
         if ($request->expectsJson()) {
             return response()->json(['data' => $bookings]);
@@ -316,7 +321,7 @@ class DashboardController extends Controller
     public function updateBookingStatus(Request $request, Booking $booking): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:approved,cancelled'],
+            'status' => ['required', 'in:approved,declined'],
         ]);
 
         $booking->update([
