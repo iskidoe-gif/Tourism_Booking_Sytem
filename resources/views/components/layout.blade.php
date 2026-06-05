@@ -81,12 +81,14 @@
             </div>
 
             <div class="auth-pane active" data-auth-pane="signin">
-                @if ($errors->any() && ! old('name') && ! old('password_confirmation'))
+                @if ($errors->any() && ! old('name') && ! old('password_confirmation') && (isset($errors) && $errors->has(['email', 'password'])))
                     <div class="alert alert-error">
                         <strong>Login Failed</strong>
                         <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
+                            @foreach ($errors->only(['email', 'password']) as $field => $messages)
+                                @foreach ($messages as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
                             @endforeach
                         </ul>
                     </div>
@@ -125,12 +127,14 @@
             </div>
 
             <div class="auth-pane" data-auth-pane="register">
-                @if ($errors->any() && (old('name') || old('password_confirmation')))
+                @if ($errors->any() && (old('name') || old('password_confirmation')) && (isset($errors) && $errors->has(['name', 'email', 'password'])))
                     <div class="alert alert-error">
                         <strong>Registration Error</strong>
                         <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
+                            @foreach ($errors->only(['name', 'email', 'password']) as $field => $messages)
+                                @foreach ($messages as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
                             @endforeach
                         </ul>
                     </div>

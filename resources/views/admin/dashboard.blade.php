@@ -759,14 +759,98 @@
 
     <!-- Recent Bookings -->
     @if($recentBookings->isNotEmpty())
+    <style>
+        .recent-bookings-table {
+            background: #1f1f3a;
+            border: 1px solid #3d3d5c;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .recent-bookings-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #2d3561 0%, #3d4571 100%);
+            border-bottom: 2px solid #4d5d8d;
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .recent-bookings-rows {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .recent-bookings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+            border-bottom: 1px solid #3d3d5c;
+            align-items: center;
+            transition: all 0.2s ease;
+            background-color: transparent;
+        }
+
+        .recent-bookings-row:nth-child(odd) {
+            background: rgba(45, 53, 97, 0.4);
+        }
+
+        .recent-bookings-row:nth-child(even) {
+            background: rgba(36, 40, 66, 0.4);
+        }
+
+        .recent-bookings-row:hover {
+            background: rgba(61, 93, 157, 0.5);
+        }
+
+        .recent-bookings-row .guest-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .recent-bookings-row .guest-name {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .recent-bookings-row .guest-email {
+            color: #9db3d1;
+            font-size: 0.75rem;
+        }
+
+        .recent-bookings-row .cell-text {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .recent-bookings-row .cell-secondary {
+            color: #b0b8d0;
+            font-size: 0.9rem;
+        }
+
+        .recent-bookings-row .cell-amount {
+            color: #7dd87d;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+    </style>
     <div class="content-section">
         <h2 class="section-title">
             <span class="section-icon">📋</span>
             Recent Bookings
         </h2>
 
-        <div style="background: rgba(75, 86, 148, 0.1); border: 1px solid rgba(75, 86, 148, 0.2); border-radius: 0.75rem; overflow: hidden;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; background: rgba(75, 86, 148, 0.2); border-bottom: 1px solid rgba(75, 86, 148, 0.3); font-weight: 600; color: var(--palette-secondary); font-size: 0.875rem;">
+        <div class="recent-bookings-table">
+            <div class="recent-bookings-header">
                 <div>Guest</div>
                 <div>Package</div>
                 <div>Tour Date</div>
@@ -775,21 +859,21 @@
                 <div>Status</div>
                 <div>Amount</div>
             </div>
-            <div style="max-height: 400px; overflow-y: auto;">
+            <div class="recent-bookings-rows">
                 @foreach($recentBookings->take(10) as $booking)
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(75, 86, 148, 0.15); align-items: center;">
-                        <div>
-                            <div style="color: var(--palette-cream); font-weight: 500;">{{ $booking->user->name }}</div>
-                            <div style="color: var(--palette-secondary); font-size: 0.75rem;">{{ $booking->user->email }}</div>
+                    <div class="recent-bookings-row">
+                        <div class="guest-info">
+                            <div class="guest-name">{{ $booking->user->name }}</div>
+                            <div class="guest-email">{{ $booking->user->email }}</div>
                         </div>
-                        <div style="color: var(--palette-cream);">{{ Str::limit($booking->package->name, 20) }}</div>
-                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_date)->format('M d, Y') }}</div>
-                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_start_date)->format('M d, Y') ?? 'Not set' }}</div>
-                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_end_date)->format('M d, Y') ?? 'Not set' }}</div>
+                        <div class="cell-text">{{ Str::limit($booking->package->name, 20) }}</div>
+                        <div class="cell-secondary">{{ optional($booking->tour_date)->format('M d, Y') }}</div>
+                        <div class="cell-secondary">{{ optional($booking->tour_start_date)->format('M d, Y') ?? 'Not set' }}</div>
+                        <div class="cell-secondary">{{ optional($booking->tour_end_date)->format('M d, Y') ?? 'Not set' }}</div>
                         <div>
                             <span class="booking-badge badge-{{ $booking->status }}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">{{ ucfirst($booking->status) }}</span>
                         </div>
-                        <div style="color: #4CAF50; font-weight: 600;">₱{{ number_format($booking->total_price, 2) }}</div>
+                        <div class="cell-amount">₱{{ number_format($booking->total_price, 2) }}</div>
                     </div>
                 @endforeach
             </div>
@@ -881,6 +965,65 @@
 
     <!-- Recent Reviews -->
     @if($recentReviews->isNotEmpty())
+    <style>
+        .review-card {
+            background: linear-gradient(135deg, rgba(45, 53, 97, 0.6) 0%, rgba(36, 40, 66, 0.6) 100%);
+            border: 1px solid #3d3d5c;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .review-card:hover {
+            border-color: #4d5d8d;
+            background: linear-gradient(135deg, rgba(61, 93, 157, 0.6) 0%, rgba(45, 53, 97, 0.6) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .review-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .review-card-info h3 {
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .review-card-info p {
+            color: #9db3d1;
+            font-size: 0.875rem;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .review-card-rating {
+            font-size: 1.75rem;
+            color: #FFD700;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .review-card-comment {
+            color: #b0b8d0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0.75rem 0;
+        }
+
+        .review-card-date {
+            color: #7d8fa3;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+    </style>
     <div class="content-section">
         <h2 class="section-title">
             <span class="section-icon">⭐</span>
@@ -889,16 +1032,16 @@
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
             @foreach($recentReviews->take(6) as $review)
-                <div class="section-card">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                        <div>
-                            <strong style="color: var(--palette-cream);">{{ $review->tourPackage->name }}</strong>
-                            <p style="color: var(--palette-secondary); font-size: 0.875rem; margin: 0.25rem 0;">by {{ $review->user->name }}</p>
+                <div class="review-card">
+                    <div class="review-card-header">
+                        <div class="review-card-info">
+                            <h3>{{ $review->tourPackage->name }}</h3>
+                            <p>by {{ $review->user->name }}</p>
                         </div>
-                        <span style="font-size: 1.5rem; color: #FFD700;">⭐ {{ $review->rating }}</span>
+                        <div class="review-card-rating">⭐ {{ $review->rating }}</div>
                     </div>
-                    <p style="color: var(--palette-secondary); font-size: 0.875rem; margin: 0.5rem 0;">{{ Str::limit($review->comment, 120) }}</p>
-                    <p style="color: var(--palette-secondary); font-size: 0.75rem;">{{ $review->created_at->diffForHumans() }}</p>
+                    <p class="review-card-comment">{{ Str::limit($review->comment, 120) }}</p>
+                    <p class="review-card-date">{{ $review->created_at->diffForHumans() }}</p>
                 </div>
             @endforeach
         </div>
@@ -907,27 +1050,102 @@
 
     <!-- Highest Rated Packages -->
     @if($packageRatings->isNotEmpty())
+    <style>
+        .rated-packages-table {
+            background: #1f1f3a;
+            border: 1px solid #3d3d5c;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .rated-packages-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, #2d3561 0%, #3d4571 100%);
+            border-bottom: 2px solid #4d5d8d;
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .rated-packages-body {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .rated-packages-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 1.25rem;
+            border-bottom: 1px solid #3d3d5c;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .rated-packages-row:nth-child(odd) {
+            background: rgba(45, 53, 97, 0.4);
+        }
+
+        .rated-packages-row:nth-child(even) {
+            background: rgba(36, 40, 66, 0.4);
+        }
+
+        .rated-packages-row:hover {
+            background: rgba(61, 93, 157, 0.5);
+        }
+
+        .rated-packages-name {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .rated-packages-rating {
+            color: #FFD700;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .rated-packages-reviews {
+            color: #b0b8d0;
+            font-weight: 500;
+        }
+
+        .rated-packages-price {
+            color: #7dd87d;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+    </style>
     <div class="content-section">
         <h2 class="section-title">
             <span class="section-icon">🌟</span>
             Highest Rated Packages
         </h2>
 
-        <div style="background: rgba(75, 86, 148, 0.1); border: 1px solid rgba(75, 86, 148, 0.2); border-radius: 0.75rem; overflow: hidden;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; background: rgba(75, 86, 148, 0.2); border-bottom: 1px solid rgba(75, 86, 148, 0.3); font-weight: 600; color: var(--palette-secondary); font-size: 0.875rem;">
+        <div class="rated-packages-table">
+            <div class="rated-packages-header">
                 <div>Package Name</div>
                 <div>Rating</div>
                 <div>Review Count</div>
                 <div>Price</div>
             </div>
-            @foreach($packageRatings as $package)
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(75, 86, 148, 0.15); align-items: center;">
-                    <div style="color: var(--palette-cream);">{{ Str::limit($package->name, 25) }}</div>
-                    <div style="color: #FFD700; font-weight: 600;">⭐ {{ number_format($package->rating, 2) }}/5.0</div>
-                    <div style="color: var(--palette-secondary);">{{ $package->reviews_count }} reviews</div>
-                    <div style="color: #4CAF50; font-weight: 600;">₱{{ number_format($package->price, 2) }}</div>
-                </div>
-            @endforeach
+            <div class="rated-packages-body">
+                @foreach($packageRatings as $package)
+                    <div class="rated-packages-row">
+                        <div class="rated-packages-name">{{ Str::limit($package->name, 25) }}</div>
+                        <div class="rated-packages-rating">⭐ {{ number_format($package->rating, 2) }}/5.0</div>
+                        <div class="rated-packages-reviews">{{ $package->reviews_count }} reviews</div>
+                        <div class="rated-packages-price">₱{{ number_format($package->price, 2) }}</div>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
     @endif
