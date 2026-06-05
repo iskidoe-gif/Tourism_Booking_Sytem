@@ -425,8 +425,8 @@ class DashboardController extends Controller
             ->get();
 
         // Get monthly booking data (last 6 months)
-        $monthlyBookings = Booking::selectRaw('MONTH(created_at) as month, COUNT(*) as count, SUM(total_price) as revenue')
-            ->whereRaw('YEAR(created_at) = YEAR(NOW())')
+        $monthlyBookings = Booking::selectRaw("CAST(strftime('%m', created_at) AS INTEGER) as month, COUNT(*) as count, SUM(total_price) as revenue")
+            ->whereRaw("strftime('%Y', created_at) = strftime('%Y', 'now')")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -466,9 +466,9 @@ class DashboardController extends Controller
         // Get active users count
         $activeUsers = Booking::distinct('user_id')->count('user_id');
 
-        // Get upcoming check-ins (tours starting within next 7 days with approved status)
+        // Get upcoming check-ins (tours starting within next 7 days with confirmed status)
         $upcomingCheckIns = Booking::with(['user', 'package'])
-            ->where('status', 'approved')
+            ->where('status', 'confirmed')
             ->whereNull('tour_started_at')  // Not yet checked in
             ->whereBetween('tour_start_date', [Carbon::today(), Carbon::today()->addDays(7)])
             ->orderBy('tour_start_date', 'asc')
