@@ -3,6 +3,19 @@ set -e
 
 echo "Starting Laravel container entrypoint..."
 
+# Ensure APP_KEY is set
+if [ -z "$APP_KEY" ]; then
+  echo "APP_KEY not set. Generating one..."
+  php artisan key:generate --force
+else
+  echo "APP_KEY is set: ${APP_KEY:0:10}..."
+fi
+
+# Clear any cached configuration
+echo "Clearing cached configuration..."
+php artisan config:clear || true
+
+# Run migrations if enabled
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   echo "Running database migrations..."
   attempt=0

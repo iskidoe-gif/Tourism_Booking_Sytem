@@ -107,12 +107,13 @@ COPY . .
 
 # Create .env file from example and generate APP_KEY
 RUN cp .env.example .env && \
-    php artisan key:generate --force || true
+    php artisan key:generate --force && \
+    chown -R www-data:www-data /var/www/html
 
-# Ensure SQLite database file exists (if using sqlite) and is writable
-RUN mkdir -p database \
- && touch database/database.sqlite \
- && chown -R www-data:www-data database/database.sqlite || true
+# Ensure all storage and cache directories exist and have correct permissions
+RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs && \
+    mkdir -p bootstrap/cache && \
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy composer-installed vendor directory from builder
 COPY --from=composer_builder /app/vendor ./vendor
@@ -123,9 +124,6 @@ COPY --from=node_builder /app/public ./public
 # Copy entrypoint helper for safe startup migrations
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-# Permissions for storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
