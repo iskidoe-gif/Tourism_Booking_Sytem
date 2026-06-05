@@ -194,8 +194,8 @@ class PackageController extends Controller
             }
 
             try {
-                Storage::disk('public')->putFileAs('', $file, $name);
-                $path = $name;
+                Storage::disk('public')->putFileAs('images', $file, $name);
+                $path = 'images/' . $name;
                 $package->image = $path;
                 $package->save();
                 \Log::info('File stored on public disk', ['path' => $path]);
@@ -292,7 +292,8 @@ class PackageController extends Controller
         }
 
         $name = time() . '-' . uniqid() . '-' . preg_replace('/[^a-z0-9\-\.]/i', '-', $original);
-        $publicPath = Storage::disk('public')->path($name);
+        $publicPath = Storage::disk('public')->path('images/' . $name);
+        $imagePath = 'images/' . $name;
 
         $out = fopen($publicPath, 'wb');
         if ($out === false) {
@@ -313,7 +314,7 @@ class PackageController extends Controller
             fclose($out);
 
             // store record and cleanup
-            $package->image = $name;
+            $package->image = $imagePath;
             $package->save();
 
             // delete tmp chunks and cleanup directory
@@ -352,26 +353,19 @@ class PackageController extends Controller
             }
         }
 
-        unset($data['image_file'], $data['rating']);
-
-        if ($request->hasFile('image_file') && $request->file('image_file')->isValid()) {
+        // Only process image_file during CREATE (when package is null/new)
+        // During UPDATE, the uploadImage endpoint already handled it via AJAX
+        if ($package === null && $request->hasFile('image_file') && $request->file('image_file')->isValid()) {
             $file = $request->file('image_file');
             $name = time() . '-' . uniqid() . '-' . preg_replace('/[^a-z0-9\-\.]/i', '-', $file->getClientOriginalName());
+            $path = 'images/' . $name;
 
-            // delete old image from public disk if present
-            if ($package && $package->image && ! str_starts_with($package->image, 'http')) {
-                $old = ltrim($package->image, '/');
-                if (Storage::disk('public')->exists($old)) {
-                    Storage::disk('public')->delete($old);
-                } elseif (File::exists(public_path($old))) {
-                    File::delete(public_path($old));
-                }
-            }
-
-            if (Storage::disk('public')->putFileAs('', $file, $name)) {
-                $data['image'] = $name;
+            if (Storage::disk('public')->putFileAs('images', $file, $name)) {
+                $data['image'] = $path;
             }
         }
+
+        unset($data['image_file'], $data['rating']);
 
         return $data;
     }
@@ -388,7 +382,7 @@ class PackageController extends Controller
             'duration_days' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
             'image' => ['nullable', 'string', 'max:255'],
-            // image_file is handled separately in preparePackageData, don't validate here
+            'image_file' => ['nullable', 'image', 'max:10240'],
             'status' => ['required', 'in:active,inactive'],
         ]);
     }

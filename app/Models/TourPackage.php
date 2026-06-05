@@ -27,6 +27,21 @@ class TourPackage extends Model
         'rating',
     ];
 
+    private function normalizeImagePath(): string
+    {
+        $imagePath = ltrim($this->image ?? '', '/');
+
+        if ($imagePath === '') {
+            return '';
+        }
+
+        // Handle stale or duplicated storage/public prefixes
+        $imagePath = preg_replace('#^(public/|storage/)#i', '', $imagePath);
+        $imagePath = preg_replace('#^(public/storage/)#i', '', $imagePath);
+
+        return ltrim($imagePath, '/');
+    }
+
     public function getImageUrlAttribute(): string
     {
         if (! $this->image) {
@@ -37,23 +52,35 @@ class TourPackage extends Model
             return $this->image;
         }
 
-        // If image already refers to a public path
-        if (file_exists(public_path($this->image))) {
-            return asset($this->image);
+        $imagePath = $this->normalizeImagePath();
+
+        if ($imagePath === '') {
+            return asset('images/package-default.svg');
         }
 
-        // If image is stored in the public disk (storage/app/public)
-        if (Storage::disk('public')->exists($this->image)) {
-            return asset('storage/' . ltrim($this->image, '/'));
+        // Public path directly under public/
+        if (file_exists(public_path($imagePath))) {
+            return asset($imagePath);
         }
 
-        // If only filename was saved (e.g., "photo.jpg"), check common locations
-        if (file_exists(public_path('images/' . $this->image))) {
-            return asset('images/' . $this->image);
+        // Public storage root (storage/app/public)
+        if (Storage::disk('public')->exists($imagePath)) {
+            return asset('storage/' . $imagePath);
         }
 
-        if (Storage::disk('public')->exists('images/' . $this->image)) {
-            return asset('storage/images/' . ltrim($this->image, '/'));
+        // Public path under public/images/
+        if (file_exists(public_path('images/' . $imagePath))) {
+            return asset('images/' . $imagePath);
+        }
+
+        // Storage public path under storage/app/public/images/
+        if (Storage::disk('public')->exists('images/' . $imagePath)) {
+            return asset('storage/images/' . $imagePath);
+        }
+
+        // If image is already stored under storage/ path in the DB use it directly
+        if (file_exists(public_path('storage/' . $imagePath))) {
+            return asset('storage/' . $imagePath);
         }
 
         return asset('images/package-default.svg');
@@ -69,19 +96,29 @@ class TourPackage extends Model
             return true;
         }
 
-        if (file_exists(public_path($this->image))) {
+        $imagePath = $this->normalizeImagePath();
+
+        if ($imagePath === '') {
+            return false;
+        }
+
+        if (file_exists(public_path($imagePath))) {
             return true;
         }
 
-        if (Storage::disk('public')->exists($this->image)) {
+        if (Storage::disk('public')->exists($imagePath)) {
             return true;
         }
 
-        if (file_exists(public_path('images/' . $this->image))) {
+        if (file_exists(public_path('images/' . $imagePath))) {
             return true;
         }
 
-        if (Storage::disk('public')->exists('images/' . $this->image)) {
+        if (Storage::disk('public')->exists('images/' . $imagePath)) {
+            return true;
+        }
+
+        if (file_exists(public_path('storage/' . $imagePath))) {
             return true;
         }
 
