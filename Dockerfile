@@ -106,13 +106,11 @@ WORKDIR /var/www/html
 COPY . .
 
 # Create .env file from example and generate APP_KEY
-RUN cp .env.example .env && \
-    php artisan key:generate --force && \
-    chown -R www-data:www-data /var/www/html
+RUN cp .env.example .env || true
+RUN php artisan key:generate --force || true
 
-# Ensure all storage and cache directories exist and have correct permissions
-RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs && \
-    mkdir -p bootstrap/cache && \
+# Ensure all storage and cache directories exist with proper permissions  
+RUN mkdir -p storage/app storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy composer-installed vendor directory from builder
