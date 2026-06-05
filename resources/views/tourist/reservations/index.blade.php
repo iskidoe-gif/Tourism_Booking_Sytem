@@ -36,8 +36,8 @@
                         <td>{{ $booking->num_guests }}</td>
                         <td class="text-success fw-semibold">₱{{ number_format($booking->total_price, 2) }}</td>
                         <td>
-                            <span class="badge badge-{{ $booking->status }}">
-                                {{ ucfirst($booking->status) }}
+                            <span class="badge rounded-pill text-white" style="background-color: {{ $booking->status_color }};">
+                                {{ $booking->status_label }}
                             </span>
                         </td>
                         <td>
