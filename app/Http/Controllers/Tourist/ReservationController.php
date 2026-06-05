@@ -37,4 +37,28 @@ class ReservationController extends Controller
             ->route('reservations.index')
             ->with('success', "Booking #{$booking->booking_number} cancelled.");
     }
+
+    public function checkIn(Booking $booking)
+    {
+        abort_if($booking->user_id !== Auth::id(), 403);
+        abort_if(!$booking->canCheckIn(), 403, 'This reservation cannot be checked in yet.');
+
+        $booking->markAsCheckedIn();
+
+        return redirect()
+            ->route('reservations.show', $booking)
+            ->with('success', 'You have successfully checked in for your reservation.');
+    }
+
+    public function checkOut(Booking $booking)
+    {
+        abort_if($booking->user_id !== Auth::id(), 403);
+        abort_if(!$booking->canCheckOut(), 403, 'This reservation cannot be checked out yet.');
+
+        $booking->markAsCheckedOut();
+
+        return redirect()
+            ->route('reservations.show', $booking)
+            ->with('success', 'You have successfully checked out from your reservation.');
+    }
 }

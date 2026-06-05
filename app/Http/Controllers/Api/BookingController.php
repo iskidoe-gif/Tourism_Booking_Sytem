@@ -265,6 +265,8 @@ class BookingController extends Controller
             'user_id' => ['nullable', 'exists:users,id'],
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
             'tour_date' => ['sometimes', 'required', 'date'],
+            'check_in_date' => ['sometimes', 'required', 'date'],
+            'check_out_date' => ['sometimes', 'required', 'date'],
             'num_guests' => ['sometimes', 'required', 'integer', 'min:1'],
             'num_adults' => ['nullable', 'integer', 'min:0'],
             'num_children' => ['nullable', 'integer', 'min:0'],

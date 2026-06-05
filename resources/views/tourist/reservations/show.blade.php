@@ -44,8 +44,10 @@
                     <div class="card-header bg-white fw-semibold">Reservation Summary</div>
                     <div class="card-body">
                         <dl class="row mb-0">
-                            <dt class="col-sm-5 text-muted">Tour Date</dt>
-                            <dd class="col-sm-7">{{ optional($booking->tour_date)->format('M d, Y') }}</dd>
+                            <dt class="col-sm-5 text-muted">Check-in Date</dt>
+                            <dd class="col-sm-7">{{ optional($booking->check_in_date ?: $booking->tour_date)->format('M d, Y') }}</dd>
+                            <dt class="col-sm-5 text-muted">Check-out Date</dt>
+                            <dd class="col-sm-7">{{ optional($booking->check_out_date)->format('M d, Y') ?: 'N/A' }}</dd>
                             <dt class="col-sm-5 text-muted">Duration</dt>
                             <dd class="col-sm-7">{{ $booking->tourPackage->duration_days }} day(s)</dd>
                             <dt class="col-sm-5 text-muted">Base price</dt>
@@ -66,6 +68,10 @@
                             <dd class="col-sm-7">{{ $booking->special_requests ?: 'None' }}</dd>
                             <dt class="col-sm-5 text-muted">Tour operator status</dt>
                             <dd class="col-sm-7">{{ ucfirst($booking->status) }}</dd>
+                            <dt class="col-sm-5 text-muted">Check-in</dt>
+                            <dd class="col-sm-7">{{ $booking->check_in_at ? $booking->check_in_at->format('M d, Y h:i A') : 'Not checked in yet' }}</dd>
+                            <dt class="col-sm-5 text-muted">Check-out</dt>
+                            <dd class="col-sm-7">{{ $booking->check_out_at ? $booking->check_out_at->format('M d, Y h:i A') : 'Not checked out yet' }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -151,15 +157,32 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-between mt-3">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mt-3">
             <a href="{{ route('reservations.index') }}" class="btn btn-outline-secondary">Back to reservations</a>
-            @if($booking->canBeCancelled())
-                <form action="{{ route('reservations.cancel', $booking) }}" method="POST" onsubmit="return confirm('Confirm cancellation of this reservation?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Cancel Reservation</button>
-                </form>
-            @endif
+
+            <div class="d-flex flex-wrap gap-2">
+                @if($booking->canCheckIn())
+                    <form action="{{ route('reservations.check-in', $booking) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success">Check In</button>
+                    </form>
+                @endif
+
+                @if($booking->canCheckOut())
+                    <form action="{{ route('reservations.check-out', $booking) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">Check Out</button>
+                    </form>
+                @endif
+
+                @if($booking->canBeCancelled())
+                    <form action="{{ route('reservations.cancel', $booking) }}" method="POST" onsubmit="return confirm('Confirm cancellation of this reservation?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Cancel Reservation</button>
+                    </form>
+                @endif
+            </div>
         </div>
     </div>
 </div>
