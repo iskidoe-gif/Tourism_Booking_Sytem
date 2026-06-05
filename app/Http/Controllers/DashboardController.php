@@ -417,7 +417,7 @@ class DashboardController extends Controller
             ->get();
 
         // Get top destinations by bookings
-        $topDestinations = Destination::withCount(['tourPackages' => function($q) {
+        $topDestinations = Destination::withCount(['packages' => function($q) {
             $q->withCount('bookings');
         }])
             ->latest('created_at')
