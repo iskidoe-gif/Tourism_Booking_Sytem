@@ -1,15 +1,5 @@
 <div class="card">
     <div class="card-body">
-        @if($errors->any())
-            <div class="alert alert-danger mb-4">
-                <ul class="mb-0">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         @php
             function parsePhpSize(string $size): int
             {
@@ -41,18 +31,24 @@
             <div class="row g-3 mb-3">
                 <div class="col-12 col-md-6">
                     <label class="form-label">Package name</label>
-                    <input type="text" name="name" value="{{ old('name', $package->name) }}" class="form-control">
+                    <input type="text" name="name" value="{{ old('name', $package->name) }}" class="form-control @error('name') is-invalid @enderror">
+                    @error('name')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="form-label">Location</label>
-                    <input type="text" name="location" value="{{ old('location', $package->location) }}" class="form-control">
+                    <input type="text" name="location" value="{{ old('location', $package->location) }}" class="form-control @error('location') is-invalid @enderror">
+                    @error('location')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="row g-3 mb-3">
                 <div class="col-12 col-md-6">
                     <label class="form-label">Category</label>
-                    <select name="category" class="form-control">
+                    <select name="category" class="form-control @error('category') is-invalid @enderror">
                         <option value="">None / Uncategorised</option>
                         <option value="natural" {{ old('category', $package->category) === 'natural' ? 'selected' : '' }}>Natural Attractions</option>
                         <option value="cultural" {{ old('category', $package->category) === 'cultural' ? 'selected' : '' }}>Cultural & Historical Sites</option>
@@ -61,33 +57,51 @@
                         <option value="events" {{ old('category', $package->category) === 'events' ? 'selected' : '' }}>Events & Festivals</option>
                         <option value="ecotourism" {{ old('category', $package->category) === 'ecotourism' ? 'selected' : '' }}>Ecotourism & Conservation Areas</option>
                     </select>
+                    @error('category')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Description</label>
-                <textarea name="description" rows="4" class="form-control">{{ old('description', $package->description) }}</textarea>
+                <textarea name="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description', $package->description) }}</textarea>
+                @error('description')
+                    <div class="text-danger small mt-1">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="row g-3 mb-3">
                 <div class="col-12 col-md-3">
                     <label class="form-label">Price</label>
-                    <input type="number" step="0.01" name="price" value="{{ old('price', $package->price) }}" class="form-control">
+                    <input type="number" step="0.01" name="price" value="{{ old('price', $package->price) }}" class="form-control @error('price') is-invalid @enderror">
+                    @error('price')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label">Duration (days)</label>
-                    <input type="number" name="duration_days" value="{{ old('duration_days', $package->duration_days) }}" class="form-control">
+                    <input type="number" name="duration_days" value="{{ old('duration_days', $package->duration_days) }}" class="form-control @error('duration_days') is-invalid @enderror">
+                    @error('duration_days')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label">Max guests</label>
-                    <input type="number" name="max_guests" value="{{ old('max_guests', $package->max_guests) }}" class="form-control">
+                    <input type="number" name="max_guests" value="{{ old('max_guests', $package->max_guests) }}" class="form-control @error('max_guests') is-invalid @enderror">
+                    @error('max_guests')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
             <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
                     <label class="form-label">Upload image</label>
-                    <input type="file" name="image_file" accept="image/*" class="form-control" id="image_file_input" @if($package->exists) data-upload-url="{{ route('admin.packages.upload-image', $package) }}" @endif>
+                    <input type="file" name="image_file" accept="image/*" class="form-control @error('image_file') is-invalid @enderror" id="image_file_input" @if($package->exists) data-upload-url="{{ route('admin.packages.upload-image', $package) }}" @endif>
+                    @error('image_file')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                     <div class="mt-2">
                         @php
                             $previewPath = null;
@@ -116,10 +130,13 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <label class="form-label">Status</label>
-                    <select name="status" class="form-control">
+                    <select name="status" class="form-control @error('status') is-invalid @enderror">
                         <option value="active" {{ old('status', $package->status) === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status', $package->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
+                    @error('status')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
