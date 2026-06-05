@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -185,6 +186,17 @@ class DashboardController extends Controller
         $package = TourPackage::whereKey($validated['tour_package_id'])
             ->where('status', 'active')
             ->firstOrFail();
+
+        $checkIn = Carbon::parse($validated['check_in_date']);
+        $checkOut = Carbon::parse($validated['check_out_date']);
+        $expectedCheckOut = $checkIn->copy()->addDays($package->duration_days);
+
+        if ($checkOut->diffInDays($checkIn, false) !== $package->duration_days) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['check_out_date' => "Check-out date must be exactly {$package->duration_days} day(s) after check-in for this package. Please select {$expectedCheckOut->format('Y-m-d')}."]);
+        }
 
         $totalGuests = $validated['num_adults'] + $validated['num_children'] + $validated['num_seniors'];
 

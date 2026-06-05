@@ -122,9 +122,12 @@
                                     <div class="col-sm-6">
                                         <label class="form-label">Check-out Date</label>
                                         <input type="date" name="check_out_date"
+                                               id="check_out_date"
                                                class="form-control @error('check_out_date') is-invalid @enderror"
-                                               value="{{ old('check_out_date') }}"
-                                               min="{{ old('check_in_date', now()->addDay()->format('Y-m-d')) }}">
+                                               value="{{ old('check_out_date', \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d')) }}"
+                                               min="{{ \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}"
+                                               max="{{ \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}">
+                                        <div class="form-text text-muted">This package is {{ $tourPackage->duration_days }} day(s); check-out must be exactly {{ $tourPackage->duration_days }} day(s) after check-in.</div>
                                         @error('check_out_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -252,6 +255,9 @@
 <script>
     const basePrice = {{ $tourPackage->price }};
     const maxGuests = {{ $tourPackage->max_guests }};
+    const bookingDurationDays = {{ $tourPackage->duration_days }};
+    const checkInInput = document.querySelector('input[name="check_in_date"]');
+    const checkOutInput = document.getElementById('check_out_date');
     const guestInputs = [
         document.getElementById('num_adults'),
         document.getElementById('num_children'),
@@ -299,8 +305,33 @@
         });
     };
 
+    const updateCheckOutConstraints = () => {
+        if (!checkInInput || !checkOutInput) {
+            return;
+        }
+
+        const checkInDate = checkInInput.value ? new Date(checkInInput.value) : null;
+        if (!checkInDate) {
+            return;
+        }
+
+        const expectedCheckOut = new Date(checkInDate);
+        expectedCheckOut.setDate(expectedCheckOut.getDate() + bookingDurationDays);
+        const formatted = expectedCheckOut.toISOString().slice(0, 10);
+
+        checkOutInput.min = formatted;
+        checkOutInput.max = formatted;
+        if (checkOutInput.value !== formatted) {
+            checkOutInput.value = formatted;
+        }
+    };
+
     guestInputs.forEach((input) => input.addEventListener('input', calculateTotals));
     serviceCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', calculateTotals));
+    if (checkInInput) {
+        checkInInput.addEventListener('change', updateCheckOutConstraints);
+    }
+    updateCheckOutConstraints();
     calculateTotals();
 </script>
 
