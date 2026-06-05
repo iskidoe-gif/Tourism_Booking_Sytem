@@ -89,6 +89,11 @@ test('package search filters by category and duration', function () {
         ->assertSeeText('Bolinao Beach Day Tour')
         ->assertSeeText('Bolinao Heritage Weekend');
 
+    $this->get(route('packages.index', ['capacity' => 7]))
+        ->assertOk()
+        ->assertSeeText('Bolinao Heritage Weekend')
+        ->assertDontSeeText('Bolinao Beach Day Tour');
+
     $this->get(route('packages.index', ['category' => 'cultural', 'duration' => '2_4']))
         ->assertOk()
         ->assertSeeText('Bolinao Heritage Weekend')

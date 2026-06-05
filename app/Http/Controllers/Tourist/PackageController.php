@@ -30,6 +30,10 @@ class PackageController extends Controller
             $selectedDuration = '2_4';
         }
 
+        $capacity = $request->filled('capacity') && $request->integer('capacity') > 0
+            ? $request->integer('capacity')
+            : null;
+
         $packages = TourPackage::active()
             ->bolinao()
             ->when($request->search, fn($q) =>
@@ -63,13 +67,14 @@ class PackageController extends Controller
                     $q->whereBetween('duration_days', [2, 4]);
                 }
             })
+            ->when($capacity, fn($q) => $q->where('max_guests', '>=', $capacity))
             ->when($request->type, fn($q) => $q->where('type', $request->type))
             ->when($request->max_price, fn($q) => $q->where('price', '<=', $request->max_price))
             ->orderBy('rating', 'desc')
             ->paginate(9)
             ->withQueryString();
 
-        return view('tourist.packages.index', compact('packages', 'categoryMap', 'selectedDuration'));
+        return view('tourist.packages.index', compact('packages', 'categoryMap', 'selectedDuration', 'capacity'));
     }
 
     public function show(TourPackage $tourPackage)
