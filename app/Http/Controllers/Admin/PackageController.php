@@ -47,13 +47,31 @@ class PackageController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $this->preparePackageData($request);
+        try {
+            $data = $this->preparePackageData($request);
+            TourPackage::create($data);
 
-        TourPackage::create($data);
-
-        return redirect()
-            ->route('admin.packages.index')
-            ->with('success', 'Tour package added successfully.');
+            return redirect()
+                ->route('admin.packages.index')
+                ->with('success', 'Tour package added successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Package creation validation failed', [
+                'errors' => $e->errors(),
+            ]);
+            return redirect()
+                ->route('admin.packages.create')
+                ->withErrors($e->errors())
+                ->withInput($request->all());
+        } catch (\Exception $e) {
+            \Log::error('Package creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()
+                ->route('admin.packages.create')
+                ->with('error', 'An error occurred while creating the package: ' . $e->getMessage())
+                ->withInput($request->all());
+        }
     }
 
     public function show(TourPackage $package): View
@@ -71,13 +89,33 @@ class PackageController extends Controller
 
     public function update(Request $request, TourPackage $package): RedirectResponse
     {
-        $data = $this->preparePackageData($request, $package);
+        try {
+            $data = $this->preparePackageData($request, $package);
+            $package->update($data);
 
-        $package->update($data);
-
-        return redirect()
-            ->route('admin.packages.index')
-            ->with('success', 'Tour package updated successfully.');
+            return redirect()
+                ->route('admin.packages.index')
+                ->with('success', 'Tour package updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('Package update validation failed', [
+                'package_id' => $package->id,
+                'errors' => $e->errors(),
+            ]);
+            return redirect()
+                ->route('admin.packages.edit', $package)
+                ->withErrors($e->errors())
+                ->withInput($request->all());
+        } catch (\Exception $e) {
+            \Log::error('Package update failed', [
+                'package_id' => $package->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()
+                ->route('admin.packages.edit', $package)
+                ->with('error', 'An error occurred while updating the package: ' . $e->getMessage())
+                ->withInput($request->all());
+        }
     }
 
     public function uploadImage(Request $request, TourPackage $package): JsonResponse
