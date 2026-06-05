@@ -22,10 +22,9 @@ Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
 Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
 
 Route::middleware('auth:sanctum')->name('api.')->group(function () {
-<<<<<<< HEAD
     Route::apiResource('bookings', BookingController::class)->only(['show']);
     Route::apiResource('payments', PaymentController::class)->except(['index', 'destroy']);
-=======
+
     Route::apiResource('bookings', BookingController::class);
     
     // Enhanced booking management endpoints
@@ -44,5 +43,4 @@ Route::middleware('auth:sanctum')->name('api.')->group(function () {
         'store',
         'show',
     ]);
->>>>>>> 378fbebc43ad3521baec1c90deb92c71d21ae64e
 });
