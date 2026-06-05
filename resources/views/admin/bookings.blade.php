@@ -10,16 +10,110 @@
                 $statusLabels = [
                     'pending' => 'Pending approval',
                     'approved' => 'Confirmed',
-                    'cancelled' => 'Declined',
+                    'cancelled' => 'Cancelled',
+                    'declined' => 'Declined',
                     'completed' => 'Completed',
                 ];
+
                 $statusClasses = [
                     'pending' => 'status-pending',
                     'approved' => 'status-approved',
-                    'cancelled' => 'status-declined',
+                    'cancelled' => 'status-cancelled',
+                    'declined' => 'status-declined',
                     'completed' => 'status-completed',
                 ];
             @endphp
+
+            <style>
+                .filter-container {
+                    background: transparent;
+                    padding: 0.25rem 0;
+                    border-radius: 0.25rem;
+                    margin-bottom: 0.5rem;
+                    border: none;
+                    display: flex;
+                    justify-content: flex-end; /* align filter to right */
+                }
+
+                /* Inline label + select */
+                .filter-grid {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+                .filter-group {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
+
+
+                .filter-group label {
+                    font-weight: 600;
+                    margin-bottom: 0.4rem;
+                    font-size: 0.9rem;
+                    color: #fff; /* filter label text white */
+                }
+
+                .filter-group input,
+                .filter-group select {
+                    padding: 0.6rem;
+                    border: 1px solid rgba(255,255,255,0.15);
+                    border-radius: 0.4rem;
+                    font-size: 0.9rem;
+                    font-family: inherit;
+                    color: #fff; /* filter control text white */
+                    background: rgba(255,255,255,0.04);
+                }
+
+                /* Option text is difficult to style on some browsers, but set explicitly */
+                .filter-group select option {
+                    color: #000;
+                    background: #fff;
+                }
+
+                .filter-group input:focus,
+                .filter-group select:focus {
+                    outline: none;
+                    border-color: #0066cc;
+                    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+                }
+
+                /* buttons removed — filter is just label + select */
+
+                /* Status badge styles */
+                .status {
+                    display: inline-block;
+                    padding: 0.25rem 0.6rem;
+                    border-radius: 0.4rem;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    color: #fff; /* status text white */
+                }
+
+                .status-pending { background: #f39c12; }
+                .status-approved { background: #28a745; }
+                .status-declined { background: #dc3545; }
+                .status-cancelled { background: #6c757d; }
+                .status-completed { background: #6f42c1; }
+            </style>
+
+            <!-- Filter Form (status only, inline) -->
+            <form method="GET" action="{{ route('admin.bookings.index') }}" class="filter-container">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" onchange="this.form.submit()">
+                            <option value="all" {{ request('status') === 'all' || !request()->filled('status') ? 'selected' : '' }}>All Statuses</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending Approval</option>
+                            <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="declined" {{ request('status') === 'declined' ? 'selected' : '' }}>Declined</option>
+                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
 
             @forelse($bookings as $booking)
                 <div class="mini booking-row">
@@ -56,7 +150,7 @@
                                 <form method="POST" action="{{ route('admin.bookings.status', $booking) }}">
                                     @csrf
                                     @method('PATCH')
-                                    <input type="hidden" name="status" value="cancelled">
+                                    <input type="hidden" name="status" value="declined">
                                     <button type="submit" class="btn btn-outline-secondary">Decline</button>
                                 </form>
                             </div>
@@ -65,10 +159,15 @@
                                 <p class="lead">Approved by {{ $booking->approver?->name ?? 'Admin' }}</p>
                                 <p class="lead">{{ $booking->approved_at?->format('Y-m-d H:i') }}</p>
                             </div>
-                        @elseif($booking->status === 'cancelled')
+                        @elseif($booking->status === 'declined')
                             <div class="booking-declined-info">
                                 <p class="lead">Declined by {{ $booking->approver?->name ?? 'Admin' }}</p>
                                 <p class="lead">{{ $booking->approved_at?->format('Y-m-d H:i') }}</p>
+                            </div>
+                        @elseif($booking->status === 'cancelled')
+                            <div class="booking-cancelled-info">
+                                <p class="lead">Cancelled{{ $booking->cancellation_reason ? (': ' . $booking->cancellation_reason) : '' }}</p>
+                                <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
                             </div>
                         @endif
                     </div>
