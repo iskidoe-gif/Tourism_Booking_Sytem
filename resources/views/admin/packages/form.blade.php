@@ -34,8 +34,8 @@
 
         <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
             @csrf
-            @if($method === 'PUT')
-                @method('PUT')
+            @if(isset($method) && in_array(strtoupper($method), ['PUT', 'PATCH'], true))
+                @method(strtoupper($method))
             @endif
 
             <div class="row g-3 mb-3">

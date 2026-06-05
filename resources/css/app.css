@@ -4126,7 +4126,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .table-actions {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
@@ -4139,6 +4139,10 @@ input:focus, textarea:focus, select:focus {
 
 .table-actions .btn {
     white-space: nowrap;
+    flex: 0 0 auto;
+    min-width: 0;
+    display: inline-flex !important;
+    width: auto !important;
 }
 
 .form-control,
