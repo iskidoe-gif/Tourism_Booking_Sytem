@@ -19,8 +19,8 @@ class Booking extends Model
         'user_id',
         'tour_package_id',
         'tour_date',
-        'check_in_date',
-        'check_out_date',
+        'tour_start_date',
+        'tour_end_date',
         'num_guests',
         'num_adults',
         'num_children',
@@ -39,8 +39,8 @@ class Booking extends Model
         'approved_at',
         'confirmed_at',
         'completed_at',
-        'check_in_at',
-        'check_out_at',
+        'tour_started_at',
+        'tour_ended_at',
         'payment_plan',
         'payment_installments',
         'guest_details',
@@ -59,10 +59,10 @@ class Booking extends Model
             'cancelled_at' => 'datetime',
             'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',
-            'check_in_date' => 'date',
-            'check_out_date' => 'date',
-            'check_in_at' => 'datetime',
-            'check_out_at' => 'datetime',
+            'tour_start_date' => 'date',
+            'tour_end_date' => 'date',
+            'tour_started_at' => 'datetime',
+            'tour_ended_at' => 'datetime',
             'reminder_sent_at' => 'datetime',
             'num_guests' => 'integer',
             'num_adults' => 'integer',
@@ -144,28 +144,28 @@ class Booking extends Model
     public function canCheckIn(): bool
     {
         return $this->isConfirmed()
-            && !$this->check_in_at
-            && !$this->check_out_at
+            && !$this->tour_started_at
+            && !$this->tour_ended_at
             && !$this->isCancelled()
             && !$this->tour_date->isFuture();
     }
 
     public function canCheckOut(): bool
     {
-        return $this->check_in_at
-            && !$this->check_out_at
+        return $this->tour_started_at
+            && !$this->tour_ended_at
             && !$this->isCancelled();
     }
 
     public function markAsCheckedIn(): void
     {
-        $this->update(['check_in_at' => now()]);
+        $this->update(['tour_started_at' => now()]);
     }
 
     public function markAsCheckedOut(): void
     {
         $this->update([
-            'check_out_at' => now(),
+            'tour_ended_at' => now(),
             'status' => 'completed',
             'completed_at' => now(),
         ]);
@@ -225,11 +225,11 @@ class Booking extends Model
 
     public function getStatusColorAttribute(): string
     {
-        if ($this->check_out_at) {
+        if ($this->tour_ended_at) {
             return '#1976d2';
         }
 
-        if ($this->check_in_at) {
+        if ($this->tour_started_at) {
             return '#4caf50';
         }
 
@@ -244,12 +244,12 @@ class Booking extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        if ($this->check_out_at) {
-            return 'Checked Out';
+        if ($this->tour_ended_at) {
+            return 'Tour Ended';
         }
 
-        if ($this->check_in_at) {
-            return 'Checked In';
+        if ($this->tour_started_at) {
+            return 'Tour Started';
         }
 
         return ucfirst(str_replace('_', ' ', $this->status));

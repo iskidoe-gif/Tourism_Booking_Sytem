@@ -350,7 +350,7 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">🛎️ Checked In</div>
+                    <div class="stat-label">🛎️ Tour Started</div>
                     <div class="stat-value">{{ $stats['checked_in_bookings'] }}</div>
                 </div>
                 <div class="stat-icon">🛎️</div>
@@ -361,7 +361,7 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">🏁 Checked Out</div>
+                    <div class="stat-label">🏁 Tour Ended</div>
                     <div class="stat-value">{{ $stats['checked_out_bookings'] }}</div>
                 </div>
                 <div class="stat-icon">🏁</div>
@@ -709,8 +709,8 @@
                 <div>Guest</div>
                 <div>Package</div>
                 <div>Tour Date</div>
-                <div>Check-In</div>
-                <div>Check-Out</div>
+                <div>Tour Start</div>
+                <div>Tour End</div>
                 <div>Status</div>
                 <div>Amount</div>
             </div>
@@ -723,8 +723,8 @@
                         </div>
                         <div style="color: var(--palette-cream);">{{ Str::limit($booking->package->name, 20) }}</div>
                         <div style="color: var(--palette-secondary);">{{ optional($booking->tour_date)->format('M d, Y') }}</div>
-                        <div style="color: var(--palette-secondary);">{{ optional($booking->check_in_date)->format('M d, Y') ?? 'Not set' }}</div>
-                        <div style="color: var(--palette-secondary);">{{ optional($booking->check_out_date)->format('M d, Y') ?? 'Not set' }}</div>
+                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_start_date)->format('M d, Y') ?? 'Not set' }}</div>
+                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_end_date)->format('M d, Y') ?? 'Not set' }}</div>
                         <div>
                             <span class="booking-badge badge-{{ $booking->status }}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">{{ ucfirst($booking->status) }}</span>
                         </div>

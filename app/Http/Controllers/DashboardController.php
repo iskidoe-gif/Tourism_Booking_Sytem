@@ -170,8 +170,8 @@ class DashboardController extends Controller
 
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
-            'check_in_date' => ['required', 'date', 'after_or_equal:today'],
-            'check_out_date' => ['required', 'date', 'after:check_in_date'],
+            'tour_start_date' => ['required', 'date', 'after_or_equal:today'],
+            'tour_end_date' => ['required', 'date', 'after:tour_start_date'],
             'num_adults' => ['required', 'integer', 'min:0'],
             'num_children' => ['required', 'integer', 'min:0'],
             'num_seniors' => ['required', 'integer', 'min:0'],
@@ -187,15 +187,15 @@ class DashboardController extends Controller
             ->where('status', 'active')
             ->firstOrFail();
 
-        $checkIn = Carbon::parse($validated['check_in_date']);
-        $checkOut = Carbon::parse($validated['check_out_date']);
+        $checkIn = Carbon::parse($validated['tour_start_date']);
+        $checkOut = Carbon::parse($validated['tour_end_date']);
         $expectedCheckOut = $checkIn->copy()->addDays($package->duration_days);
 
         if ($checkOut->diffInDays($checkIn, false) !== $package->duration_days) {
             return redirect()
                 ->back()
                 ->withInput()
-                ->withErrors(['check_out_date' => "Check-out date must be exactly {$package->duration_days} day(s) after check-in for this package. Please select {$expectedCheckOut->format('Y-m-d')}."]);
+                ->withErrors(['tour_end_date' => "Tour end date must be exactly {$package->duration_days} day(s) after tour start for this package. Please select {$expectedCheckOut->format('Y-m-d')}."]);
         }
 
         $totalGuests = $validated['num_adults'] + $validated['num_children'] + $validated['num_seniors'];
@@ -227,9 +227,9 @@ class DashboardController extends Controller
         $booking = $bookingService->createBooking([
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
-            'tour_date' => $validated['check_in_date'],
-            'check_in_date' => $validated['check_in_date'],
-            'check_out_date' => $validated['check_out_date'],
+            'tour_date' => $validated['tour_start_date'],
+            'tour_start_date' => $validated['tour_start_date'],
+            'tour_end_date' => $validated['tour_end_date'],
             'num_guests' => $totalGuests,
             'num_adults' => $validated['num_adults'],
             'num_children' => $validated['num_children'],
@@ -466,8 +466,8 @@ class DashboardController extends Controller
                 'packages' => TourPackage::count(),
                 'bookings' => $bookingCountQuery->count(),
                 'pending_bookings' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
-                'checked_in_bookings' => (clone $bookingCountQuery)->whereNotNull('check_in_at')->count(),
-                'checked_out_bookings' => (clone $bookingCountQuery)->whereNotNull('check_out_at')->count(),
+                'checked_in_bookings' => (clone $bookingCountQuery)->whereNotNull('tour_started_at')->count(),
+                'checked_out_bookings' => (clone $bookingCountQuery)->whereNotNull('tour_ended_at')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
                 'bookingsByStatus' => $bookingsByStatus,

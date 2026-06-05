@@ -110,25 +110,25 @@
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-sm-6">
-                                        <label class="form-label">Check-in Date</label>
-                                        <input type="date" name="check_in_date"
-                                               class="form-control @error('check_in_date') is-invalid @enderror"
-                                               value="{{ old('check_in_date') }}"
+                                        <label class="form-label">Tour start</label>
+                                        <input type="date" name="tour_start_date"
+                                               class="form-control @error('tour_start_date') is-invalid @enderror"
+                                               value="{{ old('tour_start_date') }}"
                                                min="{{ now()->format('Y-m-d') }}">
-                                        @error('check_in_date')
+                                        @error('tour_start_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-sm-6">
-                                        <label class="form-label">Check-out Date</label>
-                                        <input type="date" name="check_out_date"
-                                               id="check_out_date"
-                                               class="form-control @error('check_out_date') is-invalid @enderror"
-                                               value="{{ old('check_out_date', \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d')) }}"
-                                               min="{{ \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}"
-                                               max="{{ \Carbon\Carbon::parse(old('check_in_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}">
-                                        <div class="form-text text-muted">This package is {{ $tourPackage->duration_days }} day(s); check-out must be exactly {{ $tourPackage->duration_days }} day(s) after check-in.</div>
-                                        @error('check_out_date')
+                                        <label class="form-label">Tour end</label>
+                                        <input type="date" name="tour_end_date"
+                                               id="tour_end_date"
+                                               class="form-control @error('tour_end_date') is-invalid @enderror"
+                                               value="{{ old('tour_end_date', \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d')) }}"
+                                               min="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}"
+                                               max="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}">
+                                        <div class="form-text text-muted">This package is {{ $tourPackage->duration_days }} day(s); tour end must be exactly {{ $tourPackage->duration_days }} day(s) after tour start.</div>
+                                        @error('tour_end_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -256,8 +256,8 @@
     const basePrice = {{ $tourPackage->price }};
     const maxGuests = {{ $tourPackage->max_guests }};
     const bookingDurationDays = {{ $tourPackage->duration_days }};
-    const checkInInput = document.querySelector('input[name="check_in_date"]');
-    const checkOutInput = document.getElementById('check_out_date');
+    const checkInInput = document.querySelector('input[name="tour_start_date"]');
+    const checkOutInput = document.getElementById('tour_end_date');
     const guestInputs = [
         document.getElementById('num_adults'),
         document.getElementById('num_children'),

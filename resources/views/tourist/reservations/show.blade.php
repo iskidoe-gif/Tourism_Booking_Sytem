@@ -44,10 +44,10 @@
                     <div class="card-header bg-white fw-semibold">Reservation Summary</div>
                     <div class="card-body">
                         <dl class="row mb-0">
-                            <dt class="col-sm-5 text-muted">Check-in Date</dt>
-                            <dd class="col-sm-7">{{ optional($booking->check_in_date ?: $booking->tour_date)->format('M d, Y') }}</dd>
-                            <dt class="col-sm-5 text-muted">Check-out Date</dt>
-                            <dd class="col-sm-7">{{ optional($booking->check_out_date)->format('M d, Y') ?: 'N/A' }}</dd>
+                            <dt class="col-sm-5 text-muted">Tour Start Date</dt>
+                            <dd class="col-sm-7">{{ optional($booking->tour_start_date ?: $booking->tour_date)->format('M d, Y') }}</dd>
+                            <dt class="col-sm-5 text-muted">Tour End Date</dt>
+                            <dd class="col-sm-7">{{ optional($booking->tour_end_date)->format('M d, Y') ?: 'N/A' }}</dd>
                             <dt class="col-sm-5 text-muted">Duration</dt>
                             <dd class="col-sm-7">{{ $booking->tourPackage->duration_days }} day(s)</dd>
                             <dt class="col-sm-5 text-muted">Base price</dt>
@@ -68,10 +68,10 @@
                             <dd class="col-sm-7">{{ $booking->special_requests ?: 'None' }}</dd>
                             <dt class="col-sm-5 text-muted">Tour operator status</dt>
                             <dd class="col-sm-7">{{ ucfirst($booking->status) }}</dd>
-                            <dt class="col-sm-5 text-muted">Check-in</dt>
-                            <dd class="col-sm-7">{{ $booking->check_in_at ? $booking->check_in_at->format('M d, Y h:i A') : 'Not checked in yet' }}</dd>
-                            <dt class="col-sm-5 text-muted">Check-out</dt>
-                            <dd class="col-sm-7">{{ $booking->check_out_at ? $booking->check_out_at->format('M d, Y h:i A') : 'Not checked out yet' }}</dd>
+                            <dt class="col-sm-5 text-muted">Tour Start</dt>
+                            <dd class="col-sm-7">{{ $booking->tour_started_at ? $booking->tour_started_at->format('M d, Y h:i A') : 'Not started yet' }}</dd>
+                            <dt class="col-sm-5 text-muted">Tour End</dt>
+                            <dd class="col-sm-7">{{ $booking->tour_ended_at ? $booking->tour_ended_at->format('M d, Y h:i A') : 'Not ended yet' }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -164,14 +164,14 @@
                 @if($booking->canCheckIn())
                     <form action="{{ route('reservations.check-in', $booking) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success">Check In</button>
+                        <button type="submit" class="btn btn-success">Start Tour</button>
                     </form>
                 @endif
 
                 @if($booking->canCheckOut())
                     <form action="{{ route('reservations.check-out', $booking) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-primary">Check Out</button>
+                        <button type="submit" class="btn btn-primary">End Tour</button>
                     </form>
                 @endif
 

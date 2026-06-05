@@ -18,9 +18,9 @@ class BookingService
         $data['reference_code'] = $this->generateReferenceCode();
         $data['status'] = $data['status'] ?? 'pending';
 
-        // If check-in date is provided but tour_date is not, use the check-in date as the primary booking date
-        if (!isset($data['tour_date']) && isset($data['check_in_date'])) {
-            $data['tour_date'] = $data['check_in_date'];
+        // If tour start date is provided but tour_date is not, use the tour start date as the primary booking date
+        if (!isset($data['tour_date']) && isset($data['tour_start_date'])) {
+            $data['tour_date'] = $data['tour_start_date'];
         }
 
         // Calculate base price if not provided
