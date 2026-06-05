@@ -78,9 +78,42 @@ class DatabaseSeeder extends Seeder
                 'tour_package_id' => $tourPackage->id,
                 'tour_date' => now()->addWeek()->toDateString(),
                 'num_guests' => 2,
+                'num_adults' => 2,
+                'num_children' => 0,
+                'num_seniors' => 0,
                 'status' => 'confirmed',
+                'base_price' => 4500,
+                'additional_fees' => 0,
+                'discount_amount' => 0,
                 'total_price' => 9000,
+                'confirmation_code' => 'CONF-' . Str::upper(Str::random(10)),
+                'reference_code' => 'REF-' . now()->format('Ymd') . '-' . Str::upper(Str::random(6)),
                 'special_requests' => 'Seeded booking.',
+                'payment_plan' => 'full',
+                'payment_installments' => 1,
+                'guest_details' => json_encode([
+                    [
+                        'name' => 'Juan Dela Cruz',
+                        'email' => 'juan@example.com',
+                        'phone' => '+639123456789',
+                        'age' => 35,
+                    ],
+                    [
+                        'name' => 'Maria Dela Cruz',
+                        'email' => 'maria@example.com',
+                        'phone' => '+639987654321',
+                        'age' => 32,
+                    ],
+                ]),
+                'services' => json_encode([
+                    [
+                        'name' => 'Airport Pickup',
+                        'price' => 500,
+                        'description' => 'Hotel to airport transportation',
+                    ],
+                ]),
+                'confirmed_at' => now(),
+                'reminder_sent' => false,
             ]
         );
 

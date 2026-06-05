@@ -14,15 +14,37 @@ class Booking extends Model
 
     protected $fillable = [
         'booking_number',
+        'confirmation_code',
+        'reference_code',
         'user_id',
         'tour_package_id',
         'tour_date',
         'num_guests',
+        'num_adults',
+        'num_children',
+        'num_seniors',
         'status',
         'total_price',
+        'base_price',
+        'additional_fees',
+        'discount_amount',
+        'discount_code',
         'special_requests',
+        'cancellation_reason',
+        'refund_amount',
+        'cancelled_at',
         'approved_by',
         'approved_at',
+        'confirmed_at',
+        'completed_at',
+        'payment_plan',
+        'payment_installments',
+        'guest_details',
+        'services',
+        'internal_notes',
+        'admin_notes',
+        'reminder_sent',
+        'reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -30,8 +52,23 @@ class Booking extends Model
         return [
             'tour_date' => 'date',
             'approved_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'confirmed_at' => 'datetime',
+            'completed_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
             'num_guests' => 'integer',
+            'num_adults' => 'integer',
+            'num_children' => 'integer',
+            'num_seniors' => 'integer',
             'total_price' => 'decimal:2',
+            'base_price' => 'decimal:2',
+            'additional_fees' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'refund_amount' => 'decimal:2',
+            'payment_installments' => 'integer',
+            'reminder_sent' => 'boolean',
+            'guest_details' => 'collection',
+            'services' => 'collection',
         ];
     }
 
@@ -67,5 +104,100 @@ class Booking extends Model
         return Review::where('tour_package_id', $this->tour_package_id)
             ->where('user_id', $this->user_id)
             ->first();
+    }
+
+    // Helper Methods
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isConfirmed(): bool
+    {
+        return $this->status === 'confirmed' || $this->status === 'approved';
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === 'cancelled';
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return in_array($this->status, ['pending', 'confirmed', 'approved']) 
+            && $this->tour_date->isFuture();
+    }
+
+    public function generateConfirmationCode(): string
+    {
+        return 'CONF-' . strtoupper(\Illuminate\Support\Str::random(10));
+    }
+
+    public function generateReferenceCode(): string
+    {
+        return 'REF-' . now()->format('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(6));
+    }
+
+    public function calculateTotalPrice(): float
+    {
+        $base = $this->base_price ?? $this->package->price * $this->num_guests;
+        return max(0, ($base + $this->additional_fees) - $this->discount_amount);
+    }
+
+    public function markAsConfirmed(): void
+    {
+        $this->update([
+            'status' => 'confirmed',
+            'confirmed_at' => now(),
+            'confirmation_code' => $this->confirmation_code ?? $this->generateConfirmationCode(),
+            'reference_code' => $this->reference_code ?? $this->generateReferenceCode(),
+        ]);
+    }
+
+    public function markAsCancelled(string $reason = '', float $refundAmount = null): void
+    {
+        $this->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $reason,
+            'refund_amount' => $refundAmount ?? $this->total_price,
+        ]);
+    }
+
+    public function markAsCompleted(): void
+    {
+        $this->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+    }
+
+    public function getRemainingDaysAttribute(): ?int
+    {
+        if (!$this->tour_date) {
+            return null;
+        }
+        return now()->diffInDays($this->tour_date, false);
+    }
+
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'pending' => '#ffc107',
+            'confirmed', 'approved' => '#81c784',
+            'cancelled' => '#ef5350',
+            'completed' => '#64b5f6',
+            default => '#9e9e9e',
+        };
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return ucfirst(str_replace('_', ' ', $this->status));
     }
 }

@@ -70,6 +70,29 @@ Route::post('/bookings', [DashboardController::class, 'storeBooking'])
     ->middleware('auth')
     ->name('bookings.store');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/bookings/{booking}', [DashboardController::class, 'showBooking'])
+        ->name('bookings.show');
+    Route::post('/bookings/{booking}/cancel', [DashboardController::class, 'cancelBooking'])
+        ->name('bookings.cancel');
+    Route::post('/bookings/{booking}/notes', [DashboardController::class, 'addNote'])
+        ->name('bookings.add-note');
+    Route::post('/bookings/{booking}/guests', [DashboardController::class, 'updateGuests'])
+        ->name('bookings.update-guests');
+    Route::get('/bookings/{booking}/export', [DashboardController::class, 'exportBooking'])
+        ->name('bookings.export');
+});
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware([EnsureAdmin::class])
+    ->group(function () {
+        Route::post('/bookings/{booking}/confirm', [DashboardController::class, 'confirmBooking'])
+            ->name('bookings.confirm');
+        Route::post('/bookings/{booking}/discount', [DashboardController::class, 'applyDiscount'])
+            ->name('bookings.discount');
+    });
+
 Route::get('/admin/dashboard', [DashboardController::class, 'admin'])
     ->middleware([EnsureAdmin::class])
     ->name('admin.dashboard');
