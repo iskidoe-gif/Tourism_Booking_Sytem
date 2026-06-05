@@ -454,6 +454,8 @@ class DashboardController extends Controller
                 'packages' => TourPackage::count(),
                 'bookings' => $bookingCountQuery->count(),
                 'pending_bookings' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
+                'checked_in_bookings' => (clone $bookingCountQuery)->whereNotNull('check_in_at')->count(),
+                'checked_out_bookings' => (clone $bookingCountQuery)->whereNotNull('check_out_at')->count(),
                 'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
                 'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
                 'bookingsByStatus' => $bookingsByStatus,

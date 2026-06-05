@@ -350,6 +350,28 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div>
+                    <div class="stat-label">🛎️ Checked In</div>
+                    <div class="stat-value">{{ $stats['checked_in_bookings'] }}</div>
+                </div>
+                <div class="stat-icon">🛎️</div>
+            </div>
+            <div class="stat-change">Bookings with guest arrival recorded</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">🏁 Checked Out</div>
+                    <div class="stat-value">{{ $stats['checked_out_bookings'] }}</div>
+                </div>
+                <div class="stat-icon">🏁</div>
+            </div>
+            <div class="stat-change">Bookings with departure recorded</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
                     <div class="stat-label">✅ Paid Bookings</div>
                     <div class="stat-value">{{ $stats['paid_payments'] }}</div>
                 </div>
@@ -683,22 +705,26 @@
         </h2>
 
         <div style="background: rgba(75, 86, 148, 0.1); border: 1px solid rgba(75, 86, 148, 0.2); border-radius: 0.75rem; overflow: hidden;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; background: rgba(75, 86, 148, 0.2); border-bottom: 1px solid rgba(75, 86, 148, 0.3); font-weight: 600; color: var(--palette-secondary); font-size: 0.875rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; background: rgba(75, 86, 148, 0.2); border-bottom: 1px solid rgba(75, 86, 148, 0.3); font-weight: 600; color: var(--palette-secondary); font-size: 0.875rem;">
                 <div>Guest</div>
                 <div>Package</div>
                 <div>Tour Date</div>
+                <div>Check-In</div>
+                <div>Check-Out</div>
                 <div>Status</div>
                 <div>Amount</div>
             </div>
             <div style="max-height: 400px; overflow-y: auto;">
                 @foreach($recentBookings->take(10) as $booking)
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(75, 86, 148, 0.15); align-items: center;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 1rem; padding: 1rem; border-bottom: 1px solid rgba(75, 86, 148, 0.15); align-items: center;">
                         <div>
                             <div style="color: var(--palette-cream); font-weight: 500;">{{ $booking->user->name }}</div>
                             <div style="color: var(--palette-secondary); font-size: 0.75rem;">{{ $booking->user->email }}</div>
                         </div>
                         <div style="color: var(--palette-cream);">{{ Str::limit($booking->package->name, 20) }}</div>
-                        <div style="color: var(--palette-secondary);">{{ $booking->tour_date->format('M d, Y') }}</div>
+                        <div style="color: var(--palette-secondary);">{{ optional($booking->tour_date)->format('M d, Y') }}</div>
+                        <div style="color: var(--palette-secondary);">{{ optional($booking->check_in_date)->format('M d, Y') ?? 'Not set' }}</div>
+                        <div style="color: var(--palette-secondary);">{{ optional($booking->check_out_date)->format('M d, Y') ?? 'Not set' }}</div>
                         <div>
                             <span class="booking-badge badge-{{ $booking->status }}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">{{ ucfirst($booking->status) }}</span>
                         </div>
