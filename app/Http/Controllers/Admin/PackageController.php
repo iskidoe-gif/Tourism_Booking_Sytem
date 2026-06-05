@@ -154,19 +154,27 @@ class PackageController extends Controller
                 return response()->json(['error' => $message, 'code' => $uploadError], 422);
             }
 
-            $validated = $request->validate([
-                'image_file' => ['required', 'file'],
-            ]);
+            // Check if file was actually sent
+            if (! isset($_FILES['image_file']) || $_FILES['image_file']['error'] === UPLOAD_ERR_NO_FILE) {
+                \Log::warning('No file was uploaded', ['files' => $_FILES]);
+                return response()->json(['error' => 'No file was uploaded.'], 422);
+            }
 
-            \Log::info('Upload image validation passed');
-
-            if (! $request->hasFile('image_file') || ! $request->file('image_file')->isValid()) {
-                \Log::warning('Uploaded file is invalid', [
-                    'has_file' => $request->hasFile('image_file'),
-                    'is_valid' => $request->hasFile('image_file') ? $request->file('image_file')->isValid() : false,
-                    'files' => $_FILES['image_file'] ?? null,
+            // Validate using Laravel's built-in validation only after PHP upload succeeds
+            if (! $request->hasFile('image_file')) {
+                \Log::warning('Request has no image_file', [
+                    'all_files' => array_keys($request->allFiles()),
+                    'php_files' => array_keys($_FILES),
                 ]);
                 return response()->json(['error' => 'Uploaded image is invalid or missing.'], 422);
+            }
+
+            $file = $request->file('image_file');
+            if (! $file->isValid()) {
+                \Log::warning('Uploaded file is not valid', [
+                    'error' => $file->getError(),
+                ]);
+                return response()->json(['error' => 'The uploaded file is not valid.'], 422);
             }
 
             // store using the public disk so paths are consistent and served via /storage
