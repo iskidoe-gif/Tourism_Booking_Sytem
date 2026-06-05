@@ -2,6 +2,12 @@
 
 @php
     $touristUser = auth()->user()?->isTourist() ? auth()->user() : null;
+    $selectedDuration = $selectedDuration ?? request('duration', 'all');
+    if (request()->boolean('dur_1') && ! request()->boolean('dur_all')) {
+        $selectedDuration = '1';
+    } elseif (request()->boolean('dur_2') && ! request()->boolean('dur_all')) {
+        $selectedDuration = '2_4';
+    }
 @endphp
 
 <section class="packages-hero bolinao-hero">
@@ -19,13 +25,18 @@
 
 <section class="packages-listing">
     <div class="packages-container">
-        <aside class="packages-sidebar">
-            <h3>Search</h3>
-            <form action="{{ route('packages.index') }}" method="GET">
-                <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        <aside class="packages-sidebar packages-search-panel">
+            <h3>Search tour packages</h3>
+            <form action="{{ route('packages.index') }}" method="GET" class="search-form packages-search-form">
+                <div class="form-group packages-search-field packages-search-field-wide">
                     <label for="search">Search tours</label>
-                    <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search tours by name, location, or experience" class="form-control" />
+                    <div class="search-input-wrap">
+                        <span class="search-input-icon" aria-hidden="true"></span>
+                        <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by name, location, or experience" class="form-control" />
+                    </div>
+                </div>
 
+                <div class="form-group packages-search-field">
                     <label for="category">Category</label>
                     <select id="category" name="category" class="form-control">
                         <option value="">All categories</option>
@@ -33,22 +44,28 @@
                             <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
                         @endforeach
                     </select>
+                </div>
 
-                    <div class="search-cta">
-                        <button type="submit" class="btn" style="width:100%;">Search</button>
+                <div class="form-group duration-group packages-search-field">
+                    <span class="duration-title">Duration</span>
+                    <div class="duration-filter">
+                        <label class="duration-option">
+                            <input type="radio" name="duration" value="all" @checked(! in_array($selectedDuration, ['1', '2_4'], true))>
+                            <span>All</span>
+                        </label>
+                        <label class="duration-option">
+                            <input type="radio" name="duration" value="1" @checked($selectedDuration === '1')>
+                            <span>1 Day</span>
+                        </label>
+                        <label class="duration-option">
+                            <input type="radio" name="duration" value="2_4" @checked($selectedDuration === '2_4')>
+                            <span>2-4 Days</span>
+                        </label>
                     </div>
                 </div>
+
+                <button type="submit" class="search-btn packages-search-submit">Search</button>
             </form>
-
-            <hr style="margin:1rem 0; border:none; border-top:1px solid rgba(6,20,12,0.04)">
-            <h3>Advanced Search</h3>
-            <div style="font-size:0.9rem;color:#335a45">
-
-                <div style="margin-top:0.6rem">Duration</div>
-                <label><input type="checkbox" name="dur_all" checked> All</label>
-                <label><input type="checkbox" name="dur_1"> 1 Day</label>
-                <label><input type="checkbox" name="dur_2"> 2-4 Days</label>
-            </div>
         </aside>
 
         <main class="packages-main">
@@ -105,4 +122,3 @@
     </section>
 
 </x-layout>
-

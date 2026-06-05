@@ -18,32 +18,50 @@ class PackageController extends Controller
             'events' => ['label' => 'Events & Festivals', 'keywords' => ['festival','event','parade','competition','celebration']],
             'ecotourism' => ['label' => 'Ecotourism & Conservation Areas', 'keywords' => ['mangrove','park','reserve','ecolodge','protected','sanctuary']],
         ];
+        $selectedDuration = $request->input('duration', 'all');
+
+        if (! in_array($selectedDuration, ['all', '1', '2_4'], true)) {
+            $selectedDuration = 'all';
+        }
+
+        if ($request->boolean('dur_1') && ! $request->boolean('dur_all')) {
+            $selectedDuration = '1';
+        } elseif ($request->boolean('dur_2') && ! $request->boolean('dur_all')) {
+            $selectedDuration = '2_4';
+        }
 
         $packages = TourPackage::active()
             ->bolinao()
             ->when($request->search, fn($q) =>
-                $q->where('name', 'like', "%{$request->search}%")
-                  ->orWhere('location', 'like', "%{$request->search}%")
-                  ->orWhere('description', 'like', "%{$request->search}%")
+                $q->where(function($sub) use ($request) {
+                    $sub->where('name', 'like', "%{$request->search}%")
+                        ->orWhere('location', 'like', "%{$request->search}%")
+                        ->orWhere('description', 'like', "%{$request->search}%");
+                })
             )
-            ->when($request->category, function($q) use ($request, $categoryMap) {
+            ->when($request->category && array_key_exists($request->category, $categoryMap), function($q) use ($request, $categoryMap) {
                 $q->where(function($sub) use ($request, $categoryMap) {
                     $sub->where('category', $request->category);
-                    if ($request->category && array_key_exists($request->category, $categoryMap)) {
-                        $keywords = $categoryMap[$request->category]['keywords'];
-                        $sub->orWhere(function($s2) use ($keywords) {
-                            foreach ($keywords as $k) {
-                                $s2->orWhere('name', 'like', "%{$k}%")
-                                   ->orWhere('description', 'like', "%{$k}%")
-                                   ->orWhere('location', 'like', "%{$k}%");
-                            }
-                        })->orWhereHas('destination', function($d) use ($keywords) {
-                            foreach ($keywords as $k) {
-                                $d->orWhere('name', 'like', "%{$k}%");
-                            }
-                        });
-                    }
+                    $keywords = $categoryMap[$request->category]['keywords'];
+                    $sub->orWhere(function($s2) use ($keywords) {
+                        foreach ($keywords as $k) {
+                            $s2->orWhere('name', 'like', "%{$k}%")
+                               ->orWhere('description', 'like', "%{$k}%")
+                               ->orWhere('location', 'like', "%{$k}%");
+                        }
+                    })->orWhereHas('destination', function($d) use ($keywords) {
+                        foreach ($keywords as $k) {
+                            $d->orWhere('name', 'like', "%{$k}%");
+                        }
+                    });
                 });
+            })
+            ->when($selectedDuration !== 'all', function($q) use ($selectedDuration) {
+                if ($selectedDuration === '1') {
+                    $q->where('duration_days', 1);
+                } elseif ($selectedDuration === '2_4') {
+                    $q->whereBetween('duration_days', [2, 4]);
+                }
             })
             ->when($request->type, fn($q) => $q->where('type', $request->type))
             ->when($request->max_price, fn($q) => $q->where('price', '<=', $request->max_price))
@@ -51,7 +69,7 @@ class PackageController extends Controller
             ->paginate(9)
             ->withQueryString();
 
-        return view('tourist.packages.index', compact('packages', 'categoryMap'));
+        return view('tourist.packages.index', compact('packages', 'categoryMap', 'selectedDuration'));
     }
 
     public function show(TourPackage $tourPackage)

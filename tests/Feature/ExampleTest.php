@@ -43,3 +43,49 @@ test('a tour can be booked in demo mode', function () {
     expect(Booking::count())->toBe(1);
     expect(Booking::first()->user_id)->toBe($user->id);
 });
+
+test('package search filters by category and duration', function () {
+    TourPackage::create([
+        'name' => 'Bolinao Beach Day Tour',
+        'description' => 'Beach and island highlights.',
+        'location' => 'Bolinao, Pangasinan',
+        'price' => 1200,
+        'duration_days' => 1,
+        'max_guests' => 6,
+        'category' => 'natural',
+        'status' => 'active',
+        'rating' => 4.8,
+    ]);
+
+    TourPackage::create([
+        'name' => 'Bolinao Heritage Weekend',
+        'description' => 'Church and lighthouse visits.',
+        'location' => 'Bolinao, Pangasinan',
+        'price' => 3200,
+        'duration_days' => 3,
+        'max_guests' => 8,
+        'category' => 'cultural',
+        'status' => 'active',
+        'rating' => 4.6,
+    ]);
+
+    $this->get(route('packages.index', ['category' => 'natural']))
+        ->assertOk()
+        ->assertSeeText('Bolinao Beach Day Tour')
+        ->assertDontSeeText('Bolinao Heritage Weekend');
+
+    $this->get(route('packages.index', ['duration' => '2_4']))
+        ->assertOk()
+        ->assertSeeText('Bolinao Heritage Weekend')
+        ->assertDontSeeText('Bolinao Beach Day Tour');
+
+    $this->get(route('packages.index', ['duration' => 'all']))
+        ->assertOk()
+        ->assertSeeText('Bolinao Beach Day Tour')
+        ->assertSeeText('Bolinao Heritage Weekend');
+
+    $this->get(route('packages.index', ['category' => 'cultural', 'duration' => '2_4']))
+        ->assertOk()
+        ->assertSeeText('Bolinao Heritage Weekend')
+        ->assertDontSeeText('Bolinao Beach Day Tour');
+});

@@ -1,6 +1,12 @@
 <x-layout>
     @php
         $touristUser = auth()->user()?->isTourist() ? auth()->user() : null;
+        $selectedDuration = $selectedDuration ?? request('duration', 'all');
+        if (request()->boolean('dur_1') && ! request()->boolean('dur_all')) {
+            $selectedDuration = '1';
+        } elseif (request()->boolean('dur_2') && ! request()->boolean('dur_all')) {
+            $selectedDuration = '2_4';
+        }
     @endphp
 
     <section class="packages-hero bolinao-hero">
@@ -18,37 +24,46 @@
 
     <section class="packages-listing">
         <div class="packages-container">
-            <aside class="packages-sidebar">
-                <form action="{{ route('packages.index') }}" method="GET">
-                    <div class="sidebar-panel">
-                        <h3>Search tour packages</h3>
-                        <div class="form-group">
-                            <label for="search">Search tours</label>
+            <aside class="packages-sidebar packages-search-panel">
+                <h3>Search tour packages</h3>
+                <form action="{{ route('packages.index') }}" method="GET" class="search-form packages-search-form">
+                    <div class="form-group packages-search-field packages-search-field-wide">
+                        <label for="search">Search tours</label>
+                        <div class="search-input-wrap">
+                            <span class="search-input-icon" aria-hidden="true"></span>
                             <input id="search" name="search" type="search" value="{{ request('search') }}" placeholder="Search by name, location, or experience" class="form-control" />
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label for="category">Category</label>
-                            <select id="category" name="category" class="form-control">
-                                <option value="">All categories</option>
-                                @foreach($categoryMap as $key => $cat)
-                                    <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
-                                @endforeach
-                            </select>
+                    <div class="form-group packages-search-field">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" class="form-control">
+                            <option value="">All categories</option>
+                            @foreach($categoryMap as $key => $cat)
+                                <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>{{ $cat['label'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group duration-group packages-search-field">
+                        <span class="duration-title">Duration</span>
+                        <div class="duration-filter">
+                            <label class="duration-option">
+                                <input type="radio" name="duration" value="all" @checked(! in_array($selectedDuration, ['1', '2_4'], true))>
+                                <span>All</span>
+                            </label>
+                            <label class="duration-option">
+                                <input type="radio" name="duration" value="1" @checked($selectedDuration === '1')>
+                                <span>1 Day</span>
+                            </label>
+                            <label class="duration-option">
+                                <input type="radio" name="duration" value="2_4" @checked($selectedDuration === '2_4')>
+                                <span>2-4 Days</span>
+                            </label>
                         </div>
                     </div>
 
-                    <div class="sidebar-panel sidebar-panel-alt">
-                        <h3>Duration filters</h3>
-                        <p class="small-copy">Refine your results by trip length.</p>
-                        <div class="filter-group">
-                            <label class="filter-checkbox"><input type="checkbox" name="dur_all" checked> All</label>
-                            <label class="filter-checkbox"><input type="checkbox" name="dur_1" {{ request('dur_1') ? 'checked' : '' }}> 1 Day</label>
-                            <label class="filter-checkbox"><input type="checkbox" name="dur_2" {{ request('dur_2') ? 'checked' : '' }}> 2-4 Days</label>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="submit" class="search-btn packages-search-submit">Search</button>
                 </form>
             </aside>
 
@@ -105,4 +120,3 @@
         </div>
     </section>
 </x-layout>
-

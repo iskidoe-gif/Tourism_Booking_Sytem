@@ -16,8 +16,9 @@
     $adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user() ?: ($webUser?->isAdmin() ? $webUser : null);
     $touristUser = $webUser?->isTourist() ? $webUser : null;
     $isAuthPage = request()->routeIs(['admin.login']);
+    $isPackagesPage = request()->routeIs('packages.*');
 @endphp
-<body class="shell {{ request()->routeIs('home') ? 'home-shell' : ($isAuthPage ? 'auth-shell' : 'page-shell') }}">
+<body class="shell {{ $isPackagesPage ? 'packages-shell ' : '' }}{{ request()->routeIs('home') ? 'home-shell' : ($isAuthPage ? 'auth-shell' : 'page-shell') }}">
 
     <div class="topbar {{ request()->routeIs('home') ? 'home-topbar' : ($isAuthPage ? 'auth-topbar' : 'page-topbar') }}">
         <div class="frame">
