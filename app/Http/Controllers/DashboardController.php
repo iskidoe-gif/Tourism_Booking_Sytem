@@ -7,6 +7,7 @@ use App\Models\Destination;
 use App\Models\Payment;
 use App\Models\Review;
 use App\Models\TourPackage;
+use App\Services\BookingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -151,39 +152,77 @@ class DashboardController extends Controller
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
             'tour_date' => ['required', 'date', 'after:today'],
-            'num_guests' => ['required', 'integer', 'min:1'],
+            'num_adults' => ['required', 'integer', 'min:0'],
+            'num_children' => ['required', 'integer', 'min:0'],
+            'num_seniors' => ['required', 'integer', 'min:0'],
+            'guest_name' => ['required', 'string', 'max:255'],
+            'guest_email' => ['required', 'email', 'max:255'],
+            'guest_phone' => ['nullable', 'string', 'max:50'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
+            'services' => ['nullable', 'array'],
+            'services.*' => ['in:airport_transfer,travel_insurance,meal_plan'],
         ]);
 
         $package = TourPackage::whereKey($validated['tour_package_id'])
             ->where('status', 'active')
             ->firstOrFail();
 
-        $request->validate([
-            'num_guests' => ['max:' . $package->max_guests],
-        ]);
+        $totalGuests = $validated['num_adults'] + $validated['num_children'] + $validated['num_seniors'];
 
-        $booking = Booking::create([
-            'booking_number' => $this->bookingNumber(),
+        if ($totalGuests < 1 || $totalGuests > $package->max_guests) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', "Please select between 1 and {$package->max_guests} guests.");
+        }
+
+        $availableServices = [
+            'airport_transfer' => ['name' => 'Airport transfer', 'price' => 1200],
+            'travel_insurance' => ['name' => 'Travel insurance', 'price' => 450],
+            'meal_plan' => ['name' => 'Meal plan', 'price' => 650],
+        ];
+
+        $serviceItems = [];
+        $serviceTotal = 0;
+
+        foreach ($validated['services'] ?? [] as $serviceKey) {
+            if (isset($availableServices[$serviceKey])) {
+                $serviceItems[] = $availableServices[$serviceKey] + ['key' => $serviceKey];
+                $serviceTotal += $availableServices[$serviceKey]['price'];
+            }
+        }
+
+        $bookingService = new BookingService();
+        $booking = $bookingService->createBooking([
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
             'tour_date' => $validated['tour_date'],
-            'num_guests' => $validated['num_guests'],
-            'status' => 'pending',
-            'total_price' => $package->price * $validated['num_guests'],
+            'num_guests' => $totalGuests,
+            'num_adults' => $validated['num_adults'],
+            'num_children' => $validated['num_children'],
+            'num_seniors' => $validated['num_seniors'],
+            'base_price' => $package->price * $totalGuests,
+            'additional_fees' => $serviceTotal,
+            'services' => collect($serviceItems),
+            'guest_details' => collect([
+                'contact_name' => $validated['guest_name'],
+                'contact_email' => $validated['guest_email'],
+                'contact_phone' => $validated['guest_phone'],
+            ]),
             'special_requests' => $validated['special_requests'] ?? null,
+            'status' => 'pending',
         ]);
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Tour booked successfully.',
+                'message' => 'Tour booking request submitted successfully.',
                 'data' => $booking->load(['package', 'payment']),
             ], 201);
         }
 
         return redirect()
-            ->route('dashboard')
-            ->with('success', 'Tour booked successfully.');
+            ->route('reservations.show', $booking)
+            ->with('success', 'Your booking request has been submitted. We will confirm availability shortly.');
     }
 
     public function adminBookings(Request $request): JsonResponse|View

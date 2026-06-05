@@ -47,7 +47,7 @@
                         <p class="text-muted small mt-2">Guest accounts can browse tours only. Create a tourist account to make a booking.</p>
                     @elseif(auth()->user()->isTourist())
                         <a href="{{ route('bookings.create', $tourPackage) }}" class="btn btn-primary w-100">
-                            Book This Tour
+                            Reserve This Tour
                         </a>
                     @else
                         <a href="#" class="btn btn-primary w-100" data-auth-open data-auth-mode="signin">
