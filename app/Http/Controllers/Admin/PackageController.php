@@ -121,9 +121,11 @@ class PackageController extends Controller
     public function uploadImage(Request $request, TourPackage $package): JsonResponse
     {
         try {
-            @ini_set('upload_max_filesize', '0');
-            @ini_set('post_max_size', '0');
-            @ini_set('memory_limit', '-1');
+            // Try to increase PHP limits - may not work depending on server configuration
+            @ini_set('upload_max_filesize', '500M');
+            @ini_set('post_max_size', '500M');
+            @ini_set('memory_limit', '512M');
+            @ini_set('max_execution_time', '300');
 
             $uploadLimit = ini_get('upload_max_filesize');
             $postLimit = ini_get('post_max_size');
@@ -145,6 +147,8 @@ class PackageController extends Controller
                 \Log::warning('Uploaded file has PHP upload error', [
                     'error_code' => $uploadError,
                     'message' => $message,
+                    'upload_max_filesize' => $uploadLimit,
+                    'post_max_size' => $postLimit,
                     'files' => $_FILES['image_file'] ?? null,
                 ]);
                 return response()->json(['error' => $message, 'code' => $uploadError], 422);

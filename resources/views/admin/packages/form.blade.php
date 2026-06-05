@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // if package exists, upload immediately to server
-        const MAX_CLIENT_UPLOAD = 10 * 1024 * 1024; // 10MB direct upload threshold (avoid chunked for most images)
+        const MAX_CLIENT_UPLOAD = 50 * 1024 * 1024; // 50MB direct upload threshold
 
         const tokenInput = document.querySelector('input[name="_token"]');
         const csrf = tokenInput ? tokenInput.value : '';
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         async function doChunkedUpload(file, uploadUrl) {
-            const CHUNK_SIZE = 1 * 1024 * 1024; // 1MB, keep each chunk below PHP upload_max_filesize defaults
+            const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks for faster large file uploads
             const total = Math.ceil(file.size / CHUNK_SIZE);
             const uploadId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
             const chunkUrl = uploadUrl.replace('/upload-image', '/upload-chunk');
