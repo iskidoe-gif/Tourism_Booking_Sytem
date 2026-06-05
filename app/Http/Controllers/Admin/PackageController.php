@@ -194,8 +194,10 @@ class PackageController extends Controller
             }
 
             try {
-                Storage::disk('public')->putFileAs('images', $file, $name);
-                $path = 'images/' . $name;
+                $path = $this->storePackageImage($request, $package);
+                if ($path === null) {
+                    return response()->json(['error' => 'Could not save uploaded image.'], 500);
+                }
                 $package->image = $path;
                 $package->save();
                 \Log::info('File stored on public disk', ['path' => $path]);
@@ -353,21 +355,58 @@ class PackageController extends Controller
             }
         }
 
-        // Only process image_file during CREATE (when package is null/new)
-        // During UPDATE, the uploadImage endpoint already handled it via AJAX
-        if ($package === null && $request->hasFile('image_file') && $request->file('image_file')->isValid()) {
-            $file = $request->file('image_file');
-            $name = time() . '-' . uniqid() . '-' . preg_replace('/[^a-z0-9\-\.]/i', '-', $file->getClientOriginalName());
-            $path = 'images/' . $name;
-
-            if (Storage::disk('public')->putFileAs('images', $file, $name)) {
-                $data['image'] = $path;
+        // Process file uploads for both create and update.
+        // This ensures package image uploads still work when JS/AJAX fails.
+        if ($request->hasFile('image_file') && $request->file('image_file')->isValid()) {
+            $imagePath = $this->storePackageImage($request, $package);
+            if ($imagePath !== null) {
+                $data['image'] = $imagePath;
             }
         }
 
         unset($data['image_file'], $data['rating']);
 
         return $data;
+    }
+
+    private function storePackageImage(Request $request, ?TourPackage $package = null): ?string
+    {
+        if (! $request->hasFile('image_file')) {
+            return null;
+        }
+
+        $file = $request->file('image_file');
+        if (! $file->isValid()) {
+            return null;
+        }
+
+        $name = time() . '-' . uniqid() . '-' . preg_replace('/[^a-z0-9\-\.]/i', '-', $file->getClientOriginalName());
+        $path = 'images/' . $name;
+
+        if ($package && $package->image && ! str_starts_with($package->image, 'http')) {
+            $old = $this->normalizeImagePath($package->image);
+            if ($old !== '') {
+                if (Storage::disk('public')->exists($old)) {
+                    Storage::disk('public')->delete($old);
+                } elseif (File::exists(public_path($old))) {
+                    File::delete(public_path($old));
+                }
+            }
+        }
+
+        if (Storage::disk('public')->putFileAs('images', $file, $name)) {
+            return $path;
+        }
+
+        return null;
+    }
+
+    private function normalizeImagePath(string $imagePath): string
+    {
+        $normalized = ltrim($imagePath, '/');
+        $normalized = preg_replace('#^(public/|storage/|public/storage/)#i', '', $normalized);
+
+        return ltrim($normalized, '/');
     }
 
     private function validatePackage(Request $request, ?TourPackage $package = null): array
