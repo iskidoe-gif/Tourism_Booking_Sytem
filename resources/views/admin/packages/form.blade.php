@@ -24,8 +24,8 @@
 
         <form method="POST" action="{{ $action }}" enctype="multipart/form-data">
             @csrf
-            @if($method === 'PUT')
-                @method('PUT')
+            @if(isset($method) && in_array(strtoupper($method), ['PUT', 'PATCH'], true))
+                @method(strtoupper($method))
             @endif
 
             <div class="row g-3 mb-3">
@@ -152,9 +152,42 @@ document.addEventListener('DOMContentLoaded', function () {
     const input = document.getElementById('image_file_input');
     const preview = document.getElementById('image_preview');
     if (!input) return;
+    
+    // Track upload state
+    let uploadInProgress = false;
+    let uploadFailed = false;
+    let uploadSucceeded = false;
+
     input.addEventListener('change', function (e) {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
+
+        // Check if upload is possible (package must exist)
+        const uploadUrl = input.dataset.uploadUrl;
+        if (!uploadUrl) {
+            // During creation, just preview - no upload yet
+            const reader = new FileReader();
+            preview.onerror = function () {
+                preview.src = '{{ asset('images/package-default.svg') }}';
+            };
+            reader.onload = function (ev) {
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+                preview.style.maxWidth = '100%';
+                preview.style.maxHeight = '160px';
+                preview.style.objectFit = 'cover';
+            };
+            reader.onerror = function (err) {
+                console.error('FileReader error', err);
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        // Reset states
+        uploadInProgress = true;
+        uploadFailed = false;
+        uploadSucceeded = false;
 
         // immediate client-side preview (robust)
         try {
@@ -191,9 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // if package exists, upload immediately to server
-        const uploadUrl = input.dataset.uploadUrl;
-        if (!uploadUrl) return;
-        const MAX_CLIENT_UPLOAD = 1 * 1024 * 1024; // 1MB direct upload threshold
+        const MAX_CLIENT_UPLOAD = 10 * 1024 * 1024; // 10MB direct upload threshold (avoid chunked for most images)
 
         const tokenInput = document.querySelector('input[name="_token"]');
         const csrf = tokenInput ? tokenInput.value : '';
@@ -202,9 +233,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const fd = new FormData();
             fd.append('_token', csrf);
             fd.append('image_file', file);
-            const res = await fetch(uploadUrl, { method: 'POST', body: fd, credentials: 'same-origin' });
-            const body = await res.text();
-            try { return { status: res.status, body: JSON.parse(body) }; } catch (e) { throw new Error('Invalid server response: ' + body); }
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+            
+            try {
+                const res = await fetch(uploadUrl, { 
+                    method: 'POST', 
+                    body: fd, 
+                    credentials: 'same-origin',
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                const body = await res.text();
+                try { return { status: res.status, body: JSON.parse(body) }; } catch (e) { throw new Error('Invalid server response: ' + body); }
+            } catch (e) {
+                clearTimeout(timeoutId);
+                if (e.name === 'AbortError') {
+                    throw new Error('Upload timed out. Please try again with a smaller file.');
+                }
+                throw e;
+            }
         }
 
         async function doChunkedUpload(file, uploadUrl) {
@@ -261,6 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     result = await doSimpleUpload(file, uploadUrl);
                 }
 
+                uploadInProgress = false; // mark as done ASAP
                 const data = result.body;
                 if (result.status >= 200 && result.status < 300 && data.url) {
                     const ts = data.timestamp || Date.now();
@@ -281,6 +330,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; }, 350);
                         }, 2500);
                     }
+                    uploadSucceeded = true;
+                    uploadFailed = false;
                 } else {
                     let errorMessage = (data && data.error) ? data.error : 'Upload failed';
                     let extra = '';
@@ -301,6 +352,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         }, 2500);
                     }
                     console.error('Upload failed', result.status, data);
+                    uploadFailed = true;
+                    uploadSucceeded = false;
+                    uploadInProgress = false;
                 }
             } catch (err) {
                 console.error('Upload error', err);
@@ -315,9 +369,37 @@ document.addEventListener('DOMContentLoaded', function () {
                         setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; }, 350);
                     }, 2500);
                 }
+                uploadFailed = true;
+                uploadSucceeded = false;
+                uploadInProgress = false;
             }
         })();
     });
+
+    // Prevent form submission if upload is still in progress
+    const form = input.closest('form');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            // Only block if user selected a file AND it's still uploading
+            if (input.files && input.files.length > 0) {
+                if (uploadInProgress) {
+                    e.preventDefault();
+                    const toast = document.getElementById('upload_toast');
+                    if (toast) {
+                        toast.textContent = 'Image upload still in progress...';
+                        toast.style.display = 'block';
+                        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                    }
+                    return false;
+                }
+                // If upload failed, clear the file input to allow form to submit without image
+                if (uploadFailed) {
+                    input.value = '';
+                    input.files = new DataTransfer().items;
+                }
+            }
+        });
+    }
 });
 </script>
 <div id="upload_toast" role="status" aria-live="polite" style="position:fixed;right:20px;top:20px;display:none;z-index:1100;background:rgba(0,0,0,0.85);color:#fff;padding:10px 14px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.2);font-size:13px;"></div>
