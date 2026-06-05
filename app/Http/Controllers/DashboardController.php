@@ -466,6 +466,14 @@ class DashboardController extends Controller
         // Get active users count
         $activeUsers = Booking::distinct('user_id')->count('user_id');
 
+        // Get upcoming check-ins (tours starting within next 7 days with approved status)
+        $upcomingCheckIns = Booking::with(['user', 'package'])
+            ->where('status', 'approved')
+            ->whereNull('tour_started_at')  // Not yet checked in
+            ->whereBetween('tour_start_date', [Carbon::today(), Carbon::today()->addDays(7)])
+            ->orderBy('tour_start_date', 'asc')
+            ->get();
+
         return [
             'stats' => [
                 'packages' => TourPackage::count(),
@@ -487,6 +495,7 @@ class DashboardController extends Controller
             'monthlyBookings' => $monthlyBookings,
             'recentReviews' => $recentReviews,
             'packageRatings' => $packageRatings,
+            'upcomingCheckIns' => $upcomingCheckIns,
         ];
     }
 

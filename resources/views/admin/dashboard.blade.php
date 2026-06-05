@@ -312,6 +312,36 @@
         ✅ System is operating normally. Last updated: {{ now()->format('M d, Y H:i A') }}
     </div>
 
+    <!-- Upcoming Check-ins Alert -->
+    @if($upcomingCheckIns->count() > 0)
+    <div class="alert-banner" style="background: rgba(255, 152, 0, 0.15); border-left-color: #FFB74D; color: #FF9800; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <div style="font-size: 1.5rem;">⚠️</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 700; margin-bottom: 0.75rem;">Upcoming Check-ins Alert</div>
+                <div style="font-size: 0.95rem; margin-bottom: 1rem;">{{ $upcomingCheckIns->count() }} {{ $upcomingCheckIns->count() === 1 ? 'booking is' : 'bookings are' }} checking in within the next 7 days:</div>
+                <div style="display: grid; gap: 0.75rem;">
+                    @foreach($upcomingCheckIns as $booking)
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 0.75rem; border-radius: 0.4rem; font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>{{ $booking->package->name ?? 'Tour Package' }}</strong>
+                                <br>
+                                <span style="opacity: 0.9;">Guest: {{ $booking->user->name ?? 'N/A' }} ({{ $booking->num_guests }} {{ $booking->num_guests === 1 ? 'guest' : 'guests' }})</span>
+                            </div>
+                            <div style="text-align: right; white-space: nowrap;">
+                                <div style="font-weight: 700;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->format('M d') }}</div>
+                                <div style="opacity: 0.9; font-size: 0.85rem;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->diffForHumans() }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Primary Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card">
