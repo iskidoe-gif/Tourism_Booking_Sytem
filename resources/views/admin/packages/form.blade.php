@@ -145,6 +145,28 @@ document.addEventListener('DOMContentLoaded', function () {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
 
+        // Check if upload is possible (package must exist)
+        const uploadUrl = input.dataset.uploadUrl;
+        if (!uploadUrl) {
+            // During creation, just preview - no upload yet
+            const reader = new FileReader();
+            preview.onerror = function () {
+                preview.src = '{{ asset('images/package-default.svg') }}';
+            };
+            reader.onload = function (ev) {
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+                preview.style.maxWidth = '100%';
+                preview.style.maxHeight = '160px';
+                preview.style.objectFit = 'cover';
+            };
+            reader.onerror = function (err) {
+                console.error('FileReader error', err);
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
+
         // Reset states
         uploadInProgress = true;
         uploadFailed = false;
@@ -185,8 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // if package exists, upload immediately to server
-        const uploadUrl = input.dataset.uploadUrl;
-        if (!uploadUrl) return;
         const MAX_CLIENT_UPLOAD = 10 * 1024 * 1024; // 10MB direct upload threshold (avoid chunked for most images)
 
         const tokenInput = document.querySelector('input[name="_token"]');
@@ -272,6 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     result = await doSimpleUpload(file, uploadUrl);
                 }
 
+                uploadInProgress = false; // mark as done ASAP
                 const data = result.body;
                 if (result.status >= 200 && result.status < 300 && data.url) {
                     const ts = data.timestamp || Date.now();
@@ -294,7 +315,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     uploadSucceeded = true;
                     uploadFailed = false;
-                    uploadInProgress = false;
                 } else {
                     let errorMessage = (data && data.error) ? data.error : 'Upload failed';
                     let extra = '';
