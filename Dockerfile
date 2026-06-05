@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY resources resources
-RUN npm ci --silent --legacy-peer-deps && npm run build
+RUN npm ci --silent --legacy-peer-deps && npm run build && npm cache clean --force
 
 # 2) Composer builder for PHP dependencies
 FROM composer:2 AS composer_builder
@@ -25,6 +25,7 @@ FROM php:8.2-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    curl \
     libzip-dev \
     libpng-dev \
     oniguruma-dev \
@@ -34,7 +35,8 @@ RUN apk add --no-cache \
     zip \
     unzip \
     git \
- && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip
+ && docker-php-ext-install pdo pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip \
+ && apk del libzip-dev libpng-dev oniguruma-dev libxml2-dev sqlite-dev libpq-dev
 
 # Create required runtime directories for Supervisor, PHP-FPM, and Nginx
 RUN mkdir -p \
@@ -126,5 +128,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache || true
 
 EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
