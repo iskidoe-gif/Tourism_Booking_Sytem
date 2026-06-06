@@ -9,7 +9,6 @@ Thumbs.db
 *.log
 npm-debug.log
 yarn-error.log
-composer.lock
 bootstrap/cache/*
 storage/logs/*
 storage/framework/cache/*
