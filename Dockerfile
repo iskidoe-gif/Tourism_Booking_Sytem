@@ -49,6 +49,8 @@ server {
     listen [::]:80;
     root /var/www/html/public;
     index index.php;
+    # Allow unlimited request body size (large uploads handled with chunking)
+    client_max_body_size 0;
     
     location / {
         try_files $uri $uri/ /index.php?$query_string;

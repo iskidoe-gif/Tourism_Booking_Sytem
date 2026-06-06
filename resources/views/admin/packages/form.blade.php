@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let uploadFailed = false;
     let uploadSucceeded = false;
 
-    input.addEventListener('change', function (e) {
+        input.addEventListener('change', function (e) {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
 
@@ -183,11 +183,23 @@ document.addEventListener('DOMContentLoaded', function () {
             reader.readAsDataURL(file);
             return;
         }
-
+        
         // Reset states
         uploadInProgress = true;
         uploadFailed = false;
         uploadSucceeded = false;
+
+        // Generate and store a persistent upload id for this selected file so
+        // chunk uploads and finalize call use the same id even if the input
+        // is interacted with again.
+        let uploadId = input.dataset.uploadId || null;
+        if (! uploadId) {
+            uploadId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+            input.dataset.uploadId = uploadId;
+        }
+
+        // disable input during upload to avoid accidental reselection
+        input.disabled = true;
 
         // immediate client-side preview (robust)
         try {
@@ -224,7 +236,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // if package exists, upload immediately to server
-        const MAX_CLIENT_UPLOAD = 50 * 1024 * 1024; // 50MB direct upload threshold
+        // Force chunked uploads for all files to avoid server-upload-limit issues.
+        // This makes uploads reliable regardless of PHP/NGINX limits.
+        const MAX_CLIENT_UPLOAD = 0; // 0 = always chunk
 
         const tokenInput = document.querySelector('input[name="_token"]');
         const csrf = tokenInput ? tokenInput.value : '';
@@ -258,18 +272,18 @@ document.addEventListener('DOMContentLoaded', function () {
         async function doChunkedUpload(file, uploadUrl) {
             const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks for faster large file uploads
             const total = Math.ceil(file.size / CHUNK_SIZE);
-            const uploadId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9);
+            // use the persisted uploadId for all chunk requests
             const chunkUrl = uploadUrl.replace('/upload-image', '/upload-chunk');
             const completeUrl = uploadUrl.replace('/upload-image', '/complete-upload');
 
             let uploadedBytes = 0;
-            for (let i = 0; i < total; i++) {
+                for (let i = 0; i < total; i++) {
                 const start = i * CHUNK_SIZE;
                 const end = Math.min(start + CHUNK_SIZE, file.size);
                 const blob = file.slice(start, end);
                 const fd = new FormData();
                 fd.append('_token', csrf);
-                fd.append('upload_id', uploadId);
+                    fd.append('upload_id', uploadId);
                 fd.append('chunk_index', i);
                 fd.append('total_chunks', total);
                 fd.append('chunk', blob, file.name + '.part.' + i);
@@ -373,6 +387,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 uploadSucceeded = false;
                 uploadInProgress = false;
             }
+            // re-enable input and clear saved upload id on failure/success so user can retry
+            input.disabled = false;
+            delete input.dataset.uploadId;
         })();
     });
 

@@ -257,16 +257,37 @@ class PackageController extends Controller
         $index = $validated['chunk_index'];
 
         $tmpDir = 'uploads/tmp/' . $uploadId;
+        $disk = Storage::disk('local');
         try {
-            // ensure tmp dir exists on the local disk root
-            if (! Storage::disk('local')->exists($tmpDir)) {
-                Storage::disk('local')->makeDirectory($tmpDir);
+            // ensure base uploads/tmp exists
+            if (! $disk->exists('uploads/tmp')) {
+                $disk->makeDirectory('uploads/tmp');
             }
-            Storage::disk('local')->putFileAs($tmpDir, $request->file('chunk'), 'chunk_' . $index);
-            \Log::info('Chunk stored', ['upload_id' => $uploadId, 'chunk_index' => $index, 'tmp_dir' => Storage::disk('local')->path($tmpDir)]);
+            // ensure tmp dir exists for this upload id
+            if (! $disk->exists($tmpDir)) {
+                $disk->makeDirectory($tmpDir);
+            }
+
+            $stored = $disk->putFileAs($tmpDir, $request->file('chunk'), 'chunk_' . $index);
+            $absPath = $disk->path($tmpDir) . DIRECTORY_SEPARATOR . 'chunk_' . $index;
+
+            // verify file exists after write
+            $exists = file_exists($absPath) || $disk->exists($tmpDir . '/chunk_' . $index);
+
+            \Log::info('Chunk stored', [
+                'upload_id' => $uploadId,
+                'chunk_index' => $index,
+                'tmp_dir' => $disk->path($tmpDir),
+                'stored' => $stored,
+                'exists' => $exists,
+            ]);
+
+            if (! $exists) {
+                throw new \RuntimeException('Chunk was not persisted to disk');
+            }
         } catch (\Throwable $e) {
             \Log::error('Chunk store failed', ['error' => $e->getMessage(), 'upload_id' => $uploadId, 'chunk_index' => $index]);
-            return response()->json(['error' => 'Could not store chunk'], 500);
+            return response()->json(['error' => 'Could not store chunk', 'message' => $e->getMessage()], 500);
         }
 
         return response()->json(['ok' => true, 'index' => $index]);
@@ -288,9 +309,74 @@ class PackageController extends Controller
         $original = $validated['original_name'];
 
         $tmpDir = Storage::disk('local')->path('uploads/tmp/' . $uploadId);
-        if (! is_dir($tmpDir)) {
-            \Log::warning('Chunk complete failed: tmp dir missing', ['upload_id' => $uploadId, 'tmp_dir' => $tmpDir]);
-            return response()->json(['error' => 'Upload not found'], 404);
+        $diskRelative = 'uploads/tmp/' . $uploadId;
+        $disk = Storage::disk('local');
+        $exists = $disk->exists($diskRelative);
+        if (! is_dir($tmpDir) || ! $exists) {
+            // attempt to find a matching uploads tmp dir as a fallback
+            $candidates = [];
+            try {
+                $allDirs = [];
+                if ($disk->exists('uploads/tmp')) {
+                    $allDirs = $disk->allDirectories('uploads/tmp');
+                }
+                foreach ($allDirs as $d) {
+                    $allFiles = $disk->allFiles($d);
+                    $chunkCount = 0;
+                    foreach ($allFiles as $f) {
+                        if (preg_match('/chunk_\d+$/', basename($f))) {
+                            $chunkCount++;
+                        }
+                    }
+                    if ($chunkCount >= $total) {
+                        $candidates[] = ['dir' => $d, 'count' => $chunkCount];
+                    }
+                }
+            } catch (\Throwable $_) {
+                $candidates = [];
+            }
+
+            if (! empty($candidates)) {
+                // pick the best candidate (first with sufficient chunks)
+                $chosen = $candidates[0]['dir'];
+                $tmpDir = $disk->path($chosen);
+                \Log::warning('Chunk complete: using fallback tmp dir', [
+                    'requested_upload_id' => $uploadId,
+                    'chosen_dir' => $chosen,
+                    'chosen_abs' => $tmpDir,
+                    'candidate_count' => $candidates[0]['count'],
+                ]);
+            } else {
+                // gather diagnostic info
+                $files = [];
+                try {
+                    if ($disk->exists('uploads/tmp')) {
+                        $files = $disk->allFiles('uploads/tmp');
+                    }
+                } catch (\Throwable $_) {
+                    $files = [];
+                }
+
+                \Log::warning('Chunk complete failed: tmp dir missing or empty', [
+                    'upload_id' => $uploadId,
+                    'tmp_dir' => $tmpDir,
+                    'disk_root' => $disk->path(''),
+                    'disk_relative' => $diskRelative,
+                    'disk_exists' => $exists,
+                    'uploads_tmp_listing' => $files,
+                ]);
+
+                return response()->json([
+                    'error' => 'Upload not found',
+                    'debug' => [
+                        'tmp_dir' => $tmpDir,
+                        'disk_root' => $disk->path(''),
+                        'disk_relative' => $diskRelative,
+                        'disk_exists' => $exists,
+                        'uploads_tmp_listing' => $files,
+                    ],
+                ], 404);
+            }
         }
 
         $name = time() . '-' . uniqid() . '-' . preg_replace('/[^a-z0-9\-\.]/i', '-', $original);
@@ -421,7 +507,8 @@ class PackageController extends Controller
             'duration_days' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
             'image' => ['nullable', 'string', 'max:255'],
-            'image_file' => ['nullable', 'image', 'max:10240'],
+            // Allow any image size here; large files are handled via chunked uploads.
+            'image_file' => ['nullable', 'image'],
             'status' => ['required', 'in:active,inactive'],
         ]);
     }
