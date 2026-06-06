@@ -17,6 +17,10 @@ Route::get('/health', function () {
     return response()->json(['status' => 'healthy'], 200);
 })->name('health');
 
+// Diagnostics endpoint (enabled only when FORCE_APP_DEBUG=true)
+use App\Http\Controllers\DiagnosticsController;
+Route::get('/_diagnostics', [DiagnosticsController::class, 'status'])->name('diagnostics.status');
+
 Route::middleware('guest')->group(function () {
     // Keep a lightweight GET route for legacy '/login' links.
     Route::get('/login', function () { return redirect()->route('home', ['auth' => 'signin']); })->name('login');
