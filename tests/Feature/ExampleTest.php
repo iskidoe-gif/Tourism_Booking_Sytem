@@ -32,9 +32,12 @@ test('a tour can be booked in demo mode', function () {
         'rating' => 4.5,
     ]);
 
+    expect($package->duration_days)->toBe(2);
+
     $response = $this->actingAs($user)->post(route('bookings.store'), [
         'tour_package_id' => $package->id,
-        'tour_date' => now()->addDays(3)->format('Y-m-d'),
+        'tour_start_date' => '2026-06-09',
+        'tour_end_date' => '2026-06-11',
         'num_adults' => 2,
         'num_children' => 0,
         'num_seniors' => 0,
@@ -45,6 +48,7 @@ test('a tour can be booked in demo mode', function () {
     ]);
 
     $response->assertRedirect();
+    $response->assertSessionHasNoErrors();
     expect(Booking::count())->toBe(1);
     expect(Booking::first()->user_id)->toBe($user->id);
 });

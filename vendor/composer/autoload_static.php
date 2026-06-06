@@ -630,6 +630,7 @@ class ComposerStaticInit3b7195ada1b61f91cd00fd30ef952ce4
     public static $classMap = array (
         'App\\Console\\Commands\\AssignCategories' => __DIR__ . '/../..' . '/app/Console/Commands/AssignCategories.php',
         'App\\Console\\Commands\\CleanupUploadChunks' => __DIR__ . '/../..' . '/app/Console/Commands/CleanupUploadChunks.php',
+        'App\\Console\\Commands\\SetPackageImage' => __DIR__ . '/../..' . '/app/Console/Commands/SetPackageImage.php',
         'App\\Http\\Controllers\\Admin\\DestinationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DestinationController.php',
         'App\\Http\\Controllers\\Admin\\PackageController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/PackageController.php',
         'App\\Http\\Controllers\\Admin\\PaymentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/PaymentController.php',
@@ -648,6 +649,7 @@ class ComposerStaticInit3b7195ada1b61f91cd00fd30ef952ce4
         'App\\Http\\Controllers\\Tourist\\ReservationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Tourist/ReservationController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\AdminMiddleware' => __DIR__ . '/../..' . '/app/Http/Middleware/AdminMiddleware.php',
+        'App\\Http\\Middleware\\AllowCors' => __DIR__ . '/../..' . '/app/Http/Middleware/AllowCors.php',
         'App\\Http\\Middleware\\EnsureAdmin' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureAdmin.php',
         'App\\Http\\Middleware\\EnsureUploadLimits' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUploadLimits.php',
         'App\\Http\\Middleware\\RedirectIfAuthenticated' => __DIR__ . '/../..' . '/app/Http/Middleware/RedirectIfAuthenticated.php',
@@ -660,6 +662,7 @@ class ComposerStaticInit3b7195ada1b61f91cd00fd30ef952ce4
         'App\\Models\\TourPackage' => __DIR__ . '/../..' . '/app/Models/TourPackage.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
+        'App\\Services\\BookingService' => __DIR__ . '/../..' . '/app/Services/BookingService.php',
         'App\\Services\\ReportExportService' => __DIR__ . '/../..' . '/app/Services/ReportExportService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Brick\\Math\\BigDecimal' => __DIR__ . '/..' . '/brick/math/src/BigDecimal.php',

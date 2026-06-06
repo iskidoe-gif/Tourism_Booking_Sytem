@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'App\\Console\\Commands\\AssignCategories' => $baseDir . '/app/Console/Commands/AssignCategories.php',
     'App\\Console\\Commands\\CleanupUploadChunks' => $baseDir . '/app/Console/Commands/CleanupUploadChunks.php',
+    'App\\Console\\Commands\\SetPackageImage' => $baseDir . '/app/Console/Commands/SetPackageImage.php',
     'App\\Http\\Controllers\\Admin\\DestinationController' => $baseDir . '/app/Http/Controllers/Admin/DestinationController.php',
     'App\\Http\\Controllers\\Admin\\PackageController' => $baseDir . '/app/Http/Controllers/Admin/PackageController.php',
     'App\\Http\\Controllers\\Admin\\PaymentController' => $baseDir . '/app/Http/Controllers/Admin/PaymentController.php',
@@ -26,6 +27,7 @@ return array(
     'App\\Http\\Controllers\\Tourist\\ReservationController' => $baseDir . '/app/Http/Controllers/Tourist/ReservationController.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\AdminMiddleware' => $baseDir . '/app/Http/Middleware/AdminMiddleware.php',
+    'App\\Http\\Middleware\\AllowCors' => $baseDir . '/app/Http/Middleware/AllowCors.php',
     'App\\Http\\Middleware\\EnsureAdmin' => $baseDir . '/app/Http/Middleware/EnsureAdmin.php',
     'App\\Http\\Middleware\\EnsureUploadLimits' => $baseDir . '/app/Http/Middleware/EnsureUploadLimits.php',
     'App\\Http\\Middleware\\RedirectIfAuthenticated' => $baseDir . '/app/Http/Middleware/RedirectIfAuthenticated.php',
@@ -38,6 +40,7 @@ return array(
     'App\\Models\\TourPackage' => $baseDir . '/app/Models/TourPackage.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
+    'App\\Services\\BookingService' => $baseDir . '/app/Services/BookingService.php',
     'App\\Services\\ReportExportService' => $baseDir . '/app/Services/ReportExportService.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'Brick\\Math\\BigDecimal' => $vendorDir . '/brick/math/src/BigDecimal.php',

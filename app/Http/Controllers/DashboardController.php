@@ -196,7 +196,7 @@ class DashboardController extends Controller
         $checkOut = Carbon::parse($validated['tour_end_date']);
         $expectedCheckOut = $checkIn->copy()->addDays($package->duration_days);
 
-        if ($checkOut->diffInDays($checkIn, false) !== $package->duration_days) {
+        if ((int) abs($checkIn->diffInDays($checkOut, false)) !== $package->duration_days) {
             return redirect()
                 ->back()
                 ->withInput()
