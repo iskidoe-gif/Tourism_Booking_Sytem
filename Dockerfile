@@ -74,45 +74,59 @@ RUN mkdir -p /etc/nginx/http.d && \
     echo '    }' >> /etc/nginx/http.d/default.conf && \
     echo '}' >> /etc/nginx/http.d/default.conf
 
-# Configure Supervisor using RUN with echo
-RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor && \
-    echo '[supervisord]' > /etc/supervisord.conf && \
-    echo 'nodaemon=true' >> /etc/supervisord.conf && \
-    echo 'user=root' >> /etc/supervisord.conf && \
-    echo 'logfile=/var/log/supervisor/supervisord.log' >> /etc/supervisord.conf && \
-    echo 'pidfile=/var/run/supervisor/supervisord.pid' >> /etc/supervisord.conf && \
-    echo 'childlogdir=/var/log/supervisor' >> /etc/supervisord.conf && \
-    echo 'silent=false' >> /etc/supervisord.conf && \
-    echo '' >> /etc/supervisord.conf && \
-    echo '[unix_http_server]' >> /etc/supervisord.conf && \
-    echo 'file=/var/run/supervisor/supervisor.sock' >> /etc/supervisord.conf && \
-    echo '' >> /etc/supervisord.conf && \
-    echo '[supervisorctl]' >> /etc/supervisord.conf && \
-    echo 'serverurl=unix:///var/run/supervisor/supervisor.sock' >> /etc/supervisord.conf && \
-    echo '' >> /etc/supervisord.conf && \
-    echo '[rpcinterface:supervisor]' >> /etc/supervisord.conf && \
-    echo 'supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface' >> /etc/supervisord.conf && \
-    echo '' >> /etc/supervisord.conf && \
-    echo '[include]' >> /etc/supervisord.conf && \
-    echo 'files = /etc/supervisor/conf.d/*.conf' >> /etc/supervisord.conf && \
-    \
-    echo '[program:php-fpm]' > /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'command=php-fpm --nodaemonize' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'autostart=true' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'autorestart=true' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'redirect_stderr=true' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'stdout_logfile=/var/log/supervisor/php-fpm.log' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'startretries=10' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo 'startsecs=3' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo '' >> /etc/supervisor/conf.d/php-fpm.conf && \
-    echo '[program:nginx]' > /etc/supervisor/conf.d/nginx.conf && \
-    echo 'command=/usr/sbin/nginx -g "daemon off;"' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'autostart=true' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'autorestart=true' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'redirect_stderr=true' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'stdout_logfile=/var/log/supervisor/nginx.log' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'startretries=10' >> /etc/supervisor/conf.d/nginx.conf && \
-    echo 'startsecs=3' >> /etc/supervisor/conf.d/nginx.conf
+# Configure Supervisor using a shell script
+RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run/supervisor && \
+    cat > /setup-supervisor.sh << 'SCRIPT_EOF'
+#!/bin/sh
+# Create supervisord main config
+cat > /etc/supervisord.conf << 'CONFIG_EOF'
+[supervisord]
+nodaemon=true
+user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisor/supervisord.pid
+childlogdir=/var/log/supervisor
+
+[unix_http_server]
+file=/var/run/supervisor/supervisor.sock
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor/supervisor.sock
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[include]
+files = /etc/supervisor/conf.d/*.conf
+CONFIG_EOF
+
+# Create php-fpm program config
+cat > /etc/supervisor/conf.d/php-fpm.conf << 'PHPFPM_EOF'
+[program:php-fpm]
+command=php-fpm --nodaemonize
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/php-fpm.log
+startretries=10
+startsecs=3
+PHPFPM_EOF
+
+# Create nginx program config
+cat > /etc/supervisor/conf.d/nginx.conf << 'NGINX_EOF'
+[program:nginx]
+command=/usr/sbin/nginx -g "daemon off;"
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/nginx.log
+startretries=10
+startsecs=3
+NGINX_EOF
+SCRIPT_EOF
+    chmod +x /setup-supervisor.sh && \
+    /setup-supervisor.sh && \
+    rm /setup-supervisor.sh
 
 WORKDIR /var/www/html
 
