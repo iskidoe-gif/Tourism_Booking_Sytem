@@ -78,7 +78,6 @@ RUN mkdir -p /etc/nginx/http.d && \
 RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run/supervisor
 
 COPY supervisord.conf /etc/supervisord.conf
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php-fpm.conf /etc/supervisor/conf.d/php-fpm.conf
 COPY nginx.conf /etc/supervisor/conf.d/nginx.conf
 
