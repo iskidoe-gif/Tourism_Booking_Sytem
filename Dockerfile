@@ -74,59 +74,12 @@ RUN mkdir -p /etc/nginx/http.d && \
     echo '    }' >> /etc/nginx/http.d/default.conf && \
     echo '}' >> /etc/nginx/http.d/default.conf
 
-# Configure Supervisor using a shell script
-RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run/supervisor && \
-    cat > /setup-supervisor.sh << 'SCRIPT_EOF'
-#!/bin/sh
-# Create supervisord main config
-cat > /etc/supervisord.conf << 'CONFIG_EOF'
-[supervisord]
-nodaemon=true
-user=root
-logfile=/var/log/supervisor/supervisord.log
-pidfile=/var/run/supervisor/supervisord.pid
-childlogdir=/var/log/supervisor
+# Setup Supervisor directories and copy config files
+RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run/supervisor
 
-[unix_http_server]
-file=/var/run/supervisor/supervisor.sock
-
-[supervisorctl]
-serverurl=unix:///var/run/supervisor/supervisor.sock
-
-[rpcinterface:supervisor]
-supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
-
-[include]
-files = /etc/supervisor/conf.d/*.conf
-CONFIG_EOF
-
-# Create php-fpm program config
-cat > /etc/supervisor/conf.d/php-fpm.conf << 'PHPFPM_EOF'
-[program:php-fpm]
-command=php-fpm --nodaemonize
-autostart=true
-autorestart=true
-redirect_stderr=true
-stdout_logfile=/var/log/supervisor/php-fpm.log
-startretries=10
-startsecs=3
-PHPFPM_EOF
-
-# Create nginx program config
-cat > /etc/supervisor/conf.d/nginx.conf << 'NGINX_EOF'
-[program:nginx]
-command=/usr/sbin/nginx -g "daemon off;"
-autostart=true
-autorestart=true
-redirect_stderr=true
-stdout_logfile=/var/log/supervisor/nginx.log
-startretries=10
-startsecs=3
-NGINX_EOF
-SCRIPT_EOF
-    chmod +x /setup-supervisor.sh && \
-    /setup-supervisor.sh && \
-    rm /setup-supervisor.sh
+COPY supervisord.conf /etc/supervisord.conf
+COPY php-fpm.conf /etc/supervisor/conf.d/php-fpm.conf
+COPY nginx.conf /etc/supervisor/conf.d/nginx.conf
 
 WORKDIR /var/www/html
 
