@@ -80,6 +80,7 @@ RUN mkdir -p /etc/supervisor/conf.d /var/log/supervisor /var/run/supervisor
 COPY supervisord.conf /etc/supervisord.conf
 COPY php-fpm.conf /etc/supervisor/conf.d/php-fpm.conf
 COPY nginx.conf /etc/supervisor/conf.d/nginx.conf
+COPY laravel-tail.conf /etc/supervisor/conf.d/laravel-tail.conf
 
 WORKDIR /var/www/html
 

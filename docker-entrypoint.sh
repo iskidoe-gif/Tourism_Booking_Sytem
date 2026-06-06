@@ -54,5 +54,22 @@ if [ "${RUN_SEEDS:-false}" = "true" ]; then
 fi
 
 echo "=== Container startup complete ==="
+echo "Ensuring storage and cache directories exist and have correct permissions..."
+mkdir -p storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache || true
+chmod -R 775 storage bootstrap/cache || true
+
+# Allow forcing debug mode for short-lived troubleshooting via FORCE_APP_DEBUG env var
+if [ "${FORCE_APP_DEBUG:-false}" = "true" ]; then
+  echo "FORCE_APP_DEBUG enabled — exporting APP_DEBUG=true"
+  export APP_DEBUG=true
+fi
+
+echo "Recent application logs (last 200 lines):"
+if [ -f storage/logs/laravel.log ]; then
+  tail -n 200 storage/logs/laravel.log || true
+else
+  echo "(no laravel.log present yet)"
+fi
 echo "Starting Supervisor..."
 exec /usr/bin/supervisord -c /etc/supervisord.conf
