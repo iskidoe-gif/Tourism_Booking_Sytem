@@ -22,21 +22,36 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // If the configured DB is Postgres but it's unreachable in local/debug,
-        // fall back to a local SQLite file so the app can boot for local testing.
-        if (env('DB_CONNECTION') === 'pgsql' && (App::environment('local') || env('FORCE_APP_DEBUG', 'false') === 'true')) {
+        $forceDebug = env('FORCE_APP_DEBUG', 'false') === 'true';
+        $localMode = App::environment('local') || $forceDebug;
+
+        if (! $localMode) {
+            return;
+        }
+
+        $dbConnection = env('DB_CONNECTION', 'mysql');
+        $isSqlite = $dbConnection === 'sqlite';
+
+        if (! $isSqlite) {
             try {
                 DB::connection()->getPdo();
             } catch (\Exception $e) {
-                // create sqlite file if missing
-                $sqlite = database_path('database.sqlite');
-                if (! file_exists($sqlite)) {
-                    @mkdir(dirname($sqlite), 0775, true);
-                    @touch($sqlite);
+                $sqlitePath = database_path('database.sqlite');
+                if (! file_exists($sqlitePath)) {
+                    @mkdir(dirname($sqlitePath), 0775, true);
+                    @touch($sqlitePath);
                 }
+
                 Config::set('database.default', 'sqlite');
-                Config::set('database.connections.sqlite.database', $sqlite);
+                Config::set('database.connections.sqlite.database', $sqlitePath);
+                Config::set('session.driver', 'file');
+                Config::set('session.connection', null);
             }
+        }
+
+        if ($isSqlite) {
+            Config::set('session.driver', 'file');
+            Config::set('session.connection', null);
         }
     }
 }
