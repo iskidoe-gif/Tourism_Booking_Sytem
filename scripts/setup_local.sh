@@ -21,10 +21,12 @@ php -r "file_put_contents('.env', preg_replace('/^APP_ENV=.*/m', 'APP_ENV=local'
 php -r "file_put_contents('.env', preg_replace('/^APP_DEBUG=.*/m', 'APP_DEBUG=true', file_get_contents('.env')));
 " || true
 
-# Set DB to sqlite
+# Set DB to sqlite and use file sessions
 php -r "file_put_contents('.env', preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=sqlite', file_get_contents('.env')));
 " || true
 php -r "file_put_contents('.env', preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE='.getcwd().'/database/database.sqlite', file_get_contents('.env')));
+" || true
+php -r "file_put_contents('.env', preg_replace('/^SESSION_DRIVER=.*/m', 'SESSION_DRIVER=file', file_get_contents('.env')));
 " || true
 
 mkdir -p database
