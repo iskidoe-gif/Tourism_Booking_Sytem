@@ -1,256 +1,292 @@
 <x-layout title="Book a Tour">
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h4 class="fw-semibold mb-3">{{ $tourPackage->name }}</h4>
-                        <p class="text-muted small mb-2">
-                            &#128205; {{ $tourPackage->location }} &nbsp;&bull;&nbsp;
-                            {{ $tourPackage->duration_days }} day(s) &nbsp;&bull;&nbsp;
-                            Up to {{ $tourPackage->max_guests }} guests
-                        </p>
-
-                        <div class="mb-3">
-                            <span class="badge bg-success">{{ $tourPackage->category_label }}</span>
-                            <span class="badge bg-secondary">Real Tour Package</span>
-                        </div>
-
-                        <p>{{ $tourPackage->description }}</p>
-
-                        <div class="row text-center mb-3">
-                            <div class="col-4">
-                                <div class="small text-muted">Price / person</div>
-                                <div class="fw-semibold text-success">₱{{ number_format($tourPackage->price, 2) }}</div>
-                            </div>
-                            <div class="col-4">
-                                <div class="small text-muted">Duration</div>
-                                <div class="fw-semibold">{{ $tourPackage->duration_days }} day(s)</div>
-                            </div>
-                            <div class="col-4">
-                                <div class="small text-muted">Rating</div>
-                                <div class="text-warning">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        {{ $i <= round($tourPackage->rating) ? '★' : '☆' }}
-                                    @endfor
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6>What this booking includes</h6>
-                            <ul class="small mb-0">
-                                <li>Guided sightseeing and local tour support</li>
-                                <li>Pre-approved tour itinerary for easy planning</li>
-                                <li>Dedicated booking confirmation and customer support</li>
-                                <li>Secure checkout with booking reference</li>
-                            </ul>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <strong>Booking note:</strong> Your reservation request is submitted immediately. A real tour operator will confirm availability and arrange the final invoice.
-                        </div>
-                    </div>
-                </div>
+<section class="package-detail-page">
+    <div class="package-detail-hero">
+        <div class="package-detail-grid">
+            <div class="package-detail-media">
+                @if($tourPackage->image)
+                    <img src="{{ $tourPackage->image_url }}" alt="{{ $tourPackage->name }}">
+                @else
+                    <div class="package-detail-placeholder" aria-hidden="true">Bolinao</div>
+                @endif
+                <span class="package-detail-badge">{{ $tourPackage->category_label }}</span>
             </div>
 
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header bg-white fw-semibold">Traveler & Booking Information</div>
-                    <div class="card-body">
-                        @if(auth()->user()?->isGuest())
-                            <div class="alert alert-warning">
-                                Guest accounts can only browse tours. Create a tourist account or sign in to complete a booking.
-                            </div>
+            <aside class="package-detail-summary">
+                <p class="package-detail-kicker">Reserve your tour</p>
+                <h1>{{ $tourPackage->name }}</h1>
 
-                            <div class="d-flex gap-2 mb-4">
-                                <a href="#" class="btn btn-primary flex-grow-1" data-auth-open data-auth-mode="register">Create Tourist Account</a>
-                                <a href="#" class="btn btn-outline-secondary flex-grow-1" data-auth-open data-auth-mode="signin">Sign In</a>
-                            </div>
-                        @else
-                            <form method="POST" action="{{ route('bookings.store') }}">
-                                @csrf
-                                <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">
-
-                                <div class="mb-3">
-                                    <label class="form-label">Primary Contact</label>
-                                    <input type="text" name="guest_name"
-                                           class="form-control @error('guest_name') is-invalid @enderror"
-                                           value="{{ old('guest_name', auth()->user()->name) }}"
-                                           placeholder="Name of booking contact">
-                                    @error('guest_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="form-label">Email</label>
-                                        <input type="email" name="guest_email"
-                                               class="form-control @error('guest_email') is-invalid @enderror"
-                                               value="{{ old('guest_email', auth()->user()->email) }}"
-                                               placeholder="contact@example.com">
-                                        @error('guest_email')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label class="form-label">Phone</label>
-                                        <input type="tel" name="guest_phone"
-                                               class="form-control @error('guest_phone') is-invalid @enderror"
-                                               value="{{ old('guest_phone', auth()->user()->phone ?? '') }}"
-                                               placeholder="0917 123 4567">
-                                        @error('guest_phone')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="row g-3 mb-3">
-                                    <div class="col-sm-6">
-                                        <label class="form-label">Tour start</label>
-                                        <input type="date" name="tour_start_date"
-                                               class="form-control @error('tour_start_date') is-invalid @enderror"
-                                               value="{{ old('tour_start_date') }}"
-                                               min="{{ now()->format('Y-m-d') }}">
-                                        @error('tour_start_date')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <label class="form-label">Tour end</label>
-                                        <input type="date" name="tour_end_date"
-                                               id="tour_end_date"
-                                               class="form-control @error('tour_end_date') is-invalid @enderror"
-                                               value="{{ old('tour_end_date', \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d')) }}"
-                                               min="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}"
-                                               max="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}">
-                                        <div class="form-text text-muted">This package is {{ $tourPackage->duration_days }} day(s); tour end must be exactly {{ $tourPackage->duration_days }} day(s) after tour start.</div>
-                                        @error('tour_end_date')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Travelers</label>
-                                    <div class="row g-3">
-                                        <div class="col-sm-4">
-                                            <input type="number" name="num_adults" id="num_adults"
-                                                   class="form-control @error('num_adults') is-invalid @enderror"
-                                                   value="{{ old('num_adults', 1) }}"
-                                                   min="0" max="{{ $tourPackage->max_guests }}"
-                                                   placeholder="Adults">
-                                            <div class="form-text">Adults</div>
-                                            @error('num_adults')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <input type="number" name="num_children" id="num_children"
-                                                   class="form-control @error('num_children') is-invalid @enderror"
-                                                   value="{{ old('num_children', 0) }}"
-                                                   min="0" max="{{ $tourPackage->max_guests }}"
-                                                   placeholder="Children">
-                                            <div class="form-text">Children</div>
-                                            @error('num_children')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <input type="number" name="num_seniors" id="num_seniors"
-                                                   class="form-control @error('num_seniors') is-invalid @enderror"
-                                                   value="{{ old('num_seniors', 0) }}"
-                                                   min="0" max="{{ $tourPackage->max_guests }}"
-                                                   placeholder="Seniors">
-                                            <div class="form-text">Seniors</div>
-                                            @error('num_seniors')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Optional Add-ons</label>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input booking-service" type="checkbox"
-                                               name="services[]" value="airport_transfer"
-                                               id="airport_transfer" data-price="1200"
-                                               {{ in_array('airport_transfer', old('services', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="airport_transfer">
-                                            Airport transfer <span class="text-muted">(₱1,200)</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input booking-service" type="checkbox"
-                                               name="services[]" value="travel_insurance"
-                                               id="travel_insurance" data-price="450"
-                                               {{ in_array('travel_insurance', old('services', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="travel_insurance">
-                                            Travel insurance <span class="text-muted">(₱450)</span>
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input booking-service" type="checkbox"
-                                               name="services[]" value="meal_plan"
-                                               id="meal_plan" data-price="650"
-                                               {{ in_array('meal_plan', old('services', [])) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="meal_plan">
-                                            Meal plan <span class="text-muted">(₱650)</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                @error('services')
-                                    <div class="alert alert-danger">{{ $message }}</div>
-                                @enderror
-
-                                <div class="mb-3">
-                                    <label class="form-label">Special Requests <span class="text-muted">(optional)</span></label>
-                                    <textarea name="special_requests" rows="3"
-                                              class="form-control @error('special_requests') is-invalid @enderror"
-                                              placeholder="e.g. vegetarian meals, wheelchair access">{{ old('special_requests') }}</textarea>
-                                    @error('special_requests')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <input type="hidden" name="num_guests" id="num_guests" value="{{ old('num_guests', 1) }}">
-
-                                <div class="card border-secondary mb-3">
-                                    <div class="card-body p-3">
-                                        <h6 class="fw-semibold mb-3">Booking Summary</h6>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Base rate</span>
-                                            <strong>₱{{ number_format($tourPackage->price, 2) }} x <span id="guest-total">{{ old('num_adults', 1) + old('num_children', 0) + old('num_seniors', 0) }}</span></strong>
-                                        </div>
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <span>Extras</span>
-                                            <strong id="extras-total">₱0.00</strong>
-                                        </div>
-                                        <hr>
-                                        <div class="d-flex justify-content-between fw-semibold">
-                                            <span>Total estimated</span>
-                                            <strong id="total-display">₱{{ number_format($tourPackage->price, 2) }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary flex-grow-1">Submit Reservation</button>
-                                    <a href="{{ route('packages.show', $tourPackage) }}" class="btn btn-outline-secondary">Back</a>
-                                </div>
-                            </form>
-                        @endif
-                    </div>
+                <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->rating, 1) }} out of 5">
+                    @for($i = 1; $i <= 5; $i++)
+                        <span>{!! $i <= round($tourPackage->rating) ? '&#9733;' : '&#9734;' !!}</span>
+                    @endfor
+                    <strong>{{ number_format($tourPackage->rating, 1) }}</strong>
                 </div>
-            </div>
+
+                <p class="package-detail-location">
+                    {{ $tourPackage->location }} &nbsp;&bull;&nbsp; {{ $tourPackage->duration_days }} day{{ $tourPackage->duration_days === 1 ? '' : 's' }} &nbsp;&bull;&nbsp; Up to {{ $tourPackage->max_guests }} guests
+                </p>
+
+                <p class="package-detail-description">{{ $tourPackage->description }}</p>
+
+                <div class="package-detail-price">
+                    <span>Price per person</span>
+                    <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
+                </div>
+
+                <div class="package-detail-actions">
+                    <a href="{{ route('packages.show', $tourPackage) }}" class="package-detail-primary">View package details</a>
+                    <p>Reservation requests are reviewed by the tour operator and confirmed shortly after submission.</p>
+                </div>
+            </aside>
         </div>
     </div>
-</div>
+
+    <div class="row gx-4 gy-4 package-detail-content">
+        <div class="col-lg-7">
+            <section class="package-detail-panel">
+                <div class="package-detail-section-heading">
+                    <p>Traveler information</p>
+                    <h2>Complete your reservation</h2>
+                </div>
+
+                @if(auth()->user()?->isGuest())
+                    <div class="alert alert-warning">
+                        Guest accounts can only browse tours. Create a tourist account or sign in to complete a booking.
+                    </div>
+
+                    <div class="d-flex gap-2 mb-4 flex-wrap">
+                        <a href="#" class="package-detail-primary flex-grow-1" data-auth-open data-auth-mode="register">Create Tourist Account</a>
+                        <a href="#" class="package-detail-primary flex-grow-1" data-auth-open data-auth-mode="signin">Sign In</a>
+                    </div>
+                @else
+                    <form method="POST" action="{{ route('bookings.store') }}">
+                        @csrf
+                        <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Primary contact</label>
+                            <input type="text" name="guest_name"
+                                   class="form-control @error('guest_name') is-invalid @enderror"
+                                   value="{{ old('guest_name', auth()->user()->name) }}"
+                                   placeholder="Name of booking contact">
+                            @error('guest_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="guest_email"
+                                       class="form-control @error('guest_email') is-invalid @enderror"
+                                       value="{{ old('guest_email', auth()->user()->email) }}"
+                                       placeholder="contact@example.com">
+                                @error('guest_email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" name="guest_phone"
+                                       class="form-control @error('guest_phone') is-invalid @enderror"
+                                       value="{{ old('guest_phone', auth()->user()->phone ?? '') }}"
+                                       placeholder="0917 123 4567">
+                                @error('guest_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">Tour start</label>
+                                <input type="date" name="tour_start_date"
+                                       class="form-control @error('tour_start_date') is-invalid @enderror"
+                                       value="{{ old('tour_start_date') }}"
+                                       min="{{ now()->format('Y-m-d') }}">
+                                @error('tour_start_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Tour end</label>
+                                <input type="date" name="tour_end_date"
+                                       id="tour_end_date"
+                                       class="form-control @error('tour_end_date') is-invalid @enderror"
+                                       value="{{ old('tour_end_date', \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d')) }}"
+                                       min="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}"
+                                       max="{{ \Carbon\Carbon::parse(old('tour_start_date', now()))->addDays($tourPackage->duration_days)->format('Y-m-d') }}">
+                                <div class="form-text text-muted">This package is {{ $tourPackage->duration_days }} day(s); tour end is fixed to match the duration.</div>
+                                @error('tour_end_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Travelers</label>
+                            <div class="row g-3">
+                                <div class="col-sm-4">
+                                    <input type="number" name="num_adults" id="num_adults"
+                                           class="form-control @error('num_adults') is-invalid @enderror"
+                                           value="{{ old('num_adults', 1) }}"
+                                           min="0" max="{{ $tourPackage->max_guests }}"
+                                           placeholder="Adults">
+                                    <div class="form-text">Adults</div>
+                                    @error('num_adults')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="number" name="num_children" id="num_children"
+                                           class="form-control @error('num_children') is-invalid @enderror"
+                                           value="{{ old('num_children', 0) }}"
+                                           min="0" max="{{ $tourPackage->max_guests }}"
+                                           placeholder="Children">
+                                    <div class="form-text">Children</div>
+                                    @error('num_children')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-sm-4">
+                                    <input type="number" name="num_seniors" id="num_seniors"
+                                           class="form-control @error('num_seniors') is-invalid @enderror"
+                                           value="{{ old('num_seniors', 0) }}"
+                                           min="0" max="{{ $tourPackage->max_guests }}"
+                                           placeholder="Seniors">
+                                    <div class="form-text">Seniors</div>
+                                    @error('num_seniors')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Optional add-ons</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input booking-service" type="checkbox"
+                                       name="services[]" value="airport_transfer"
+                                       id="airport_transfer" data-price="1200"
+                                       {{ in_array('airport_transfer', old('services', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="airport_transfer">
+                                    Airport transfer <span class="text-muted">(₱1,200)</span>
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input booking-service" type="checkbox"
+                                       name="services[]" value="travel_insurance"
+                                       id="travel_insurance" data-price="450"
+                                       {{ in_array('travel_insurance', old('services', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="travel_insurance">
+                                    Travel insurance <span class="text-muted">(₱450)</span>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input booking-service" type="checkbox"
+                                       name="services[]" value="meal_plan"
+                                       id="meal_plan" data-price="650"
+                                       {{ in_array('meal_plan', old('services', [])) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="meal_plan">
+                                    Meal plan <span class="text-muted">(₱650)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        @error('services')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+
+                        <div class="mb-3">
+                            <label class="form-label">Special requests <span class="text-muted">(optional)</span></label>
+                            <textarea name="special_requests" rows="3"
+                                      class="form-control @error('special_requests') is-invalid @enderror"
+                                      placeholder="e.g. vegetarian meals, wheelchair access">{{ old('special_requests') }}</textarea>
+                            @error('special_requests')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <input type="hidden" name="num_guests" id="num_guests" value="{{ old('num_guests', 1) }}">
+
+                        <div class="d-flex flex-column gap-3">
+                            <button type="submit" class="package-detail-primary">Submit Reservation</button>
+                            <a href="{{ route('packages.show', $tourPackage) }}" class="text-muted" style="text-decoration: underline;">Back to package</a>
+                        </div>
+                    </form>
+                @endif
+            </section>
+        </div>
+
+        <div class="col-lg-5">
+            <section class="package-detail-panel">
+                <div class="package-detail-section-heading">
+                    <p>Package details</p>
+                    <h2>Your tour summary</h2>
+                </div>
+
+                <div class="package-detail-stats">
+                    <div>
+                        <span>Destination</span>
+                        <strong>{{ $tourPackage->destination?->name ?? 'Bolinao' }}</strong>
+                    </div>
+                    <div>
+                        <span>Duration</span>
+                        <strong>{{ $tourPackage->duration_days }} day{{ $tourPackage->duration_days === 1 ? '' : 's' }}</strong>
+                    </div>
+                    <div>
+                        <span>Max guests</span>
+                        <strong>{{ $tourPackage->max_guests }}</strong>
+                    </div>
+                    <div>
+                        <span>Category</span>
+                        <strong>{{ $tourPackage->category_label }}</strong>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="mb-2">What’s included</h6>
+                    <ul class="small mb-0 text-muted">
+                        <li>Guided sightseeing and local tour support</li>
+                        <li>Pre-approved itinerary for easy planning</li>
+                        <li>Booking confirmation and customer support</li>
+                        <li>Secure checkout with reservation tracking</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="package-detail-panel">
+                <div class="package-detail-section-heading">
+                    <p>Estimated cost</p>
+                    <h2>Booking total</h2>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Base rate</span>
+                    <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Guests</span>
+                    <strong id="guest-total">{{ old('num_adults', 1) + old('num_children', 0) + old('num_seniors', 0) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Extras</span>
+                    <strong id="extras-total">₱0.00</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-semibold">
+                    <span>Total estimated</span>
+                    <strong id="total-display">₱{{ number_format($tourPackage->price, 2) }}</strong>
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    <strong>Note:</strong> This is an estimate. Final charges may vary after tour operator confirmation.
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
 
 <script>
     const basePrice = {{ $tourPackage->price }};
