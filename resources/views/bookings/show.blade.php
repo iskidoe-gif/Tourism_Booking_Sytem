@@ -414,7 +414,14 @@
         @if($booking->cancelled_at)
             <div class="timeline-item">
                 <div class="timeline-date">Cancelled</div>
-                <div class="timeline-event">{{ $booking->cancelled_at->format('M d, Y H:i') }}</div>
+                <div class="timeline-event">
+                    {{ $booking->cancelled_at->format('M d, Y H:i') }}
+                    @if($booking->cancellation_reason)
+                        <div style="margin-top: 0.5rem; color: #ef5350; font-size: 0.9rem;">
+                            <strong>Reason:</strong> {{ $booking->cancellation_reason }}
+                        </div>
+                    @endif
+                </div>
             </div>
         @endif
         @if($booking->completed_at)

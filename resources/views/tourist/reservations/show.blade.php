@@ -191,8 +191,9 @@
     </div>
 </div>
 
+@if($booking->canBeCancelled())
 <!-- Cancellation Modal -->
-<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -217,5 +218,6 @@
         </div>
     </div>
 </div>
+@endif
 
 </x-layout>

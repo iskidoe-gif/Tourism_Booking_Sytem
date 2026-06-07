@@ -169,14 +169,17 @@
                             </div>
                         @elseif($booking->status === 'cancelled')
                             <div class="booking-cancelled-info">
-                                <p class="lead">Cancelled{{ $booking->cancellation_reason ? (': ' . $booking->cancellation_reason) : '' }}</p>
+                                <p class="lead">Cancelled</p>
                                 <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
+                                @if($booking->cancellation_reason)
+                                    <button type="button" class="btn btn-info" onclick="showCancellationModal({{ $booking->id }}, '{{ $booking->cancellation_reason }}')">View Cancellation Reason</button>
+                                @endif
                             </div>
                         @elseif($booking->status === 'cancellation_pending')
                             <div class="booking-cancellation-pending-info">
-                                <p class="lead"><strong>Cancellation Requested:</strong> {{ $booking->cancellation_reason }}</p>
                                 <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
                                 <div class="booking-actions">
+                                    <button type="button" class="btn btn-info" onclick="showCancellationModal({{ $booking->id }}, '{{ $booking->cancellation_reason }}')">View Cancellation</button>
                                     <form method="POST" action="{{ route('admin.bookings.approve-cancellation', $booking) }}">
                                         @csrf
                                         <button type="submit" class="btn btn-danger">Approve Cancellation</button>
@@ -201,4 +204,32 @@
             @endif
         </div>
     </div>
+</div>
+
+<!-- Cancellation Details Modal -->
+<div class="modal fade" id="cancellationModal" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancellation Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="cancellationReasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCancellationModal(bookingId, reason) {
+    document.getElementById('cancellationReasonText').textContent = reason;
+    const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
+    modal.show();
+}
+</script>
+
 </x-layout>

@@ -173,21 +173,6 @@ class DashboardController extends Controller
         return view('tourist.packages', $data);
     }
 
-    public function reservations(Request $request): JsonResponse|View|RedirectResponse
-    {
-        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
-        $data = $this->touristData($request);
-
-        if ($request->expectsJson()) {
-            return response()->json($data);
-        }
-
-        return view('tourist.reservations', $data);
-    }
-
     public function storeBooking(Request $request): JsonResponse|RedirectResponse
     {
         if ($request->user()?->isGuest()) {
