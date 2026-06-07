@@ -1,5 +1,10 @@
 <x-layout title="Book a Tour">
 
+@php
+    $selectedPromoId = request('promo');
+    $selectedPromo = $selectedPromoId ? \App\Models\PromoPackage::find($selectedPromoId) : null;
+@endphp
+
 <section class="package-detail-page">
     <div class="package-detail-hero">
         <div class="package-detail-grid">
@@ -32,6 +37,11 @@
                 <div class="package-detail-price">
                     <span>Price per person</span>
                     <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
+                    @if($selectedPromo && $selectedPromo->isActive())
+                        <div class="mt-2">
+                            <span class="badge bg-success">{{ $selectedPromo->name }} - {{ $selectedPromo->discount_percentage }}% OFF</span>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="package-detail-actions">
@@ -63,6 +73,9 @@
                     <form method="POST" action="{{ route('bookings.store') }}">
                         @csrf
                         <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">
+                        @if($selectedPromo && $selectedPromo->isActive())
+                            <input type="hidden" name="promo_package_id" value="{{ $selectedPromo->id }}">
+                        @endif
 
                         <div class="mb-3">
                             <label class="form-label">Primary contact</label>

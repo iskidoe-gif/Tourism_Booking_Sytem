@@ -1,4 +1,7 @@
 <x-layout :title="$tourPackage->name">
+@php
+    $selectedPromoId = request('promo');
+@endphp
     <section class="package-detail-page">
         <div class="package-detail-hero">
             <a href="{{ route('packages.index') }}" class="package-detail-back">Back to packages</a>
@@ -40,7 +43,7 @@
                                 </button>
                                 <p>Guest accounts can browse tours only. Create a tourist account to make a booking.</p>
                             @elseif(auth()->user()->isTourist())
-                                <a href="{{ route('bookings.create', $tourPackage) }}" class="package-detail-primary">
+                                <a href="{{ route('bookings.create', array_merge([$tourPackage], $selectedPromoId ? ['promo' => $selectedPromoId] : [])) }}" class="package-detail-primary">
                                     Reserve This Tour
                                 </a>
                             @else

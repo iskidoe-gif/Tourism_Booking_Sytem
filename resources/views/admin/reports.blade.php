@@ -49,6 +49,7 @@
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Start Date</th>
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">End Date</th>
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Guests</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Promo</th>
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Status</th>
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Total Price</th>
                         <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #4CAF50;">Payment</th>
@@ -64,6 +65,13 @@
                             <td style="padding: 0.75rem;">{{ optional($booking->tour_start_date)->format('Y-m-d') ?? 'N/A' }}</td>
                             <td style="padding: 0.75rem;">{{ optional($booking->tour_end_date)->format('Y-m-d') ?? 'N/A' }}</td>
                             <td style="padding: 0.75rem;">{{ $booking->num_guests }}</td>
+                            <td style="padding: 0.75rem;">
+                                @if($booking->promoPackage)
+                                    <span style="color: #ffc107; font-weight: 600;">{{ $booking->promoPackage->name }} ({{ $booking->promoPackage->discount_percentage }}%)</span>
+                                @else
+                                    <span style="color: #8890a8;">-</span>
+                                @endif
+                            </td>
                             <td style="padding: 0.75rem;">
                                 <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.8rem; font-weight: 600; 
                                     @if($booking->status === 'approved') background: #28a745; color: white;
@@ -86,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" style="padding: 2rem; text-align: center; color: #8890a8;">
+                            <td colspan="11" style="padding: 2rem; text-align: center; color: #8890a8;">
                                 No booking data available.
                             </td>
                         </tr>

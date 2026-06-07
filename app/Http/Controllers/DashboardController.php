@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Destination;
 use App\Models\FamousTouristSpot;
 use App\Models\Payment;
+use App\Models\PromoPackage;
 use App\Models\Review;
 use App\Models\TourPackage;
 use App\Services\BookingService;
@@ -57,7 +58,14 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        return view('welcome', compact('topRatedPackages', 'customerReviews', 'famousTouristSpots'));
+        $promoPackages = PromoPackage::where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        return view('welcome', compact('topRatedPackages', 'customerReviews', 'famousTouristSpots', 'promoPackages'));
     }
 
     public function admin(Request $request): JsonResponse|View
@@ -89,6 +97,24 @@ class DashboardController extends Controller
         $spot = FamousTouristSpot::findOrFail($id);
 
         return view('famous-tourist-spot-details', compact('spot'));
+    }
+
+    public function promoPackages(Request $request): View
+    {
+        $promoPackages = PromoPackage::where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->latest()
+            ->get();
+
+        return view('promo-packages', compact('promoPackages'));
+    }
+
+    public function showPromoPackage($id): View
+    {
+        $promoPackage = PromoPackage::findOrFail($id);
+
+        return view('promo-package-details', compact('promoPackage'));
     }
 
     public function packages(Request $request): JsonResponse|View|RedirectResponse
@@ -170,7 +196,7 @@ class DashboardController extends Controller
             return response()->json($data);
         }
 
-        return view('tourist.packages', $data);
+        return view('tourist.packages.index', $data);
     }
 
     public function storeBooking(Request $request): JsonResponse|RedirectResponse
@@ -190,6 +216,7 @@ class DashboardController extends Controller
 
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
+            'promo_package_id' => ['nullable', 'exists:promo_packages,id'],
             'tour_start_date' => ['required', 'date', 'after_or_equal:today'],
             'tour_end_date' => ['required', 'date', 'after:tour_start_date'],
             'num_adults' => ['required', 'integer', 'min:0'],
@@ -243,10 +270,26 @@ class DashboardController extends Controller
             }
         }
 
+        // Apply promo package discount if provided
+        $discountAmount = 0;
+        $discountCode = null;
+        $promoPackageId = null;
+
+        if (!empty($validated['promo_package_id'])) {
+            $promoPackage = PromoPackage::find($validated['promo_package_id']);
+            if ($promoPackage && $promoPackage->isActive()) {
+                $basePrice = $package->price * $totalGuests;
+                $discountAmount = $basePrice * ($promoPackage->discount_percentage / 100);
+                $discountCode = $promoPackage->name;
+                $promoPackageId = $promoPackage->id;
+            }
+        }
+
         $bookingService = new BookingService();
         $booking = $bookingService->createBooking([
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
+            'promo_package_id' => $promoPackageId,
             'tour_date' => $validated['tour_start_date'],
             'tour_start_date' => $validated['tour_start_date'],
             'tour_end_date' => $validated['tour_end_date'],
@@ -256,6 +299,8 @@ class DashboardController extends Controller
             'num_seniors' => $validated['num_seniors'],
             'base_price' => $package->price * $totalGuests,
             'additional_fees' => $serviceTotal,
+            'discount_amount' => $discountAmount,
+            'discount_code' => $discountCode,
             'services' => collect($serviceItems),
             'guest_details' => collect([
                 'contact_name' => $validated['guest_name'],

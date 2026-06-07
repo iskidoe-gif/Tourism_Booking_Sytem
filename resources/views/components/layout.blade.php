@@ -16,20 +16,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Enhance all buttons with immediate feedback
             const buttons = document.querySelectorAll('button, .btn, .btn-primary, .btn-secondary, .navbtn, .bolinao-button');
-            
+
             buttons.forEach(button => {
-                // Skip if already has onclick handler
+                // Skip if already has onclick handler or is a link with valid href
                 if (button.getAttribute('onclick')) return;
-                
+                if (button.tagName === 'A' && button.getAttribute('href') && button.getAttribute('href') !== '#' && !button.getAttribute('href').startsWith('javascript')) return;
+
                 button.addEventListener('click', function(e) {
                     const originalText = this.textContent;
                     const isLink = this.tagName === 'A';
                     const href = isLink ? this.getAttribute('href') : null;
-                    
+
                     // Show immediate feedback
                     this.style.opacity = '0.7';
                     this.style.transform = 'scale(0.98)';
-                    
+
                     // If it's a link, navigate immediately
                     if (isLink && href && href !== '#' && !href.startsWith('javascript')) {
                         e.preventDefault();
@@ -37,7 +38,7 @@
                             window.location.href = href;
                         }, 50);
                     }
-                    
+
                     // Reset visual state after short delay
                     setTimeout(() => {
                         this.style.opacity = '1';
@@ -45,7 +46,7 @@
                     }, 150);
                 });
             });
-            
+
             // Enhance form submissions
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
@@ -80,6 +81,7 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
                         <x-nav-link :href="route('admin.bookings.index')" :active="request()->routeIs('admin.bookings.index')">Bookings</x-nav-link>
                         <x-nav-link :href="route('admin.packages-stats')" :active="request()->routeIs('admin.packages-stats')">Packages</x-nav-link>
+                        <x-nav-link :href="route('admin.promo-packages.index')" :active="request()->routeIs('admin.promo-packages.*')">Promo Packages</x-nav-link>
                         <x-nav-link :href="route('admin.famous-tourist-spots.index')" :active="request()->routeIs('admin.famous-tourist-spots.index')">Tourist Spots</x-nav-link>
                         <x-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.index')">Payments</x-nav-link>
                         <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.index')">Reports</x-nav-link>
@@ -90,11 +92,14 @@
                     @elseif($touristUser)
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Packages</x-nav-link>
+                        <x-nav-link :href="route('promo-packages.index')" :active="request()->routeIs('promo-packages.*')">Promo Packages</x-nav-link>
                         <x-nav-link :href="route('famous-tourist-spots.index')" :active="request()->routeIs('famous-tourist-spots.index')">Tourist Spots</x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
-                            <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
-                        </a>
+                        @if(!$touristUser->isGuest())
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
+                            <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
+                                <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
+                            </a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf
                             <button class="navbtn">Logout</button>
@@ -102,6 +107,7 @@
                     @else
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Packages</x-nav-link>
+                        <x-nav-link :href="route('promo-packages.index')" :active="request()->routeIs('promo-packages.*')">Promo Packages</x-nav-link>
                         <x-nav-link :href="route('famous-tourist-spots.index')" :active="request()->routeIs('famous-tourist-spots.index')">Tourist Spots</x-nav-link>
                         <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                     @endif

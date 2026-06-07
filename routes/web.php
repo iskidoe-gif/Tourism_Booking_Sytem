@@ -50,6 +50,12 @@ Route::get('/famous-tourist-spots', [DashboardController::class, 'famousTouristS
 Route::get('/famous-tourist-spots/{id}', [DashboardController::class, 'showFamousTouristSpot'])
     ->name('famous-tourist-spots.show');
 
+Route::get('/promo-packages', [DashboardController::class, 'promoPackages'])
+    ->name('promo-packages.index');
+
+Route::get('/promo-packages/{id}', [DashboardController::class, 'showPromoPackage'])
+    ->name('promo-packages.show');
+
 Route::get('/packages/{tourPackage}', [TouristPackageController::class, 'show'])
     ->name('packages.show');
 
@@ -62,7 +68,7 @@ Route::delete('/reviews/{review}', [\App\Http\Controllers\ReviewController::clas
     ->name('reviews.destroy');
 
 Route::get('/bookings/{tourPackage}/create', [BookingController::class, 'create'])
-    ->middleware('auth')
+    ->middleware(['auth', 'not.guest'])
     ->name('bookings.create');
 
 Route::get('/reservations', [ReservationController::class, 'index'])
@@ -91,10 +97,10 @@ Route::post('/reservations/{booking}/check-out', [ReservationController::class, 
     ->name('reservations.check-out');
 
 Route::post('/bookings', [DashboardController::class, 'storeBooking'])
-    ->middleware('auth')
+    ->middleware(['auth', 'not.guest'])
     ->name('bookings.store');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'not.guest'])->group(function () {
     Route::get('/bookings/{booking}', [DashboardController::class, 'showBooking'])
         ->name('bookings.show');
     Route::post('/bookings/{booking}/cancel', [DashboardController::class, 'cancelBooking'])
@@ -139,6 +145,8 @@ Route::prefix('admin')
         Route::resource('famous-tourist-spots', FamousTouristSpotController::class)->except(['show']);
 
         Route::resource('destinations', \App\Http\Controllers\Admin\DestinationController::class)->except(['show']);
+
+        Route::resource('promo-packages', \App\Http\Controllers\Admin\PromoPackageController::class)->except(['show']);
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 

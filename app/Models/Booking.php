@@ -18,6 +18,7 @@ class Booking extends Model
         'reference_code',
         'user_id',
         'tour_package_id',
+        'promo_package_id',
         'tour_date',
         'tour_start_date',
         'tour_end_date',
@@ -99,6 +100,11 @@ class Booking extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function promoPackage(): BelongsTo
+    {
+        return $this->belongsTo(PromoPackage::class);
     }
 
     public function approver(): BelongsTo

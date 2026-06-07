@@ -1555,7 +1555,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .auth-panel.admin .auth-input {
-    background: #fff;
+    background: #e8f4f8;
     color: var(--palette-ink);
     border-color: rgba(15, 23, 42, 0.15);
 }

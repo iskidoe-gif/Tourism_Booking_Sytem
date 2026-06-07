@@ -17,7 +17,11 @@
 
                                     <div class="bolinao-actions">
                                         @auth
-                                            <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
+                                            @if(auth()->user()->isGuest())
+                                                <button type="button" class="bolinao-button bolinao-button-light" data-auth-open data-auth-mode="register">Book a Trip Now</button>
+                                            @else
+                                                <a href="{{ route('packages.index') }}" class="bolinao-button bolinao-button-light">Book a Trip Now</a>
+                                            @endif
                                         @else
                                             <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Book a Trip Now</a>
                                         @endauth
@@ -156,6 +160,56 @@
 
             <div style="text-align: center; margin-top: 2rem;">
                 <a href="{{ route('famous-tourist-spots.index') }}" class="btn btn-primary">View All Famous Tourist Spots</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="promo-packages-section" aria-label="Promo packages and special offers" style="padding: 5rem 1.5rem 3rem;">
+        <div class="featured-packages-inner">
+            <div class="section-header">
+                <p>Special Offers</p>
+                <h2>Promo Packages</h2>
+                <p>Exclusive discounts and special deals for your Bolinao adventure</p>
+            </div>
+
+            <div class="package-card-grid">
+                @forelse($promoPackages->take(3) as $promo)
+                    <article class="package-card">
+                        @if($promo->image)
+                            <div class="package-card-media" style="background-image: url('{{ asset('storage/' . $promo->image) }}');"></div>
+                        @else
+                            <div class="package-card-media" style="background: linear-gradient(135deg, rgba(76, 175, 80, 0.3) 0%, rgba(17, 24, 68, 0.5) 100%); display: flex; align-items: center; justify-content: center;">
+                                <div style="font-size: 4rem; opacity: 0.5;">🎉</div>
+                            </div>
+                        @endif
+                        <div class="package-card-body">
+                            <div class="package-card-meta">
+                                <span>🏷️ {{ $promo->discount_percentage }}% OFF</span>
+                                <span>Valid until {{ $promo->end_date->format('M d, Y') }}</span>
+                            </div>
+                            <h3 class="package-card-title">{{ $promo->name }}</h3>
+                            <p class="package-card-description">{{ Str::limit($promo->description, 110) }}</p>
+                            <div class="package-card-footer" style="text-align: center;">
+                                <a href="{{ route('promo-packages.show', $promo->id) }}" class="btn btn-secondary">View Details</a>
+                                @auth
+                                    @if(auth()->user()->isGuest())
+                                        <button type="button" class="btn btn-primary" data-auth-open data-auth-mode="register">Avail Promo</button>
+                                    @else
+                                        <a href="{{ route('packages.index', ['promo' => $promo->id]) }}" class="btn btn-primary">Avail Promo</a>
+                                    @endif
+                                @else
+                                    <a href="#" class="btn btn-primary" data-auth-open>Avail Promo</a>
+                                @endauth
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <p style="grid-column: 1 / -1; text-align: center; padding: 2rem;">No promo packages available at the moment. Check back soon!</p>
+                @endforelse
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ route('promo-packages.index') }}" class="btn btn-primary">View All Promo Packages</a>
             </div>
         </div>
     </section>

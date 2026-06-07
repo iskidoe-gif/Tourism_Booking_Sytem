@@ -130,6 +130,9 @@
                                 | Tour end: {{ $booking->tour_end_date?->format('M d, Y') ?? 'Not set' }}
                             </p>
                             <p class="lead">Guests: {{ $booking->num_guests }} | Price: PHP {{ number_format((float) $booking->total_price, 2) }}</p>
+                            @if($booking->promoPackage)
+                                <p class="lead" style="color: #ffc107;"><strong>🎉 Promo:</strong> {{ $booking->promoPackage->name }} ({{ $booking->promoPackage->discount_percentage }}% OFF)</p>
+                            @endif
                             @if($booking->special_requests)
                                 <p class="lead"><strong>Requests:</strong> {{ $booking->special_requests }}</p>
                             @endif

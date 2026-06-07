@@ -8,6 +8,7 @@ use App\Models\Destination;
 use App\Models\Payment;
 use App\Models\TourPackage;
 use App\Models\User;
+use App\Models\FamousTouristSpot;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -61,6 +62,8 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(TourPackageSeeder::class);
+
+        $this->call(FamousTouristSpotSeeder::class);
 
         $this->call(ReviewSeeder::class);
 

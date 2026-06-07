@@ -306,6 +306,32 @@
         @endif
     </div>
 
+    <!-- Promo Package -->
+    @if($booking->promoPackage)
+        <div class="booking-detail-section" style="border-left: 4px solid #ffc107;">
+            <div class="booking-detail-title">🎉 Promo Package Applied</div>
+            
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Promo Name</span>
+                <span class="booking-detail-value" style="color: #ffc107;">{{ $booking->promoPackage->name }}</span>
+            </div>
+            @if($booking->promoPackage->description)
+                <div class="booking-detail-row">
+                    <span class="booking-detail-label">Description</span>
+                    <span class="booking-detail-value">{{ $booking->promoPackage->description }}</span>
+                </div>
+            @endif
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Discount</span>
+                <span class="booking-detail-value" style="color: #ffc107;">{{ $booking->promoPackage->discount_percentage }}% OFF</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Valid Until</span>
+                <span class="booking-detail-value">{{ $booking->promoPackage->end_date->format('M d, Y') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Price Summary -->
     <div class="booking-detail-section">
         <div class="booking-detail-title">💰 Pricing Details</div>

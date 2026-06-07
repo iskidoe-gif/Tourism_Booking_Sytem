@@ -6,7 +6,7 @@
                     <path d="M12 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm-8-9a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1zm16 0a1 1 0 0 0-1 1v2a1 1 0 1 0 2 0V8a1 1 0 0 0-1-1z" />
                 </svg>
             </div>
-            <h1 class="auth-title">Admin Login</h1>
+            <h1 class="auth-title">Log in to your account</h1>
             <p class="auth-lead">Sign in with your admin account to manage bookings, packages, and reports.</p>
         </div>
 
@@ -21,7 +21,7 @@
             @csrf
 
             <div class="auth-group">
-                <label for="email">Admin Email</label>
+                <label for="email">Email Address</label>
                 <input id="email" name="email" type="email" value="{{ old('email') }}" placeholder="admin@tourph.com" class="auth-input" required autocomplete="email" />
                 @error('email')<p class="error-text">{{ $message }}</p>@enderror
             </div>
@@ -32,7 +32,14 @@
                 @error('password')<p class="error-text">{{ $message }}</p>@enderror
             </div>
 
-            <button type="submit" class="btn-primary">Access Dashboard</button>
+            <div class="auth-group">
+                <div class="form-check">
+                    <input type="checkbox" name="remember" id="remember" class="form-check-input" {{ old('remember') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="remember">Remember me</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Sign In</button>
         </form>
 
         <div class="divider">
@@ -48,7 +55,7 @@
         @endif
 
         <div class="auth-links">
-            <a href="{{ route('home') }}" class="btn-secondary">Back to home</a>
+            <a href="{{ route('home') }}" class="btn-secondary">Continue as Guest</a>
         </div>
     </div>
 </x-layout>
