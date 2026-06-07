@@ -40,6 +40,13 @@ class BookingController extends Controller
             'status'           => 'pending',
         ]);
 
+        // Automatically create a payment record for the booking
+        $booking->payment()->create([
+            'amount' => $booking->total_price,
+            'status' => 'unpaid',
+            'method' => 'cash',
+        ]);
+
         return redirect()
             ->route('reservations.show', $booking)
             ->with('success', "Booking #{$booking->booking_number} submitted! Waiting for admin approval.");

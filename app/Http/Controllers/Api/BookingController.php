@@ -44,7 +44,14 @@ class BookingController extends Controller
 
         $booking = Booking::create($validated);
 
-        return response()->json(['data' => $booking->load(['user', 'package'])], 201);
+        // Automatically create a payment record for the booking
+        $booking->payment()->create([
+            'amount' => $booking->total_price,
+            'status' => 'unpaid',
+            'method' => 'cash',
+        ]);
+
+        return response()->json(['data' => $booking->load(['user', 'package', 'payment'])], 201);
     }
 
     public function show(Booking $booking): JsonResponse

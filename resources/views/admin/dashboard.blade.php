@@ -776,16 +776,16 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
             @foreach($topPackages as $package)
                 <div class="insight-card">
-                    <div class="insight-title">{{ $package->name }}</div>
+                    <div class="insight-title">{{ $package->name ?? 'Unknown Package' }}</div>
                     
                     <div class="metric-row">
                         <span class="metric-label">Location</span>
-                        <span class="metric-value" style="font-size: 1rem;">{{ $package->location }}</span>
+                        <span class="metric-value" style="font-size: 1rem;">{{ $package->location ?? 'Unknown' }}</span>
                     </div>
 
                     <div class="metric-row">
                         <span class="metric-label">Total Bookings</span>
-                        <span class="metric-value">{{ $package->bookings_count }}</span>
+                        <span class="metric-value">{{ $package->bookings_count ?? 0 }}</span>
                     </div>
 
                     <div class="metric-row">
@@ -801,7 +801,7 @@
 
                     <div class="metric-row">
                         <span class="metric-label">Price</span>
-                        <span class="metric-value" style="color: #4CAF50;">₱{{ number_format($package->price, 2) }}</span>
+                        <span class="metric-value" style="color: #4CAF50;">₱{{ number_format($package->price ?? 0, 2) }}</span>
                     </div>
                 </div>
             @endforeach
@@ -916,13 +916,13 @@
                 <div class="review-card">
                     <div class="review-card-header">
                         <div class="review-card-info">
-                            <h3>{{ $review->tourPackage->name }}</h3>
-                            <p>by {{ $review->user->name }}</p>
+                            <h3>{{ $review->tourPackage?->name ?? 'Unknown Package' }}</h3>
+                            <p>by {{ $review->user?->name ?? 'Unknown User' }}</p>
                         </div>
                         <div class="review-card-rating">⭐ {{ $review->rating }}</div>
                     </div>
-                    <p class="review-card-comment">{{ Str::limit($review->comment, 120) }}</p>
-                    <p class="review-card-date">{{ $review->created_at->diffForHumans() }}</p>
+                    <p class="review-card-comment">{{ Str::limit($review->comment ?? 'No comment', 120) }}</p>
+                    <p class="review-card-date">{{ $review->created_at?->diffForHumans() ?? 'Recently' }}</p>
                 </div>
             @endforeach
         </div>
@@ -1020,10 +1020,10 @@
             <div class="rated-packages-body">
                 @foreach($packageRatings as $package)
                     <div class="rated-packages-row">
-                        <div class="rated-packages-name">{{ Str::limit($package->name, 25) }}</div>
-                        <div class="rated-packages-rating">⭐ {{ number_format($package->rating, 2) }}/5.0</div>
-                        <div class="rated-packages-reviews">{{ $package->reviews_count }} reviews</div>
-                        <div class="rated-packages-price">₱{{ number_format($package->price, 2) }}</div>
+                        <div class="rated-packages-name">{{ Str::limit($package->name ?? 'Unknown Package', 25) }}</div>
+                        <div class="rated-packages-rating">⭐ {{ number_format($package->rating ?? 0, 2) }}/5.0</div>
+                        <div class="rated-packages-reviews">{{ $package->reviews_count ?? 0 }} reviews</div>
+                        <div class="rated-packages-price">₱{{ number_format($package->price ?? 0, 2) }}</div>
                     </div>
                 @endforeach
             </div>

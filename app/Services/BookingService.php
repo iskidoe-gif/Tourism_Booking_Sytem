@@ -36,7 +36,16 @@ class BookingService
             $data['discount_amount'] ?? 0
         );
 
-        return Booking::create($data);
+        $booking = Booking::create($data);
+
+        // Automatically create a payment record for the booking
+        $booking->payment()->create([
+            'amount' => $booking->total_price,
+            'status' => 'unpaid',
+            'method' => 'cash',
+        ]);
+
+        return $booking;
     }
 
     /**
