@@ -120,9 +120,6 @@
                     @endforeach
                 </div>
 
-                <div class="package-pagination" style="margin-top:1rem">
-                    {{ $packages->links() }}
-                </div>
             @endif
         </main>
     </div>

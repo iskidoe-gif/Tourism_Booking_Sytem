@@ -130,6 +130,11 @@ class Booking extends Model
         return $this->status === 'cancelled';
     }
 
+    public function isCancellationPending(): bool
+    {
+        return $this->status === 'cancellation_pending';
+    }
+
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
@@ -138,7 +143,8 @@ class Booking extends Model
     public function canBeCancelled(): bool
     {
         return in_array($this->status, ['pending', 'confirmed', 'approved'])
-            && $this->tour_date->isFuture();
+            && $this->tour_date->isFuture()
+            && !$this->isCancellationPending();
     }
 
     public function canCheckIn(): bool
@@ -238,6 +244,7 @@ class Booking extends Model
             'confirmed', 'approved' => '#81c784',
             'declined' => '#dc3545',
             'cancelled' => '#6c757d',
+            'cancellation_pending' => '#fd7e14',
             'completed' => '#64b5f6',
             default => '#9e9e9e',
         };
@@ -253,6 +260,9 @@ class Booking extends Model
             return 'Tour Started';
         }
 
-        return ucfirst(str_replace('_', ' ', $this->status));
+        return match($this->status) {
+            'cancellation_pending' => 'Cancellation Pending',
+            default => ucfirst(str_replace('_', ' ', $this->status)),
+        };
     }
 }

@@ -26,16 +26,23 @@ class ReservationController extends Controller
         return view('tourist.reservations.show', compact('booking'));
     }
 
-    public function cancel(Booking $booking)
+    public function cancel(Request $request, Booking $booking)
     {
         abort_if($booking->user_id !== Auth::id(), 403);
         abort_if($booking->status !== 'pending', 403, 'Only pending bookings can be cancelled.');
 
-        $booking->update(['status' => 'cancelled']);
+        $request->validate([
+            'cancellation_reason' => 'required|string|max:500',
+        ]);
+
+        $booking->update([
+            'status' => 'cancellation_pending',
+            'cancellation_reason' => $request->cancellation_reason,
+        ]);
 
         return redirect()
             ->route('reservations.index')
-            ->with('success', "Booking #{$booking->booking_number} cancelled.");
+            ->with('success', "Cancellation request for booking #{$booking->booking_number} submitted. Awaiting admin approval.");
     }
 
     public function checkIn(Booking $booking)

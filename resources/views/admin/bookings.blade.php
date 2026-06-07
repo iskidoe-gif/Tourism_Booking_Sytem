@@ -13,6 +13,7 @@
                     'cancelled' => 'Cancelled',
                     'declined' => 'Declined',
                     'completed' => 'Completed',
+                    'cancellation_pending' => 'Cancellation Pending',
                 ];
 
                 $statusClasses = [
@@ -21,6 +22,7 @@
                     'cancelled' => 'status-cancelled',
                     'declined' => 'status-declined',
                     'completed' => 'status-completed',
+                    'cancellation_pending' => 'status-cancellation-pending',
                 ];
             @endphp
 
@@ -47,7 +49,6 @@
                     align-items: center;
                     gap: 0.5rem;
                 }
-
 
                 .filter-group label {
                     font-weight: 600;
@@ -97,6 +98,7 @@
                 .status-declined { background: #dc3545; }
                 .status-cancelled { background: #6c757d; }
                 .status-completed { background: #6f42c1; }
+                .status-cancellation-pending { background: #fd7e14; }
             </style>
 
             <!-- Filter Form (status only, inline) -->
@@ -110,6 +112,7 @@
                             <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Confirmed</option>
                             <option value="declined" {{ request('status') === 'declined' ? 'selected' : '' }}>Declined</option>
                             <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="cancellation_pending" {{ request('status') === 'cancellation_pending' ? 'selected' : '' }}>Cancellation Pending</option>
                         </select>
                     </div>
                 </div>
@@ -168,6 +171,21 @@
                             <div class="booking-cancelled-info">
                                 <p class="lead">Cancelled{{ $booking->cancellation_reason ? (': ' . $booking->cancellation_reason) : '' }}</p>
                                 <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
+                            </div>
+                        @elseif($booking->status === 'cancellation_pending')
+                            <div class="booking-cancellation-pending-info">
+                                <p class="lead"><strong>Cancellation Requested:</strong> {{ $booking->cancellation_reason }}</p>
+                                <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
+                                <div class="booking-actions">
+                                    <form method="POST" action="{{ route('admin.bookings.approve-cancellation', $booking) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger">Approve Cancellation</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.bookings.reject-cancellation', $booking) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-secondary">Reject Cancellation</button>
+                                    </form>
+                                </div>
                             </div>
                         @endif
                     </div>

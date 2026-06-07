@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\HandleCsrfExceptions;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureAdmin::class,
         ]);
+
+        $middleware->replace(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, HandleCsrfExceptions::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -28,8 +28,8 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
             margin-bottom: 2.5rem;
         }
 
@@ -239,7 +239,7 @@
         }
 
         .alert-banner {
-            background: rgba(255, 193, 7, 0.15);
+            background: rgba(255, 193, 7, 0.4);
             border-left: 3px solid #FFB74D;
             border-radius: 0.5rem;
             padding: 1.25rem;
@@ -250,9 +250,18 @@
         }
 
         .alert-banner.success {
-            background: rgba(129, 199, 132, 0.15);
+            background: rgba(129, 199, 132, 0.4);
             border-left-color: #81c784;
             color: #81c784;
+        }
+
+        .dark-card {
+            background: #1a1a2e;
+            border: 1px solid #2d2d4d;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .kpi-grid {
@@ -308,70 +317,12 @@
     </div>
 
     <!-- Alert Banner -->
-    <div class="alert-banner success">
-        ✅ System is operating normally. Last updated: {{ now()->format('M d, Y H:i A') }}
+    <div class="dark-card">
+        <div class="alert-banner success">
+            ✅ System is operating normally. Last updated: {{ now()->format('M d, Y H:i A') }}
+        </div>
     </div>
 
-    <!-- Upcoming Check-ins Alert -->
-    @if($upcomingCheckIns && $upcomingCheckIns->count() > 0)
-    <style>
-        .upcoming-checkins-alert {
-            background: rgba(255, 152, 0, 0.15);
-            border-left: 3px solid #FFB74D;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-bottom: 2rem;
-            color: #FF9800;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        .checkin-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.75rem;
-            border-radius: 0.4rem;
-            font-size: 0.9rem;
-            margin-bottom: 0.75rem;
-        }
-        .checkin-item:last-child {
-            margin-bottom: 0;
-        }
-        .checkin-item-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        .checkin-date {
-            text-align: right;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-    </style>
-    <div class="upcoming-checkins-alert">
-        <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-            <div style="font-size: 1.5rem; flex-shrink: 0;">⚠️</div>
-            <div>
-                <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem;">Upcoming Check-ins Alert</div>
-                <div>{{ $upcomingCheckIns->count() }} {{ $upcomingCheckIns->count() === 1 ? 'booking is' : 'bookings are' }} checking in within the next 7 days</div>
-            </div>
-        </div>
-        @foreach($upcomingCheckIns as $booking)
-        <div class="checkin-item">
-            <div class="checkin-item-flex">
-                <div>
-                    <strong>{{ $booking->package->name ?? 'Tour Package' }}</strong>
-                    <br>
-                    <span style="opacity: 0.8; font-size: 0.9rem;">Guest: {{ $booking->user->name ?? 'N/A' }} ({{ $booking->num_guests }} {{ $booking->num_guests === 1 ? 'guest' : 'guests' }})</span>
-                </div>
-                <div class="checkin-date">
-                    <div style="font-weight: 700; font-size: 1rem;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->format('M d, Y') }}</div>
-                    <div style="opacity: 0.8; font-size: 0.85rem; margin-top: 0.25rem;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->diffForHumans() }}</div>
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
 
     <!-- Primary Stats Grid -->
     <div class="stats-grid">
@@ -433,19 +384,19 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">✅ Paid Bookings</div>
+                    <div class="stat-label">✅ Paid (Not Started)</div>
                     <div class="stat-value">{{ $stats['paid_payments'] }}</div>
                 </div>
                 <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-change">Revenue confirmed</div>
+            <div class="stat-change">Paid, awaiting tour</div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
                 <div>
                     <div class="stat-label">💰 Total Revenue</div>
-                    <div class="stat-value">₱{{ number_format((float) $stats['revenue'], 0) }}</div>
+                    <div class="stat-value" style="font-size: 1.875rem; line-height: 2.25rem;">₱{{ number_format((float) $stats['revenue'], 0) }}</div>
                 </div>
                 <div class="stat-icon">💰</div>
             </div>
@@ -583,35 +534,6 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">⚡</span>
-            Quick Actions
-        </h2>
-
-        <div class="quick-actions">
-            <a href="{{ route('admin.bookings.index') }}" class="action-btn">
-                📋 View Bookings
-            </a>
-            <a href="{{ route('admin.packages.index') }}" class="action-btn">
-                ➕ Manage Packages
-            </a>
-            <a href="{{ route('admin.packages-stats') }}" class="action-btn">
-                📊 Package Stats
-            </a>
-            <a href="{{ route('admin.reports.index') }}" class="action-btn">
-                📄 Generate Reports
-            </a>
-            <a href="{{ route('admin.destinations.index') }}" class="action-btn">
-                🗺️ Manage Destinations
-            </a>
-            <a href="{{ route('admin.payments.index') }}" class="action-btn">
-                💳 Payment History
-            </a>
-        </div>
-    </div>
-
     <!-- System Health -->
     <div class="content-section">
         <h2 class="section-title">
@@ -713,44 +635,6 @@
                     </div>
                     <div class="progress-bar">
                         <div class="progress-fill green" style="width: {{ $stats['bookings'] > 0 ? round(($stats['bookingsByStatus']['approved'] / $stats['bookings']) * 100, 1) : 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="insight-card">
-                <div class="insight-title">Payment Status</div>
-                
-                <div class="metric-row">
-                    <span class="metric-label">Paid</span>
-                    <span class="metric-value" style="color: #4CAF50;">{{ $stats['paymentsByStatus']['paid'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Pending</span>
-                    <span class="metric-value" style="color: #FFC107;">{{ $stats['paymentsByStatus']['pending'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Failed</span>
-                    <span class="metric-value" style="color: #F44336;">{{ $stats['paymentsByStatus']['failed'] }}</span>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span class="progress-label-text">Payment Collection</span>
-                        <span class="progress-label-value">
-                            @php 
-                                $totalPayments = $stats['paymentsByStatus']['paid'] + $stats['paymentsByStatus']['pending'] + $stats['paymentsByStatus']['failed'];
-                            @endphp
-                            @if($totalPayments > 0)
-                                {{ round(($stats['paymentsByStatus']['paid'] / $totalPayments) * 100, 1) }}%
-                            @else
-                                0%
-                            @endif
-                        </span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill blue" style="width: {{ $totalPayments > 0 ? round(($stats['paymentsByStatus']['paid'] / $totalPayments) * 100, 1) : 0 }}%"></div>
                     </div>
                 </div>
             </div>
@@ -925,37 +809,34 @@
     </div>
     @endif
 
-    <!-- Top Destinations -->
-    @if($topDestinations->isNotEmpty())
+    <!-- Famous Tourist Spots -->
+    @if($famousTouristSpots->isNotEmpty())
     <div class="content-section">
         <h2 class="section-title">
             <span class="section-icon">🗺️</span>
-            Popular Destinations
+            Famous Tourist Spots
         </h2>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-            @foreach($topDestinations->take(5) as $destination)
+            @foreach($famousTouristSpots->take(5) as $spot)
                 <div class="insight-card">
-                    <div class="insight-title">{{ $destination->name }}</div>
-                    
+                    <div class="insight-title">{{ $spot->name }}</div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Location</span>
+                        <span class="metric-value" style="font-size: 0.875rem;">{{ $spot->location }}</span>
+                    </div>
+
                     <div class="metric-row">
                         <span class="metric-label">Description</span>
-                        <span class="metric-value" style="font-size: 0.875rem;">{{ Str::limit($destination->description, 50) }}</span>
+                        <span class="metric-value" style="font-size: 0.875rem;">{{ Str::limit($spot->description, 50) }}</span>
                     </div>
 
                     <div class="metric-row">
-                        <span class="metric-label">Active Packages</span>
-                        <span class="metric-value">{{ $destination->tour_packages_count }}</span>
-                    </div>
-
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span class="progress-label-text">Tourism Index</span>
-                            <span class="progress-label-value">{{ min(100, $destination->tour_packages_count * 20) }}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill blue" style="width: {{ min(100, $destination->tour_packages_count * 20) }}%"></div>
-                        </div>
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value" style="color: {{ $spot->is_active ? '#81c784' : '#8890a8' }};">
+                            {{ $spot->is_active ? 'Active' : 'Inactive' }}
+                        </span>
                     </div>
                 </div>
             @endforeach

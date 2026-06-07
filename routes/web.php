@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\FamousTouristSpotController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
@@ -42,6 +43,12 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 Route::get('/packages', [DashboardController::class, 'packages'])
     ->name('packages.index');
+
+Route::get('/famous-tourist-spots', [DashboardController::class, 'famousTouristSpots'])
+    ->name('famous-tourist-spots.index');
+
+Route::get('/famous-tourist-spots/{id}', [DashboardController::class, 'showFamousTouristSpot'])
+    ->name('famous-tourist-spots.show');
 
 Route::get('/packages/{tourPackage}', [TouristPackageController::class, 'show'])
     ->name('packages.show');
@@ -129,6 +136,8 @@ Route::prefix('admin')
         Route::put('/packages/{package}', [PackageController::class, 'update'])->name('packages.update');
         Route::delete('/packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
+        Route::resource('famous-tourist-spots', FamousTouristSpotController::class)->except(['show']);
+
         Route::resource('destinations', \App\Http\Controllers\Admin\DestinationController::class)->except(['show']);
 
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -143,4 +152,8 @@ Route::prefix('admin')
         Route::get('/packages-stats', [DashboardController::class, 'adminPackages'])->name('packages-stats');
         Route::patch('/bookings/{booking}/status', [DashboardController::class, 'updateBookingStatus'])
             ->name('bookings.status');
+        Route::post('/bookings/{booking}/approve-cancellation', [DashboardController::class, 'approveCancellation'])
+            ->name('bookings.approve-cancellation');
+        Route::post('/bookings/{booking}/reject-cancellation', [DashboardController::class, 'rejectCancellation'])
+            ->name('bookings.reject-cancellation');
     });

@@ -29,7 +29,7 @@ class PackageController extends Controller
             ->when($request->category, function ($query) use ($request) {
                 $query->where('category', $request->category);
             })
-            ->paginate(5)
+            ->paginate(6)
             ->withQueryString();
 
         $categories = TourPackage::categoryLabels();

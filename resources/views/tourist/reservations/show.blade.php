@@ -77,12 +77,18 @@
                 </div>
 
                 @if($booking->cancellation_reason)
-                    <div class="card border-danger mb-4">
-                        <div class="card-header bg-white fw-semibold text-danger">Cancellation Details</div>
+                    <div class="card {{ $booking->isCancellationPending() ? 'border-warning' : 'border-danger' }} mb-4">
+                        <div class="card-header bg-white fw-semibold {{ $booking->isCancellationPending() ? 'text-warning' : 'text-danger' }}">
+                            {{ $booking->isCancellationPending() ? 'Cancellation Request Pending' : 'Cancellation Details' }}
+                        </div>
                         <div class="card-body">
                             <p class="mb-2"><strong>Reason</strong></p>
                             <p class="mb-2">{{ $booking->cancellation_reason }}</p>
-                            <p class="mb-0"><strong>Refund</strong> ₱{{ number_format($booking->refund_amount ?? 0, 2) }}</p>
+                            @if($booking->isCancelled())
+                                <p class="mb-0"><strong>Refund</strong> ₱{{ number_format($booking->refund_amount ?? 0, 2) }}</p>
+                            @elseif($booking->isCancellationPending())
+                                <p class="mb-0 text-muted"><em>Your cancellation request is awaiting admin approval.</em></p>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -176,13 +182,38 @@
                 @endif
 
                 @if($booking->canBeCancelled())
-                    <form action="{{ route('reservations.cancel', $booking) }}" method="POST" onsubmit="return confirm('Confirm cancellation of this reservation?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Cancel Reservation</button>
-                    </form>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">Cancel Reservation</button>
+                @elseif($booking->isCancellationPending())
+                    <button type="button" class="btn btn-warning" disabled>Cancellation Pending</button>
                 @endif
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">Cancel Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('reservations.cancel', $booking) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="modal-body">
+                    <p class="mb-3">Please provide a reason for cancelling this reservation:</p>
+                    <div class="mb-3">
+                        <label for="cancellation_reason" class="form-label">Reason for cancellation <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="cancellation_reason" name="cancellation_reason" rows="4" required placeholder="Please explain why you need to cancel this reservation..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

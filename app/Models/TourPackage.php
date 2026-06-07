@@ -58,32 +58,37 @@ class TourPackage extends Model
             return asset('images/package-default.svg');
         }
 
-        // Public path directly under public/
-        if (file_exists(public_path($imagePath))) {
-            return asset($imagePath);
-        }
+        // Optimize: Check most likely paths first and cache the result
+        $cacheKey = 'package_image_url_' . $this->id . '_' . md5($imagePath);
+        
+        return cache()->remember($cacheKey, now()->addHours(24), function() use ($imagePath) {
+            // Public storage root (storage/app/public) - most common
+            if (Storage::disk('public')->exists($imagePath)) {
+                return asset('storage/' . $imagePath);
+            }
 
-        // Public storage root (storage/app/public)
-        if (Storage::disk('public')->exists($imagePath)) {
-            return asset('storage/' . $imagePath);
-        }
+            // Public path directly under public/
+            if (file_exists(public_path($imagePath))) {
+                return asset($imagePath);
+            }
 
-        // Public path under public/images/
-        if (file_exists(public_path('images/' . $imagePath))) {
-            return asset('images/' . $imagePath);
-        }
+            // Storage public path under storage/app/public/images/
+            if (Storage::disk('public')->exists('images/' . $imagePath)) {
+                return asset('storage/images/' . $imagePath);
+            }
 
-        // Storage public path under storage/app/public/images/
-        if (Storage::disk('public')->exists('images/' . $imagePath)) {
-            return asset('storage/images/' . $imagePath);
-        }
+            // Public path under public/images/
+            if (file_exists(public_path('images/' . $imagePath))) {
+                return asset('images/' . $imagePath);
+            }
 
-        // If image is already stored under storage/ path in the DB use it directly
-        if (file_exists(public_path('storage/' . $imagePath))) {
-            return asset('storage/' . $imagePath);
-        }
+            // If image is already stored under storage/ path in the DB use it directly
+            if (file_exists(public_path('storage/' . $imagePath))) {
+                return asset('storage/' . $imagePath);
+            }
 
-        return asset('images/package-default.svg');
+            return asset('images/package-default.svg');
+        });
     }
 
     public function getHasImageAttribute(): bool

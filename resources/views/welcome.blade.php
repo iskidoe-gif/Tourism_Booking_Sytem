@@ -1,5 +1,5 @@
 <x-layout>
-    
+
     <section class="homepage-slider" aria-label="Homepage slider">
         <div class="slider-view">
             <div class="slider-track">
@@ -115,6 +115,47 @@
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+    </section>
+
+    <section class="famous-tourist-spots" aria-label="Famous tourist spots in Bolinao" style="padding: 5rem 1.5rem 3rem;">
+        <div class="featured-packages-inner">
+            <div class="section-header">
+                <p>Explore Bolinao</p>
+                <h2>Famous Tourist Spots</h2>
+                <p>Discover the most popular destinations and attractions in Bolinao</p>
+            </div>
+
+            <div class="package-card-grid">
+                @forelse($famousTouristSpots->take(3) as $spot)
+                    <article class="package-card">
+                        @if($spot->image)
+                            <div class="package-card-media" style="background-image: url('{{ asset('storage/' . $spot->image) }}');"></div>
+                        @else
+                            <div class="package-card-media" style="background: linear-gradient(135deg, rgba(75, 86, 148, 0.3) 0%, rgba(17, 24, 68, 0.5) 100%); display: flex; align-items: center; justify-content: center;">
+                                <div style="font-size: 4rem; opacity: 0.5;">🗺️</div>
+                            </div>
+                        @endif
+                        <div class="package-card-body">
+                            <div class="package-card-meta">
+                                <span>📍 {{ $spot->location }}</span>
+                                <span>{{ $spot->is_active ? 'Active' : 'Inactive' }}</span>
+                            </div>
+                            <h3 class="package-card-title">{{ $spot->name }}</h3>
+                            <p class="package-card-description">{{ Str::limit($spot->description, 110) }}</p>
+                            <div class="package-card-footer">
+                                <a href="{{ route('famous-tourist-spots.show', $spot->id) }}" class="btn btn-secondary">View details</a>
+                            </div>
+                        </div>
+                    </article>
+                @empty
+                    <p style="grid-column: 1 / -1; text-align: center; padding: 2rem;">No famous tourist spots available yet. Check back soon!</p>
+                @endforelse
+            </div>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ route('famous-tourist-spots.index') }}" class="btn btn-primary">View All Famous Tourist Spots</a>
             </div>
         </div>
     </section>
