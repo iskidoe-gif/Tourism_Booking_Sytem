@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;use Carbon\Carbon;use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +20,8 @@ class TourPackage extends Model
         'price',
         'duration_days',
         'max_guests',
+        'time_start',
+        'time_end',
         'image',
         'category',
         'status',
@@ -151,8 +152,28 @@ class TourPackage extends Model
         'price' => 'decimal:2',
         'duration_days' => 'integer',
         'max_guests' => 'integer',
+        'time_start' => 'string',
+        'time_end' => 'string',
         'rating' => 'decimal:2',
     ];
+
+    public function getTimeStartFormattedAttribute(): string
+    {
+        if (! $this->time_start) {
+            return 'TBD';
+        }
+
+        return Carbon::parse($this->time_start)->format('g:i A');
+    }
+
+    public function getTimeEndFormattedAttribute(): string
+    {
+        if (! $this->time_end) {
+            return 'TBD';
+        }
+
+        return Carbon::parse($this->time_end)->format('g:i A');
+    }
 
     public function bookings(): HasMany
     {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tourist;
 
 use App\Http\Controllers\Controller;
+use App\Models\PromoPackage;
 use App\Models\TourPackage;
 use Illuminate\Http\Request;
 
@@ -84,6 +85,13 @@ class PackageController extends Controller
 
         $tourPackage->load(['reviews.user', 'destination']);
 
-        return view('tourist.packages.show', compact('tourPackage'));
+        $selectedPromoId = request('promo');
+        $selectedPromo = null;
+        if ($selectedPromoId) {
+            $promo = PromoPackage::find($selectedPromoId);
+            $selectedPromo = $promo?->isActive() ? $promo : null;
+        }
+
+        return view('tourist.packages.show', compact('tourPackage', 'selectedPromo'));
     }
 }

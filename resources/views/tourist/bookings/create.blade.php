@@ -2,7 +2,10 @@
 
 @php
     $selectedPromoId = request('promo');
-    $selectedPromo = $selectedPromoId ? \App\Models\PromoPackage::find($selectedPromoId) : null;
+    $promo = $selectedPromoId ? \App\Models\PromoPackage::find($selectedPromoId) : null;
+    $selectedPromo = $promo && $promo->isActive() ? $promo : null;
+    $promoMinStartDays = $selectedPromo?->minStartDays() ?? 0;
+    $promoStartMinDate = $promoMinStartDays > 0 ? now()->addDays($promoMinStartDays)->format('Y-m-d') : now()->format('Y-m-d');
 @endphp
 
 <section class="package-detail-page">
@@ -36,11 +39,14 @@
 
                 <div class="package-detail-price">
                     <span>Price per person</span>
-                    <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
                     @if($selectedPromo && $selectedPromo->isActive())
+                        <strong>₱{{ number_format($selectedPromo->discountedPrice($tourPackage->price), 2) }}</strong>
+                        <span style="display:block; font-size:0.88rem; color: rgba(255,255,255,0.7); text-decoration: line-through;">₱{{ number_format($tourPackage->price, 2) }}</span>
                         <div class="mt-2">
                             <span class="badge bg-success">{{ $selectedPromo->name }} - {{ $selectedPromo->discount_percentage }}% OFF</span>
                         </div>
+                    @else
+                        <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
                     @endif
                 </div>
 
@@ -70,8 +76,12 @@
                         <a href="#" class="package-detail-primary flex-grow-1" data-auth-open data-auth-mode="signin">Sign In</a>
                     </div>
                 @else
-                    <form method="POST" action="{{ route('bookings.store') }}">
+                    <form method="POST" action="{{ route('bookings.store') }}" class="package-detail-form-grid">
                         @csrf
+                        <div class="package-detail-note mb-4">
+                            <p class="mb-2 text-muted">Reservation note</p>
+                            <p class="mb-0">Your request will be reviewed by the tour operator. We will contact you if there are any changes before confirmation.</p>
+                        </div>
                         <input type="hidden" name="tour_package_id" value="{{ $tourPackage->id }}">
                         @if($selectedPromo && $selectedPromo->isActive())
                             <input type="hidden" name="promo_package_id" value="{{ $selectedPromo->id }}">
@@ -116,8 +126,11 @@
                                 <label class="form-label">Tour start</label>
                                 <input type="date" name="tour_start_date"
                                        class="form-control @error('tour_start_date') is-invalid @enderror"
-                                       value="{{ old('tour_start_date') }}"
-                                       min="{{ now()->format('Y-m-d') }}">
+                                       value="{{ old('tour_start_date', $promoStartMinDate) }}"
+                                       min="{{ $promoStartMinDate }}">
+                                @if($promoMinStartDays > 0)
+                                    <div class="form-text text-muted">This promo requires tour start at least {{ $promoMinStartDays }} days from today.</div>
+                                @endif
                                 @error('tour_start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -277,8 +290,14 @@
 
                 <div class="d-flex justify-content-between mb-2">
                     <span>Base rate</span>
-                    <strong>₱{{ number_format($tourPackage->price, 2) }}</strong>
+                    <strong id="base-rate-display">₱{{ number_format($selectedPromo && $selectedPromo->isActive() ? $selectedPromo->discountedPrice($tourPackage->price) : $tourPackage->price, 2) }}</strong>
                 </div>
+                @if($selectedPromo && $selectedPromo->isActive())
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Promo savings</span>
+                        <strong id="discount-total">₱0.00</strong>
+                    </div>
+                @endif
                 <div class="d-flex justify-content-between mb-2">
                     <span>Guests</span>
                     <strong id="guest-total">{{ old('num_adults', 1) + old('num_children', 0) + old('num_seniors', 0) }}</strong>
@@ -290,7 +309,7 @@
                 <hr>
                 <div class="d-flex justify-content-between fw-semibold">
                     <span>Total estimated</span>
-                    <strong id="total-display">₱{{ number_format($tourPackage->price, 2) }}</strong>
+                    <strong id="total-display">₱{{ number_format($selectedPromo && $selectedPromo->isActive() ? $selectedPromo->discountedPrice($tourPackage->price) : $tourPackage->price, 2) }}</strong>
                 </div>
 
                 <div class="alert alert-info mt-4 mb-0">
@@ -303,6 +322,7 @@
 
 <script>
     const basePrice = {{ $tourPackage->price }};
+    const promoDiscount = {{ $selectedPromo && $selectedPromo->isActive() ? $selectedPromo->discount_percentage : 0 }};
     const maxGuests = {{ $tourPackage->max_guests }};
     const bookingDurationDays = {{ $tourPackage->duration_days }};
     const checkInInput = document.querySelector('input[name="tour_start_date"]');
@@ -316,6 +336,8 @@
     const guestTotalDisplay = document.getElementById('guest-total');
     const extrasTotalDisplay = document.getElementById('extras-total');
     const totalDisplay = document.getElementById('total-display');
+    const baseRateDisplay = document.getElementById('base-rate-display');
+    const discountTotalDisplay = document.getElementById('discount-total');
     const hiddenGuestTotal = document.getElementById('num_guests');
 
     const formatMoney = (value) => {
@@ -338,11 +360,19 @@
             }
         });
 
-        const subtotal = guests * basePrice;
+        const unitPrice = promoDiscount > 0 ? basePrice * (1 - promoDiscount / 100) : basePrice;
+        const subtotal = guests * unitPrice;
+        const discountAmount = promoDiscount > 0 ? guests * basePrice * (promoDiscount / 100) : 0;
         const total = subtotal + serviceTotal;
 
         extrasTotalDisplay.textContent = formatMoney(serviceTotal);
         totalDisplay.textContent = formatMoney(total);
+        if (baseRateDisplay) {
+            baseRateDisplay.textContent = formatMoney(unitPrice);
+        }
+        if (discountTotalDisplay) {
+            discountTotalDisplay.textContent = formatMoney(discountAmount);
+        }
 
         guestInputs.forEach((input) => {
             if (parseInt(input.value) < 0) {

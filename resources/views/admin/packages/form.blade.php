@@ -93,6 +93,20 @@
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Start time</label>
+                    <input type="time" name="time_start" value="{{ old('time_start', $package->time_start) }}" class="form-control @error('time_start') is-invalid @enderror">
+                    @error('time_start')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label">End time</label>
+                    <input type="time" name="time_end" value="{{ old('time_end', $package->time_end) }}" class="form-control @error('time_end') is-invalid @enderror">
+                    @error('time_end')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
             </div>
 
             <div class="row g-3 mb-3">

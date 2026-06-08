@@ -417,6 +417,60 @@ html, body, .shell, .frame, .bolinao-hero, .bolinao-card {
         width: 100%;
     }
 
+    .package-detail-grid {
+        grid-template-columns: minmax(0, 1.25fr) minmax(20rem, 0.75fr);
+        gap: 1.5rem;
+    }
+
+    .package-detail-media {
+        min-height: auto;
+        max-height: 26rem;
+        aspect-ratio: 16 / 9;
+    }
+
+    .package-detail-media img,
+    .package-detail-placeholder {
+        min-height: auto;
+        height: 100%;
+    }
+
+    .package-detail-summary {
+        padding: 1.75rem;
+    }
+
+    .package-detail-panel {
+        padding: 1.75rem;
+    }
+
+    .package-detail-section-heading h2 {
+        font-size: 1.55rem;
+    }
+
+    .package-detail-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 1024px) {
+        .package-detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .package-detail-media {
+            max-height: 22rem;
+        }
+    }
+
+    @media (max-width: 680px) {
+        .package-detail-summary,
+        .package-detail-panel {
+            padding: 1.2rem;
+        }
+
+        .package-detail-section-heading h2 {
+            font-size: 1.35rem;
+        }
+    }
+
 
 /* UI / UX improvements: clearer hero text, better search inputs, buttons, and accessibility */
 :root {

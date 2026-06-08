@@ -506,6 +506,8 @@ class PackageController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'duration_days' => ['required', 'integer', 'min:1'],
             'max_guests' => ['required', 'integer', 'min:1'],
+            'time_start' => ['nullable', 'date_format:H:i'],
+            'time_end' => ['nullable', 'date_format:H:i', 'after:time_start'],
             'image' => ['nullable', 'string', 'max:255'],
             // Allow any image size here; large files are handled via chunked uploads.
             'image_file' => ['nullable', 'image'],

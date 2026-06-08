@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => EnsureAdmin::class,
+            'not.guest' => \App\Http\Middleware\EnsureNotGuest::class,
         ]);
 
         $middleware->replace(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, HandleCsrfExceptions::class);

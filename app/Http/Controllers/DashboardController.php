@@ -144,6 +144,18 @@ class DashboardController extends Controller
             ? $request->integer('capacity')
             : null;
 
+        $selectedPromo = null;
+        if ($request->filled('promo')) {
+            $promo = PromoPackage::find($request->input('promo'));
+            if ($promo?->isActive()) {
+                $selectedPromo = $promo;
+                $minCapacity = $promo->minGuestCapacity();
+                if ($minCapacity && (! $capacity || $capacity < $minCapacity)) {
+                    $capacity = $minCapacity;
+                }
+            }
+        }
+
         $packages = TourPackage::active()
             ->bolinao()
             ->when($request->search, fn($q) => $q->where(function($sub) use ($request) {
@@ -186,7 +198,7 @@ class DashboardController extends Controller
 
         $destinations = Destination::orderBy('name')->get();
 
-        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity');
+        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity', 'selectedPromo');
 
         if ($request->user()) {
             $data = array_merge($this->touristData($request), $data);
@@ -278,6 +290,14 @@ class DashboardController extends Controller
         if (!empty($validated['promo_package_id'])) {
             $promoPackage = PromoPackage::find($validated['promo_package_id']);
             if ($promoPackage && $promoPackage->isActive()) {
+                $minStartDays = $promoPackage->minStartDays();
+                if ($minStartDays > 0 && $checkIn->lt(now()->addDays($minStartDays))) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['tour_start_date' => "This promo requires tour start at least {$minStartDays} days from today."]);
+                }
+
                 $basePrice = $package->price * $totalGuests;
                 $discountAmount = $basePrice * ($promoPackage->discount_percentage / 100);
                 $discountCode = $promoPackage->name;
