@@ -41,32 +41,42 @@ class DashboardController extends Controller
 
     public function home(): View
     {
-        $topRatedPackages = TourPackage::active()
-            ->bolinao()
-            ->where('rating', '>=', 4)
-            ->orderBy('rating', 'desc')
-            ->limit(3)
-            ->get();
+        try {
+            $topRatedPackages = TourPackage::active()
+                ->bolinao()
+                ->where('rating', '>=', 4)
+                ->orderBy('rating', 'desc')
+                ->limit(3)
+                ->get();
 
-        $customerReviews = Review::with(['user', 'tourPackage'])
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get();
+            $customerReviews = Review::with(['user', 'tourPackage'])
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->get();
 
-        $famousTouristSpots = FamousTouristSpot::where('is_active', true)
-            ->orderBy('sort_order')
-            ->latest()
-            ->limit(6)
-            ->get();
+            $famousTouristSpots = FamousTouristSpot::where('is_active', true)
+                ->orderBy('sort_order')
+                ->latest()
+                ->limit(6)
+                ->get();
 
-        $promoPackages = PromoPackage::where('is_active', true)
-            ->where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->latest()
-            ->limit(3)
-            ->get();
+            $promoPackages = PromoPackage::where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->latest()
+                ->limit(3)
+                ->get();
 
-        return view('welcome', compact('topRatedPackages', 'customerReviews', 'famousTouristSpots', 'promoPackages'));
+            return view('welcome', compact('topRatedPackages', 'customerReviews', 'famousTouristSpots', 'promoPackages'));
+        } catch (\Exception $e) {
+            // Return empty collections if database is not available
+            return view('welcome', [
+                'topRatedPackages' => collect(),
+                'customerReviews' => collect(),
+                'famousTouristSpots' => collect(),
+                'promoPackages' => collect(),
+            ]);
+        }
     }
 
     public function admin(Request $request): JsonResponse|View

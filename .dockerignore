@@ -32,7 +32,6 @@ pest.xml
 .stylelintrc
 docker-compose.yml
 Dockerfile.dev
-render.yaml
 tests/
 .github/
 public/storage
