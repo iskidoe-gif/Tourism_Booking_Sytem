@@ -24,6 +24,11 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     curl \
+    libzip \
+    libpng \
+    oniguruma \
+    libxml2 \
+    libpq \
     libzip-dev \
     libpng-dev \
     oniguruma-dev \
