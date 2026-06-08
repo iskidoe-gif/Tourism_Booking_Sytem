@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use RuntimeException;
 use ZipArchive;
 
@@ -51,64 +52,25 @@ class ReportExportService
         return $xlsxFile;
     }
 
-    public function pdf(string $title, array $headers, array $rows): string
+    public function pdf(string $title, array $headers, array $rows, string $periodLabel = 'All Time'): string
     {
-        $lines = [];
-        $lines[] = $title;
-        $lines[] = str_repeat('-', strlen($title));
-        $lines[] = implode(' | ', $headers);
+        $html = view('exports.report-pdf', [
+            'title' => $title,
+            'headers' => $headers,
+            'rows' => $rows,
+            'periodLabel' => $periodLabel,
+            'generatedAt' => now()->format('Y-m-d H:i:s')
+        ])->render();
 
-        foreach (array_slice($rows, 0, 25) as $row) {
-            $lines[] = implode(' | ', array_map(static fn ($value) => (string) $value, $row));
-        }
-
-        return $this->buildSimplePdf($lines);
-    }
-
-    private function buildSimplePdf(array $lines): string
-    {
-        $escapedLines = array_map([$this, 'pdfEscape'], $lines);
-        $content = "BT\n/F1 11 Tf\n50 770 Td\n";
-
-        foreach ($escapedLines as $index => $line) {
-            $content .= ($index === 0 ? '' : 'T* ') . "({$line}) Tj\n";
-        }
-
-        $content .= "ET";
-        $length = strlen($content);
-
-        $objects = [];
-        $objects[] = "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj";
-        $objects[] = "2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj";
-        $objects[] = "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj";
-        $objects[] = "4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj";
-        $objects[] = "5 0 obj << /Length {$length} >> stream\n{$content}\nendstream endobj";
-
-        $pdf = "%PDF-1.4\n";
-        $offsets = [0];
-
-        foreach ($objects as $object) {
-            $offsets[] = strlen($pdf);
-            $pdf .= $object . "\n";
-        }
-
-        $xrefPosition = strlen($pdf);
-        $pdf .= "xref\n0 " . (count($offsets)) . "\n";
-        $pdf .= "0000000000 65535 f \n";
-
-        for ($i = 1; $i < count($offsets); $i++) {
-            $pdf .= sprintf("%010d 00000 n \n", $offsets[$i]);
-        }
-
-        $pdf .= "trailer << /Size " . count($offsets) . " /Root 1 0 R >>\n";
-        $pdf .= "startxref\n{$xrefPosition}\n%%EOF";
-
-        return $pdf;
-    }
-
-    private function pdfEscape(string $value): string
-    {
-        return str_replace(['\\', '(', ')'], ['\\\\', '\(', '\)'], $value);
+        $pdf = Pdf::loadHTML($html)
+            ->setPaper('a4', 'landscape')
+            ->setOption('defaultFont', 'Arial')
+            ->setOption('font-size', 8)
+            ->setOption('margin-left', 10)
+            ->setOption('margin-right', 10)
+            ->setOption('margin-top', 15)
+            ->setOption('margin-bottom', 15);
+        return $pdf->output();
     }
 
     private function sheetXml(array $headers, array $rows, string $sheetTitle): string

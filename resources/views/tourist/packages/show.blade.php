@@ -1,7 +1,10 @@
 <x-layout :title="$tourPackage->name">
+@php
+    $selectedPromoId = request('promo');
+@endphp
     <section class="package-detail-page">
         <div class="package-detail-hero">
-            <a href="{{ route('packages.index') }}" class="package-detail-back">Back to packages</a>
+            <a href="{{ route('packages.index', request()->only('promo')) }}" class="package-detail-back">Back to packages</a>
 
             <div class="package-detail-grid">
                 <div class="package-detail-media">
@@ -17,19 +20,26 @@
                     <p class="package-detail-kicker">Tour package</p>
                     <h1>{{ $tourPackage->name }}</h1>
 
-                    <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->rating, 1) }} out of 5">
+                    <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->average_rating, 1) }} out of 5">
                         @for($i = 1; $i <= 5; $i++)
-                            <span>{!! $i <= round($tourPackage->rating) ? '&#9733;' : '&#9734;' !!}</span>
+                            <span>{!! $i <= round($tourPackage->average_rating) ? '&#9733;' : '&#9734;' !!}</span>
                         @endfor
-                        <strong>{{ number_format($tourPackage->rating, 1) }}</strong>
+                        <strong>{{ number_format($tourPackage->average_rating, 1) }}</strong>
                     </div>
 
                     <p class="package-detail-location">{{ $tourPackage->location }}</p>
                     <p class="package-detail-description">{{ $tourPackage->description }}</p>
+                    <p class="package-detail-schedule">{{ $tourPackage->time_start_formatted }} &mdash; {{ $tourPackage->time_end_formatted }}</p>
 
                     <div class="package-detail-price">
                         <span>Price per person</span>
-                        <strong>&#8369;{{ number_format($tourPackage->price, 2) }}</strong>
+                        @if(isset($selectedPromo) && $selectedPromo?->isActive())
+                            <span style="display:block; color: rgba(234, 224, 207, 0.75); font-size: 0.95rem;">{{ $selectedPromo->name }} • {{ number_format($selectedPromo->discount_percentage, 0) }}% OFF</span>
+                            <strong>&#8369;{{ number_format($selectedPromo->discountedPrice($tourPackage->price), 2) }}</strong>
+                            <span style="display:block; font-size: 0.88rem; color: rgba(255,255,255,0.7); text-decoration: line-through;">&#8369;{{ number_format($tourPackage->price, 2) }}</span>
+                        @else
+                            <strong>&#8369;{{ number_format($tourPackage->price, 2) }}</strong>
+                        @endif
                     </div>
 
                     <div class="package-detail-actions">
@@ -40,7 +50,7 @@
                                 </button>
                                 <p>Guest accounts can browse tours only. Create a tourist account to make a booking.</p>
                             @elseif(auth()->user()->isTourist())
-                                <a href="{{ route('bookings.create', $tourPackage) }}" class="package-detail-primary">
+                                <a href="{{ route('bookings.create', array_merge([$tourPackage], request()->only('promo'))) }}" class="package-detail-primary">
                                     Reserve This Tour
                                 </a>
                             @else

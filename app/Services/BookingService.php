@@ -29,14 +29,33 @@ class BookingService
             $data['base_price'] = $package->price * ($data['num_guests'] ?? 1);
         }
 
+        // Apply promo discount if promo_package_id is provided
+        if (isset($data['promo_package_id']) && $data['promo_package_id']) {
+            $promoPackage = \App\Models\PromoPackage::find($data['promo_package_id']);
+            if ($promoPackage && $promoPackage->isActive()) {
+                $discountAmount = ($data['base_price'] * $promoPackage->discount_percentage) / 100;
+                $data['discount_amount'] = $discountAmount;
+                $data['discount_code'] = $promoPackage->name;
+            }
+        }
+
         // Calculate total price
         $data['total_price'] = $data['total_price'] ?? $this->calculateTotal(
             $data['base_price'] ?? 0,
-            $data['additional_fees'] ?? 0,
+            ($data['additional_fees'] ?? 0) + ($data['tourist_guide_fee'] ?? 0),
             $data['discount_amount'] ?? 0
         );
 
-        return Booking::create($data);
+        $booking = Booking::create($data);
+
+        // Automatically create a payment record for the booking
+        $booking->payment()->create([
+            'amount' => $booking->total_price,
+            'status' => 'unpaid',
+            'method' => 'cash',
+        ]);
+
+        return $booking;
     }
 
     /**
@@ -97,7 +116,7 @@ class BookingService
             'discount_code' => $discountCode,
             'total_price' => $this->calculateTotal(
                 $booking->base_price,
-                $booking->additional_fees,
+                ($booking->additional_fees ?? 0) + ($booking->tourist_guide_fee ?? 0),
                 $newDiscount
             ),
         ]);

@@ -43,14 +43,8 @@
                         <td>
                             <a href="{{ route('reservations.show', $booking) }}"
                                class="btn btn-sm btn-outline-secondary">View</a>
-                            @if($booking->status === 'pending')
-                                <form method="POST" action="{{ route('reservations.cancel', $booking) }}"
-                                      class="d-inline"
-                                      onsubmit="return confirm('Cancel this booking?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
-                                </form>
+                            @if($booking->isPending() || $booking->status === 'confirmed')
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="showCancelModal({{ $booking->id }})">Cancel</button>
                             @endif
                         </td>
                     </tr>
@@ -62,5 +56,41 @@
 
     <div class="mt-3">{{ $bookings->links() }}</div>
 @endif
+
+<!-- Single Cancellation Modal -->
+<div class="modal fade" id="cancelModalIndex" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Reservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="cancelFormIndex" action="{{ route('reservations.cancel', ['booking' => '__ID__']) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <div class="modal-body">
+                    <p class="mb-3">Please provide a reason for cancelling this reservation:</p>
+                    <div class="mb-3">
+                        <label for="cancellation_reason_index" class="form-label">Reason for cancellation <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="cancellation_reason_index" name="cancellation_reason" rows="4" required placeholder="Please explain why you need to cancel this reservation..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCancelModal(bookingId) {
+    const form = document.getElementById('cancelFormIndex');
+    form.action = form.action.replace('__ID__', bookingId);
+    const modal = new bootstrap.Modal(document.getElementById('cancelModalIndex'));
+    modal.show();
+}
+</script>
 
 </x-layout>

@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Proof URL or path</label>
+                    <label class="form-label">Proof of payment</label>
                     <input type="text" name="proof" value="{{ old('proof', $payment->proof) }}" class="form-control" placeholder="images/proof.jpg">
                 </div>
 

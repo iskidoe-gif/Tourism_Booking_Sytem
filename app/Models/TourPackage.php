@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;use Carbon\Carbon;use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +20,8 @@ class TourPackage extends Model
         'price',
         'duration_days',
         'max_guests',
+        'time_start',
+        'time_end',
         'image',
         'category',
         'status',
@@ -58,32 +59,37 @@ class TourPackage extends Model
             return asset('images/package-default.svg');
         }
 
-        // Public path directly under public/
-        if (file_exists(public_path($imagePath))) {
-            return asset($imagePath);
-        }
+        // Optimize: Check most likely paths first and cache the result
+        $cacheKey = 'package_image_url_' . $this->id . '_' . md5($imagePath);
+        
+        return cache()->remember($cacheKey, now()->addHours(24), function() use ($imagePath) {
+            // Public storage root (storage/app/public) - most common
+            if (Storage::disk('public')->exists($imagePath)) {
+                return asset('storage/' . $imagePath);
+            }
 
-        // Public storage root (storage/app/public)
-        if (Storage::disk('public')->exists($imagePath)) {
-            return asset('storage/' . $imagePath);
-        }
+            // Public path directly under public/
+            if (file_exists(public_path($imagePath))) {
+                return asset($imagePath);
+            }
 
-        // Public path under public/images/
-        if (file_exists(public_path('images/' . $imagePath))) {
-            return asset('images/' . $imagePath);
-        }
+            // Storage public path under storage/app/public/images/
+            if (Storage::disk('public')->exists('images/' . $imagePath)) {
+                return asset('storage/images/' . $imagePath);
+            }
 
-        // Storage public path under storage/app/public/images/
-        if (Storage::disk('public')->exists('images/' . $imagePath)) {
-            return asset('storage/images/' . $imagePath);
-        }
+            // Public path under public/images/
+            if (file_exists(public_path('images/' . $imagePath))) {
+                return asset('images/' . $imagePath);
+            }
 
-        // If image is already stored under storage/ path in the DB use it directly
-        if (file_exists(public_path('storage/' . $imagePath))) {
-            return asset('storage/' . $imagePath);
-        }
+            // If image is already stored under storage/ path in the DB use it directly
+            if (file_exists(public_path('storage/' . $imagePath))) {
+                return asset('storage/' . $imagePath);
+            }
 
-        return asset('images/package-default.svg');
+            return asset('images/package-default.svg');
+        });
     }
 
     public function getHasImageAttribute(): bool
@@ -146,8 +152,28 @@ class TourPackage extends Model
         'price' => 'decimal:2',
         'duration_days' => 'integer',
         'max_guests' => 'integer',
+        'time_start' => 'string',
+        'time_end' => 'string',
         'rating' => 'decimal:2',
     ];
+
+    public function getTimeStartFormattedAttribute(): string
+    {
+        if (! $this->time_start) {
+            return 'TBD';
+        }
+
+        return Carbon::parse($this->time_start)->format('g:i A');
+    }
+
+    public function getTimeEndFormattedAttribute(): string
+    {
+        if (! $this->time_end) {
+            return 'TBD';
+        }
+
+        return Carbon::parse($this->time_end)->format('g:i A');
+    }
 
     public function bookings(): HasMany
     {
@@ -162,6 +188,19 @@ class TourPackage extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes) && $this->attributes['reviews_avg_rating'] !== null) {
+            return round($this->attributes['reviews_avg_rating'], 2);
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return round($this->reviews->avg('rating') ?? 0, 2);
+        }
+
+        return round($this->rating ?? 0, 2);
     }
 
     public function scopeActive(Builder $query)

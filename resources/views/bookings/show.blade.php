@@ -306,6 +306,32 @@
         @endif
     </div>
 
+    <!-- Promo Package -->
+    @if($booking->promoPackage)
+        <div class="booking-detail-section" style="border-left: 4px solid #ffc107;">
+            <div class="booking-detail-title">🎉 Promo Package Applied</div>
+            
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Promo Name</span>
+                <span class="booking-detail-value" style="color: #ffc107;">{{ $booking->promoPackage->name }}</span>
+            </div>
+            @if($booking->promoPackage->description)
+                <div class="booking-detail-row">
+                    <span class="booking-detail-label">Description</span>
+                    <span class="booking-detail-value">{{ $booking->promoPackage->description }}</span>
+                </div>
+            @endif
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Discount</span>
+                <span class="booking-detail-value" style="color: #ffc107;">{{ $booking->promoPackage->discount_percentage }}% OFF</span>
+            </div>
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Valid Until</span>
+                <span class="booking-detail-value">{{ $booking->promoPackage->end_date->format('M d, Y') }}</span>
+            </div>
+        </div>
+    @endif
+
     <!-- Price Summary -->
     <div class="booking-detail-section">
         <div class="booking-detail-title">💰 Pricing Details</div>
@@ -318,6 +344,12 @@
             <span class="booking-detail-label">Additional Fees</span>
             <span class="booking-detail-value">₱{{ number_format($booking->additional_fees ?? 0, 2) }}</span>
         </div>
+        @if($booking->tourist_guide_fee > 0)
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Tour guide fee</span>
+                <span class="booking-detail-value">₱{{ number_format($booking->tourist_guide_fee, 2) }}</span>
+            </div>
+        @endif
         @if($booking->discount_amount > 0)
             <div class="booking-detail-row">
                 <span class="booking-detail-label">Discount
@@ -347,9 +379,20 @@
             <div class="booking-detail-title">🎁 Additional Services</div>
             
             @foreach($booking->services as $service)
+                @php
+                    $serviceLabel = 'Service';
+                    $servicePrice = 0;
+
+                    if (is_array($service)) {
+                        $serviceLabel = $service['name'] ?? ($service['key'] ?? 'Service');
+                        $servicePrice = $service['price'] ?? 0;
+                    } elseif (is_string($service)) {
+                        $serviceLabel = ucfirst(str_replace('_', ' ', $service));
+                    }
+                @endphp
                 <div class="booking-detail-row">
-                    <span class="booking-detail-label">{{ $service['name'] ?? 'Service' }}</span>
-                    <span class="booking-detail-value">₱{{ number_format($service['price'] ?? 0, 2) }}</span>
+                    <span class="booking-detail-label">{{ $serviceLabel }}</span>
+                    <span class="booking-detail-value">₱{{ number_format($servicePrice, 2) }}</span>
                 </div>
             @endforeach
         </div>
@@ -414,7 +457,14 @@
         @if($booking->cancelled_at)
             <div class="timeline-item">
                 <div class="timeline-date">Cancelled</div>
-                <div class="timeline-event">{{ $booking->cancelled_at->format('M d, Y H:i') }}</div>
+                <div class="timeline-event">
+                    {{ $booking->cancelled_at->format('M d, Y H:i') }}
+                    @if($booking->cancellation_reason)
+                        <div style="margin-top: 0.5rem; color: #ef5350; font-size: 0.9rem;">
+                            <strong>Reason:</strong> {{ $booking->cancellation_reason }}
+                        </div>
+                    @endif
+                </div>
             </div>
         @endif
         @if($booking->completed_at)

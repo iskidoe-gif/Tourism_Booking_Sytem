@@ -28,8 +28,8 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
             margin-bottom: 2.5rem;
         }
 
@@ -239,7 +239,7 @@
         }
 
         .alert-banner {
-            background: rgba(255, 193, 7, 0.15);
+            background: rgba(255, 193, 7, 0.4);
             border-left: 3px solid #FFB74D;
             border-radius: 0.5rem;
             padding: 1.25rem;
@@ -250,9 +250,18 @@
         }
 
         .alert-banner.success {
-            background: rgba(129, 199, 132, 0.15);
+            background: rgba(129, 199, 132, 0.4);
             border-left-color: #81c784;
             color: #81c784;
+        }
+
+        .dark-card {
+            background: #1a1a2e;
+            border: 1px solid #2d2d4d;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .kpi-grid {
@@ -306,72 +315,6 @@
             <span>📈</span> Complete overview of your tourism booking system
         </p>
     </div>
-
-    <!-- Alert Banner -->
-    <div class="alert-banner success">
-        ✅ System is operating normally. Last updated: {{ now()->format('M d, Y H:i A') }}
-    </div>
-
-    <!-- Upcoming Check-ins Alert -->
-    @if($upcomingCheckIns && $upcomingCheckIns->count() > 0)
-    <style>
-        .upcoming-checkins-alert {
-            background: rgba(255, 152, 0, 0.15);
-            border-left: 3px solid #FFB74D;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-bottom: 2rem;
-            color: #FF9800;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        .checkin-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.75rem;
-            border-radius: 0.4rem;
-            font-size: 0.9rem;
-            margin-bottom: 0.75rem;
-        }
-        .checkin-item:last-child {
-            margin-bottom: 0;
-        }
-        .checkin-item-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-        .checkin-date {
-            text-align: right;
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-    </style>
-    <div class="upcoming-checkins-alert">
-        <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-            <div style="font-size: 1.5rem; flex-shrink: 0;">⚠️</div>
-            <div>
-                <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem;">Upcoming Check-ins Alert</div>
-                <div>{{ $upcomingCheckIns->count() }} {{ $upcomingCheckIns->count() === 1 ? 'booking is' : 'bookings are' }} checking in within the next 7 days</div>
-            </div>
-        </div>
-        @foreach($upcomingCheckIns as $booking)
-        <div class="checkin-item">
-            <div class="checkin-item-flex">
-                <div>
-                    <strong>{{ $booking->package->name ?? 'Tour Package' }}</strong>
-                    <br>
-                    <span style="opacity: 0.8; font-size: 0.9rem;">Guest: {{ $booking->user->name ?? 'N/A' }} ({{ $booking->num_guests }} {{ $booking->num_guests === 1 ? 'guest' : 'guests' }})</span>
-                </div>
-                <div class="checkin-date">
-                    <div style="font-weight: 700; font-size: 1rem;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->format('M d, Y') }}</div>
-                    <div style="opacity: 0.8; font-size: 0.85rem; margin-top: 0.25rem;">{{ \Carbon\Carbon::parse($booking->tour_start_date)->diffForHumans() }}</div>
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
 
     <!-- Primary Stats Grid -->
     <div class="stats-grid">
@@ -433,19 +376,19 @@
         <div class="stat-card">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">✅ Paid Bookings</div>
+                    <div class="stat-label">✅ Paid (Not Started)</div>
                     <div class="stat-value">{{ $stats['paid_payments'] }}</div>
                 </div>
                 <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-change">Revenue confirmed</div>
+            <div class="stat-change">Paid, awaiting tour</div>
         </div>
 
         <div class="stat-card">
             <div class="stat-header">
                 <div>
                     <div class="stat-label">💰 Total Revenue</div>
-                    <div class="stat-value">₱{{ number_format((float) $stats['revenue'], 0) }}</div>
+                    <div class="stat-value" style="font-size: 1.875rem; line-height: 2.25rem;">₱{{ number_format((float) $stats['revenue'], 0) }}</div>
                 </div>
                 <div class="stat-icon">💰</div>
             </div>
@@ -581,68 +524,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">⚡</span>
-            Quick Actions
-        </h2>
-
-        <div class="quick-actions">
-            <a href="{{ route('admin.bookings.index') }}" class="action-btn">
-                📋 View Bookings
-            </a>
-            <a href="{{ route('admin.packages.index') }}" class="action-btn">
-                ➕ Manage Packages
-            </a>
-            <a href="{{ route('admin.packages-stats') }}" class="action-btn">
-                📊 Package Stats
-            </a>
-            <a href="{{ route('admin.reports.index') }}" class="action-btn">
-                📄 Generate Reports
-            </a>
-            <a href="{{ route('admin.destinations.index') }}" class="action-btn">
-                🗺️ Manage Destinations
-            </a>
-            <a href="{{ route('admin.payments.index') }}" class="action-btn">
-                💳 Payment History
-            </a>
-        </div>
-    </div>
-
-    <!-- System Health -->
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">🔧</span>
-            System Health
-        </h2>
-
-        <div class="kpi-grid">
-            <div class="kpi-box">
-                <div class="kpi-label">Database Status</div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="font-size: 1.5rem;">✅</span>
-                    <div class="kpi-value" style="font-size: 1.25rem;">Optimal</div>
-                </div>
-                <div class="kpi-subtext">All tables healthy</div>
-            </div>
-
-            <div class="kpi-box">
-                <div class="kpi-label">Last Backup</div>
-                <div class="kpi-value" style="font-size: 1.25rem;">Auto</div>
-                <div class="kpi-subtext">System automated</div>
-            </div>
-
-            <div class="kpi-box">
-                <div class="kpi-label">System Uptime</div>
-                <div class="kpi-value" style="font-size: 1.25rem;">99.9%</div>
-                <div class="kpi-subtext">Excellent performance</div>
-            </div>
-        </div>
-    </div>
-
     <!-- Additional Metrics -->
     <div class="content-section">
         <h2 class="section-title">
@@ -683,79 +564,108 @@
             </div>
 
             <div class="insight-card">
-                <div class="insight-title">Booking Status Trends</div>
+                <div class="insight-title">Top Categories</div>
                 
-                <div class="metric-row">
-                    <span class="metric-label">Approved</span>
-                    <span class="metric-value" style="color: #4CAF50;">{{ $stats['bookingsByStatus']['approved'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Pending</span>
-                    <span class="metric-value" style="color: #FFC107;">{{ $stats['bookingsByStatus']['pending'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Cancelled</span>
-                    <span class="metric-value" style="color: #F44336;">{{ $stats['bookingsByStatus']['cancelled'] }}</span>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span class="progress-label-text">Approval Rate</span>
-                        <span class="progress-label-value">
-                            @if($stats['bookings'] > 0)
-                                {{ round(($stats['bookingsByStatus']['approved'] / $stats['bookings']) * 100, 1) }}%
-                            @else
-                                0%
-                            @endif
-                        </span>
+                @forelse($topCategories as $category)
+                    <div class="metric-row" style="margin-bottom: 0.75rem;">
+                        <span class="metric-label">{{ $categoryLabels[$category->category] ?? ucfirst($category->category) }}</span>
+                        <span class="metric-value" style="color: #4CAF50;">{{ $category->total_bookings }} bookings</span>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill green" style="width: {{ $stats['bookings'] > 0 ? round(($stats['bookingsByStatus']['approved'] / $stats['bookings']) * 100, 1) : 0 }}%"></div>
+                    @if (! $loop->last)
+                        <hr style="border-color: rgba(255,255,255,0.08); margin: 0.75rem 0;" />
+                    @endif
+                @empty
+                    <div class="metric-row">
+                        <span class="metric-label">No booking data yet.</span>
                     </div>
-                </div>
-            </div>
-
-            <div class="insight-card">
-                <div class="insight-title">Payment Status</div>
-                
-                <div class="metric-row">
-                    <span class="metric-label">Paid</span>
-                    <span class="metric-value" style="color: #4CAF50;">{{ $stats['paymentsByStatus']['paid'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Pending</span>
-                    <span class="metric-value" style="color: #FFC107;">{{ $stats['paymentsByStatus']['pending'] }}</span>
-                </div>
-
-                <div class="metric-row">
-                    <span class="metric-label">Failed</span>
-                    <span class="metric-value" style="color: #F44336;">{{ $stats['paymentsByStatus']['failed'] }}</span>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-label">
-                        <span class="progress-label-text">Payment Collection</span>
-                        <span class="progress-label-value">
-                            @php 
-                                $totalPayments = $stats['paymentsByStatus']['paid'] + $stats['paymentsByStatus']['pending'] + $stats['paymentsByStatus']['failed'];
-                            @endphp
-                            @if($totalPayments > 0)
-                                {{ round(($stats['paymentsByStatus']['paid'] / $totalPayments) * 100, 1) }}%
-                            @else
-                                0%
-                            @endif
-                        </span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill blue" style="width: {{ $totalPayments > 0 ? round(($stats['paymentsByStatus']['paid'] / $totalPayments) * 100, 1) : 0 }}%"></div>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </div>
+
+    <!-- Top Packages -->
+    @if($topPackages->isNotEmpty())
+    <div class="content-section">
+        <h2 class="section-title">
+            <span class="section-icon">🏆</span>
+            Top Performing & Highly Rated Packages
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            @foreach($topPackages as $package)
+                <div class="insight-card">
+                    <div class="insight-title">{{ $package->name ?? 'Unknown Package' }}</div>
+                    
+                    <div class="metric-row">
+                        <span class="metric-label">Location</span>
+                        <span class="metric-value" style="font-size: 1rem;">{{ $package->location ?? 'Unknown' }}</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Total Bookings</span>
+                        <span class="metric-value">{{ $package->bookings_count ?? 0 }}</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Rating</span>
+                        <span class="metric-value" style="color: #FFD700;">
+                            @if($package->average_rating > 0)
+                                ⭐ {{ number_format($package->average_rating, 1) }}/5.0
+                            @else
+                                No ratings
+                            @endif
+                        </span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Review Count</span>
+                        <span class="metric-value">{{ $package->reviews_count ?? 0 }} reviews</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Price</span>
+                        <span class="metric-value" style="color: #4CAF50;">₱{{ number_format($package->price ?? 0, 2) }}</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <!-- Famous Tourist Spots -->
+    @if($famousTouristSpots->isNotEmpty())
+    <div class="content-section">
+        <h2 class="section-title">
+            <span class="section-icon">🗺️</span>
+            Famous Tourist Spots
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            @foreach($famousTouristSpots->take(5) as $spot)
+                <div class="insight-card">
+                    <div class="insight-title">{{ $spot->name }}</div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Location</span>
+                        <span class="metric-value" style="font-size: 0.875rem;">{{ $spot->location }}</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Description</span>
+                        <span class="metric-value" style="font-size: 0.875rem;">{{ Str::limit($spot->description, 50) }}</span>
+                    </div>
+
+                    <div class="metric-row">
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value" style="color: {{ $spot->is_active ? '#81c784' : '#8890a8' }};">
+                            {{ $spot->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 
     <!-- Recent Bookings -->
     @if($recentBookings->isNotEmpty())
@@ -881,88 +791,6 @@
     </div>
     @endif
 
-    <!-- Top Packages -->
-    @if($topPackages->isNotEmpty())
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">🏆</span>
-            Top Performing Packages
-        </h2>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-            @foreach($topPackages as $package)
-                <div class="insight-card">
-                    <div class="insight-title">{{ $package->name }}</div>
-                    
-                    <div class="metric-row">
-                        <span class="metric-label">Location</span>
-                        <span class="metric-value" style="font-size: 1rem;">{{ $package->location }}</span>
-                    </div>
-
-                    <div class="metric-row">
-                        <span class="metric-label">Total Bookings</span>
-                        <span class="metric-value">{{ $package->bookings_count }}</span>
-                    </div>
-
-                    <div class="metric-row">
-                        <span class="metric-label">Rating</span>
-                        <span class="metric-value" style="color: #FFD700;">
-                            @if($package->rating)
-                                ⭐ {{ number_format($package->rating, 1) }}/5.0
-                            @else
-                                No ratings
-                            @endif
-                        </span>
-                    </div>
-
-                    <div class="metric-row">
-                        <span class="metric-label">Price</span>
-                        <span class="metric-value" style="color: #4CAF50;">₱{{ number_format($package->price, 2) }}</span>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    <!-- Top Destinations -->
-    @if($topDestinations->isNotEmpty())
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">🗺️</span>
-            Popular Destinations
-        </h2>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-            @foreach($topDestinations->take(5) as $destination)
-                <div class="insight-card">
-                    <div class="insight-title">{{ $destination->name }}</div>
-                    
-                    <div class="metric-row">
-                        <span class="metric-label">Description</span>
-                        <span class="metric-value" style="font-size: 0.875rem;">{{ Str::limit($destination->description, 50) }}</span>
-                    </div>
-
-                    <div class="metric-row">
-                        <span class="metric-label">Active Packages</span>
-                        <span class="metric-value">{{ $destination->tour_packages_count }}</span>
-                    </div>
-
-                    <div class="progress-container">
-                        <div class="progress-label">
-                            <span class="progress-label-text">Tourism Index</span>
-                            <span class="progress-label-value">{{ min(100, $destination->tour_packages_count * 20) }}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill blue" style="width: {{ min(100, $destination->tour_packages_count * 20) }}%"></div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
     <!-- Recent Reviews -->
     @if($recentReviews->isNotEmpty())
     <style>
@@ -1035,120 +863,19 @@
                 <div class="review-card">
                     <div class="review-card-header">
                         <div class="review-card-info">
-                            <h3>{{ $review->tourPackage->name }}</h3>
-                            <p>by {{ $review->user->name }}</p>
+                            <h3>{{ $review->tourPackage?->name ?? 'Unknown Package' }}</h3>
+                            <p>by {{ $review->user?->name ?? 'Unknown User' }}</p>
                         </div>
                         <div class="review-card-rating">⭐ {{ $review->rating }}</div>
                     </div>
-                    <p class="review-card-comment">{{ Str::limit($review->comment, 120) }}</p>
-                    <p class="review-card-date">{{ $review->created_at->diffForHumans() }}</p>
+                    <p class="review-card-comment">{{ Str::limit($review->comment ?? 'No comment', 120) }}</p>
+                    <p class="review-card-date">{{ $review->created_at?->diffForHumans() ?? 'Recently' }}</p>
                 </div>
             @endforeach
         </div>
     </div>
     @endif
 
-    <!-- Highest Rated Packages -->
-    @if($packageRatings->isNotEmpty())
-    <style>
-        .rated-packages-table {
-            background: #1f1f3a;
-            border: 1px solid #3d3d5c;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .rated-packages-header {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 1rem;
-            padding: 1.25rem;
-            background: linear-gradient(135deg, #2d3561 0%, #3d4571 100%);
-            border-bottom: 2px solid #4d5d8d;
-            font-weight: 700;
-            color: #ffffff;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .rated-packages-body {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .rated-packages-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 1rem;
-            padding: 1.25rem;
-            border-bottom: 1px solid #3d3d5c;
-            align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .rated-packages-row:nth-child(odd) {
-            background: rgba(45, 53, 97, 0.4);
-        }
-
-        .rated-packages-row:nth-child(even) {
-            background: rgba(36, 40, 66, 0.4);
-        }
-
-        .rated-packages-row:hover {
-            background: rgba(61, 93, 157, 0.5);
-        }
-
-        .rated-packages-name {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .rated-packages-rating {
-            color: #FFD700;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .rated-packages-reviews {
-            color: #b0b8d0;
-            font-weight: 500;
-        }
-
-        .rated-packages-price {
-            color: #7dd87d;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-    </style>
-    <div class="content-section">
-        <h2 class="section-title">
-            <span class="section-icon">🌟</span>
-            Highest Rated Packages
-        </h2>
-
-        <div class="rated-packages-table">
-            <div class="rated-packages-header">
-                <div>Package Name</div>
-                <div>Rating</div>
-                <div>Review Count</div>
-                <div>Price</div>
-            </div>
-            <div class="rated-packages-body">
-                @foreach($packageRatings as $package)
-                    <div class="rated-packages-row">
-                        <div class="rated-packages-name">{{ Str::limit($package->name, 25) }}</div>
-                        <div class="rated-packages-rating">⭐ {{ number_format($package->rating, 2) }}/5.0</div>
-                        <div class="rated-packages-reviews">{{ $package->reviews_count }} reviews</div>
-                        <div class="rated-packages-price">₱{{ number_format($package->price, 2) }}</div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endif
 </x-layout>
 
 <style>

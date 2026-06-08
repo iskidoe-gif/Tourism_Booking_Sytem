@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Destination;
+use App\Models\FamousTouristSpot;
 use App\Models\Payment;
+use App\Models\PromoPackage;
 use App\Models\Review;
 use App\Models\TourPackage;
 use App\Services\BookingService;
@@ -13,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Carbon\Carbon;
 
@@ -24,7 +27,10 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        $data = $this->touristData($request);
+        $cacheKey = 'tourist_dashboard_' . $request->user()?->id;
+        $data = cache()->remember($cacheKey, now()->addMinutes(5), function() use ($request) {
+            return $this->touristData($request);
+        });
 
         if ($request->expectsJson()) {
             return response()->json($data);
@@ -35,30 +41,96 @@ class DashboardController extends Controller
 
     public function home(): View
     {
-        $topRatedPackages = TourPackage::active()
-            ->bolinao()
-            ->where('rating', '>=', 4)
-            ->orderBy('rating', 'desc')
-            ->limit(3)
-            ->get();
+        try {
+            $topRatedPackages = TourPackage::active()
+                ->bolinao()
+                ->where('rating', '>=', 4)
+                ->orderBy('rating', 'desc')
+                ->limit(3)
+                ->get();
 
-        $customerReviews = Review::with(['user', 'tourPackage'])
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get();
+            $customerReviews = Review::with(['user', 'tourPackage'])
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->get();
 
-        return view('welcome', compact('topRatedPackages', 'customerReviews'));
+            $famousTouristSpots = FamousTouristSpot::where('is_active', true)
+                ->orderBy('sort_order')
+                ->latest()
+                ->limit(6)
+                ->get();
+
+            $promoPackages = PromoPackage::where('is_active', true)
+                ->where('start_date', '<=', now())
+                ->where('end_date', '>=', now())
+                ->latest()
+                ->limit(3)
+                ->get();
+
+            return view('welcome', compact('topRatedPackages', 'customerReviews', 'famousTouristSpots', 'promoPackages'));
+        } catch (\Exception $e) {
+            // Return empty collections if database is not available
+            return view('welcome', [
+                'topRatedPackages' => collect(),
+                'customerReviews' => collect(),
+                'famousTouristSpots' => collect(),
+                'promoPackages' => collect(),
+            ]);
+        }
     }
 
     public function admin(Request $request): JsonResponse|View
     {
-        $data = $this->buildDashboardData($request);
+        $cacheKey = 'admin_dashboard_' . ($request->user()?->id ?? 'guest');
+        $data = cache()->remember($cacheKey, now()->addMinutes(5), function() use ($request) {
+            return $this->buildDashboardData($request);
+        });
+
+        $data = array_merge([
+            'topCategories' => $data['topCategories'] ?? collect(),
+            'categoryLabels' => $data['categoryLabels'] ?? TourPackage::categoryLabels(),
+        ], $data);
 
         if ($request->expectsJson()) {
             return response()->json($data);
         }
 
         return view('admin.dashboard', $data);
+    }
+
+    public function famousTouristSpots(Request $request): View
+    {
+        $spots = FamousTouristSpot::where('is_active', true)
+            ->orderBy('sort_order')
+            ->latest()
+            ->get();
+
+        return view('famous-tourist-spots', compact('spots'));
+    }
+
+    public function showFamousTouristSpot($id): View
+    {
+        $spot = FamousTouristSpot::findOrFail($id);
+
+        return view('famous-tourist-spot-details', compact('spot'));
+    }
+
+    public function promoPackages(Request $request): View
+    {
+        $promoPackages = PromoPackage::where('is_active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->latest()
+            ->get();
+
+        return view('promo-packages', compact('promoPackages'));
+    }
+
+    public function showPromoPackage($id): View
+    {
+        $promoPackage = PromoPackage::findOrFail($id);
+
+        return view('promo-package-details', compact('promoPackage'));
     }
 
     public function packages(Request $request): JsonResponse|View|RedirectResponse
@@ -87,6 +159,18 @@ class DashboardController extends Controller
         $capacity = $request->filled('capacity') && $request->integer('capacity') > 0
             ? $request->integer('capacity')
             : null;
+
+        $selectedPromo = null;
+        if ($request->filled('promo')) {
+            $promo = PromoPackage::find($request->input('promo'));
+            if ($promo?->isActive()) {
+                $selectedPromo = $promo;
+                $minCapacity = $promo->minGuestCapacity();
+                if ($minCapacity && (! $capacity || $capacity < $minCapacity)) {
+                    $capacity = $minCapacity;
+                }
+            }
+        }
 
         $packages = TourPackage::active()
             ->bolinao()
@@ -125,12 +209,12 @@ class DashboardController extends Controller
             ->when($request->type, fn($q) => $q->where('type', $request->type))
             ->when($request->max_price, fn($q) => $q->where('price', '<=', $request->max_price))
             ->orderBy('updated_at', 'desc')
-            ->paginate(6)
+            ->paginate(10)
             ->withQueryString();
 
         $destinations = Destination::orderBy('name')->get();
 
-        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity');
+        $data = compact('packages', 'destinations', 'categoryMap', 'selectedDuration', 'capacity', 'selectedPromo');
 
         if ($request->user()) {
             $data = array_merge($this->touristData($request), $data);
@@ -140,22 +224,7 @@ class DashboardController extends Controller
             return response()->json($data);
         }
 
-        return view('tourist.packages', $data);
-    }
-
-    public function reservations(Request $request): JsonResponse|View|RedirectResponse
-    {
-        if (Auth::guard('admin')->check() || $request->user()?->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
-        $data = $this->touristData($request);
-
-        if ($request->expectsJson()) {
-            return response()->json($data);
-        }
-
-        return view('tourist.reservations', $data);
+        return view('tourist.packages.index', $data);
     }
 
     public function storeBooking(Request $request): JsonResponse|RedirectResponse
@@ -175,6 +244,7 @@ class DashboardController extends Controller
 
         $validated = $request->validate([
             'tour_package_id' => ['required', 'exists:tour_packages,id'],
+            'promo_package_id' => ['nullable', 'exists:promo_packages,id'],
             'tour_start_date' => ['required', 'date', 'after_or_equal:today'],
             'tour_end_date' => ['required', 'date', 'after:tour_start_date'],
             'num_adults' => ['required', 'integer', 'min:0'],
@@ -184,6 +254,7 @@ class DashboardController extends Controller
             'guest_email' => ['required', 'email', 'max:255'],
             'guest_phone' => ['nullable', 'string', 'max:50'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
+            'tourist_guide' => ['nullable', 'boolean'],
             'services' => ['nullable', 'array'],
             'services.*' => ['in:airport_transfer,travel_insurance,meal_plan'],
         ]);
@@ -228,10 +299,36 @@ class DashboardController extends Controller
             }
         }
 
+        $touristGuideFee = !empty($validated['tourist_guide']) ? 1200 : 0;
+
+        // Apply promo package discount if provided
+        $discountAmount = 0;
+        $discountCode = null;
+        $promoPackageId = null;
+
+        if (!empty($validated['promo_package_id'])) {
+            $promoPackage = PromoPackage::find($validated['promo_package_id']);
+            if ($promoPackage && $promoPackage->isActive()) {
+                $minStartDays = $promoPackage->minStartDays();
+                if ($minStartDays > 0 && $checkIn->lt(now()->addDays($minStartDays))) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['tour_start_date' => "This promo requires tour start at least {$minStartDays} days from today."]);
+                }
+
+                $basePrice = $package->price * $totalGuests;
+                $discountAmount = $basePrice * ($promoPackage->discount_percentage / 100);
+                $discountCode = $promoPackage->name;
+                $promoPackageId = $promoPackage->id;
+            }
+        }
+
         $bookingService = new BookingService();
         $booking = $bookingService->createBooking([
             'user_id' => $request->user()->id,
             'tour_package_id' => $package->id,
+            'promo_package_id' => $promoPackageId,
             'tour_date' => $validated['tour_start_date'],
             'tour_start_date' => $validated['tour_start_date'],
             'tour_end_date' => $validated['tour_end_date'],
@@ -241,6 +338,10 @@ class DashboardController extends Controller
             'num_seniors' => $validated['num_seniors'],
             'base_price' => $package->price * $totalGuests,
             'additional_fees' => $serviceTotal,
+            'tourist_guide' => !empty($validated['tourist_guide']),
+            'tourist_guide_fee' => $touristGuideFee,
+            'discount_amount' => $discountAmount,
+            'discount_code' => $discountCode,
             'services' => collect($serviceItems),
             'guest_details' => collect([
                 'contact_name' => $validated['guest_name'],
@@ -272,7 +373,7 @@ class DashboardController extends Controller
             $query->where('status', $request->status);
         }
 
-        $bookings = $query->paginate(20)->appends($request->query());
+        $bookings = $query->paginate(10)->appends($request->query());
 
         if ($request->expectsJson()) {
             return response()->json(['data' => $bookings]);
@@ -335,14 +436,74 @@ class DashboardController extends Controller
             ->with('success', 'Booking status updated successfully.');
     }
 
+    public function approveCancellation(Request $request, Booking $booking): RedirectResponse
+    {
+        if (!Auth::guard('admin')->check() && $request->user()?->role !== 'admin') {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        if ($booking->status !== 'cancellation_pending') {
+            return back()->with('error', 'This booking is not pending cancellation.');
+        }
+
+        $booking->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'approved_by' => Auth::guard('admin')->id() ?? $request->user()?->id,
+            'approved_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('admin.bookings.index')
+            ->with('success', 'Cancellation approved successfully.');
+    }
+
+    public function rejectCancellation(Request $request, Booking $booking): RedirectResponse
+    {
+        if (!Auth::guard('admin')->check() && $request->user()?->role !== 'admin') {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        if ($booking->status !== 'cancellation_pending') {
+            return back()->with('error', 'This booking is not pending cancellation.');
+        }
+
+        $booking->update([
+            'status' => 'pending',
+            'cancellation_reason' => null,
+        ]);
+
+        return redirect()
+            ->route('admin.bookings.index')
+            ->with('success', 'Cancellation rejected. Booking restored to pending status.');
+    }
+
     private function touristData(Request $request): array
     {
         $user = $request->user();
-        $bookingQuery = Booking::with(['user', 'package', 'payment'])
+        
+        // Optimize: Single query with aggregation instead of multiple count queries
+        $bookingStats = Booking::where('user_id', $user->id)
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+            ')
+            ->first();
+        
+        $bookings = Booking::with(['user', 'package', 'payment'])
             ->where('user_id', $user->id)
-            ->latest();
-        $bookings = $bookingQuery->get();
-        $paymentQuery = Payment::whereIn('booking_id', Booking::where('user_id', $user->id)->select('id'));
+            ->latest()
+            ->get();
+
+        // Optimize: Single query for payment stats
+        $paymentStats = Payment::whereIn('booking_id', Booking::where('user_id', $user->id)->select('id'))
+            ->selectRaw('
+                SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
+                SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as revenue
+            ')
+            ->first();
 
         // Get top-rated packages
         $topRatedPackages = TourPackage::active()
@@ -367,9 +528,9 @@ class DashboardController extends Controller
 
         // Get booking breakdown by status
         $bookingsByStatus = [
-            'approved' => (clone $bookingQuery)->where('status', 'approved')->count(),
-            'pending' => (clone $bookingQuery)->where('status', 'pending')->count(),
-            'cancelled' => (clone $bookingQuery)->where('status', 'cancelled')->count(),
+            'approved' => $bookingStats->approved ?? 0,
+            'pending' => $bookingStats->pending ?? 0,
+            'cancelled' => $bookingStats->cancelled ?? 0,
         ];
 
         // Get most booked destinations
@@ -383,10 +544,10 @@ class DashboardController extends Controller
         return [
             'stats' => [
                 'packages' => TourPackage::active()->bolinao()->count(),
-                'bookings' => $bookingQuery->count(),
-                'pending_bookings' => (clone $bookingQuery)->where('status', 'pending')->count(),
-                'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
-                'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
+                'bookings' => $bookingStats->total ?? 0,
+                'pending_bookings' => $bookingStats->pending ?? 0,
+                'paid_payments' => $paymentStats->paid_count ?? 0,
+                'revenue' => $paymentStats->revenue ?? 0,
                 'bookingsByStatus' => $bookingsByStatus,
             ],
             'availablePackages' => TourPackage::query()
@@ -406,8 +567,36 @@ class DashboardController extends Controller
     private function buildDashboardData(Request $request): array
     {
         $user = Auth::guard('admin')->user() ?? $request->user();
-        $bookingCountQuery = Booking::query();
-        $paymentQuery = Payment::query();
+
+        // Optimize: Single query for booking stats aggregation
+        // Make metrics mutually exclusive based on booking lifecycle
+        $bookingStats = Booking::selectRaw('
+            COUNT(*) as total,
+            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved,
+            SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled,
+            SUM(CASE WHEN tour_started_at IS NOT NULL AND tour_ended_at IS NULL THEN 1 ELSE 0 END) as checked_in,
+            SUM(CASE WHEN tour_ended_at IS NOT NULL THEN 1 ELSE 0 END) as checked_out
+        ')
+        ->first();
+
+        // Optimize: Single query for payment stats
+        // Count paid bookings that are not already in tour progress
+        $paymentStats = Payment::selectRaw('
+            SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count,
+            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_count,
+            SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) as failed_count,
+            SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as revenue
+        ')
+        ->first();
+
+        // Get paid bookings count excluding those with tour progress
+        $paidBookingsWithoutProgress = Booking::whereHas('payment', function($q) {
+            $q->where('status', 'paid');
+        })
+        ->whereNull('tour_started_at')
+        ->whereNull('tour_ended_at')
+        ->count();
 
         // Get recent bookings with details
         $recentBookings = Booking::with(['user', 'package', 'payment'])
@@ -415,17 +604,18 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        // Get top packages by booking count
-        $topPackages = TourPackage::withCount('bookings')
-            ->orderBy('bookings_count', 'desc')
+        // Get top packages by bookings and live review average
+        $topPackages = TourPackage::withCount(['bookings', 'reviews'])
+            ->withAvg('reviews', 'rating')
+            ->orderByDesc('bookings_count')
+            ->orderByDesc('reviews_avg_rating')
             ->limit(5)
             ->get();
 
-        // Get top destinations by bookings
-        $topDestinations = Destination::withCount(['packages' => function($q) {
-            $q->withCount('bookings');
-        }])
-            ->latest('created_at')
+        // Get famous tourist spots
+        $famousTouristSpots = FamousTouristSpot::where('is_active', true)
+            ->orderBy('sort_order')
+            ->latest()
             ->limit(5)
             ->get();
 
@@ -439,16 +629,26 @@ class DashboardController extends Controller
 
         // Get booking status breakdown
         $bookingsByStatus = [
-            'pending' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
-            'approved' => (clone $bookingCountQuery)->where('status', 'approved')->count(),
-            'cancelled' => (clone $bookingCountQuery)->where('status', 'cancelled')->count(),
+            'pending' => $bookingStats->pending ?? 0,
+            'approved' => $bookingStats->approved ?? 0,
+            'cancelled' => $bookingStats->cancelled ?? 0,
         ];
+
+        // Get top categories by total bookings
+        $topCategories = Booking::join('tour_packages', 'bookings.tour_package_id', '=', 'tour_packages.id')
+            ->select('tour_packages.category', DB::raw('COUNT(bookings.id) as total_bookings'))
+            ->groupBy('tour_packages.category')
+            ->orderByDesc('total_bookings')
+            ->limit(3)
+            ->get();
+
+        $categoryLabels = TourPackage::categoryLabels();
 
         // Get payment breakdown
         $paymentsByStatus = [
-            'paid' => (clone $paymentQuery)->where('status', 'paid')->count(),
-            'pending' => (clone $paymentQuery)->where('status', 'pending')->count(),
-            'failed' => (clone $paymentQuery)->where('status', 'failed')->count(),
+            'paid' => $paymentStats->paid_count ?? 0,
+            'pending' => $paymentStats->pending_count ?? 0,
+            'failed' => $paymentStats->failed_count ?? 0,
         ];
 
         // Get recent reviews
@@ -457,16 +657,12 @@ class DashboardController extends Controller
             ->limit(8)
             ->get();
 
-        // Get average ratings by package
-        $packageRatings = TourPackage::withCount('reviews')
-            ->with('reviews')
-            ->orderBy('rating', 'desc')
-            ->limit(5)
-            ->get();
-
         // Calculate customer satisfaction
-        $avgRating = Review::avg('rating') ?? 0;
-        $totalReviews = Review::count();
+        $reviewStats = Review::selectRaw('
+            AVG(rating) as avg_rating,
+            COUNT(*) as total_reviews
+        ')
+        ->first();
 
         // Get active users count
         $activeUsers = Booking::distinct('user_id')->count('user_id');
@@ -482,24 +678,25 @@ class DashboardController extends Controller
         return [
             'stats' => [
                 'packages' => TourPackage::count(),
-                'bookings' => $bookingCountQuery->count(),
-                'pending_bookings' => (clone $bookingCountQuery)->where('status', 'pending')->count(),
-                'checked_in_bookings' => (clone $bookingCountQuery)->whereNotNull('tour_started_at')->count(),
-                'checked_out_bookings' => (clone $bookingCountQuery)->whereNotNull('tour_ended_at')->count(),
-                'paid_payments' => (clone $paymentQuery)->where('status', 'paid')->count(),
-                'revenue' => (clone $paymentQuery)->where('status', 'paid')->sum('amount'),
+                'bookings' => $bookingStats->total ?? 0,
+                'pending_bookings' => $bookingStats->pending ?? 0,
+                'checked_in_bookings' => $bookingStats->checked_in ?? 0,
+                'checked_out_bookings' => $bookingStats->checked_out ?? 0,
+                'paid_payments' => $paidBookingsWithoutProgress,
+                'revenue' => $paymentStats->revenue ?? 0,
                 'bookingsByStatus' => $bookingsByStatus,
                 'paymentsByStatus' => $paymentsByStatus,
-                'avgRating' => round($avgRating, 2),
-                'totalReviews' => $totalReviews,
+                'avgRating' => round($reviewStats->avg_rating ?? 0, 2),
+                'totalReviews' => $reviewStats->total_reviews ?? 0,
                 'activeUsers' => $activeUsers,
             ],
             'recentBookings' => $recentBookings,
             'topPackages' => $topPackages,
-            'topDestinations' => $topDestinations,
+            'topCategories' => $topCategories,
+            'categoryLabels' => $categoryLabels,
+            'famousTouristSpots' => $famousTouristSpots,
             'monthlyBookings' => $monthlyBookings,
             'recentReviews' => $recentReviews,
-            'packageRatings' => $packageRatings,
             'upcomingCheckIns' => $upcomingCheckIns,
         ];
     }

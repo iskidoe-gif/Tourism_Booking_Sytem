@@ -8,18 +8,20 @@ use Illuminate\Support\Facades\Route;
 Route::get('/packages', [TourPackageController::class, 'index']);
 Route::get('/packages/{package}', [TourPackageController::class, 'show']);
 
-Route::get('/bookings', [BookingController::class, 'index']);
-Route::get('/payments', [PaymentController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/bookings', [BookingController::class, 'index']);
+    Route::get('/payments', [PaymentController::class, 'index']);
 
-Route::post('/packages', [TourPackageController::class, 'store']);
-Route::post('/bookings', [BookingController::class, 'store']);
+    Route::post('/packages', [TourPackageController::class, 'store']);
+    Route::post('/bookings', [BookingController::class, 'store']);
 
-Route::put('/packages/{package}', [TourPackageController::class, 'update']);
-Route::put('/bookings/{booking}', [BookingController::class, 'update']);
+    Route::put('/packages/{package}', [TourPackageController::class, 'update']);
+    Route::put('/bookings/{booking}', [BookingController::class, 'update']);
 
-Route::delete('/packages/{package}', [TourPackageController::class, 'destroy']);
-Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
-Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
+    Route::delete('/packages/{package}', [TourPackageController::class, 'destroy']);
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy']);
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
+});
 
 Route::middleware('auth:sanctum')->name('api.')->group(function () {
     Route::apiResource('bookings', BookingController::class)->only(['show']);

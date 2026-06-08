@@ -13,6 +13,7 @@
                     'cancelled' => 'Cancelled',
                     'declined' => 'Declined',
                     'completed' => 'Completed',
+                    'cancellation_pending' => 'Cancellation Pending',
                 ];
 
                 $statusClasses = [
@@ -21,6 +22,7 @@
                     'cancelled' => 'status-cancelled',
                     'declined' => 'status-declined',
                     'completed' => 'status-completed',
+                    'cancellation_pending' => 'status-cancellation-pending',
                 ];
             @endphp
 
@@ -47,7 +49,6 @@
                     align-items: center;
                     gap: 0.5rem;
                 }
-
 
                 .filter-group label {
                     font-weight: 600;
@@ -97,6 +98,7 @@
                 .status-declined { background: #dc3545; }
                 .status-cancelled { background: #6c757d; }
                 .status-completed { background: #6f42c1; }
+                .status-cancellation-pending { background: #fd7e14; }
             </style>
 
             <!-- Filter Form (status only, inline) -->
@@ -110,6 +112,7 @@
                             <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Confirmed</option>
                             <option value="declined" {{ request('status') === 'declined' ? 'selected' : '' }}>Declined</option>
                             <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="cancellation_pending" {{ request('status') === 'cancellation_pending' ? 'selected' : '' }}>Cancellation Pending</option>
                         </select>
                     </div>
                 </div>
@@ -127,8 +130,23 @@
                                 | Tour end: {{ $booking->tour_end_date?->format('M d, Y') ?? 'Not set' }}
                             </p>
                             <p class="lead">Guests: {{ $booking->num_guests }} | Price: PHP {{ number_format((float) $booking->total_price, 2) }}</p>
+                            @if($booking->promoPackage)
+                                <p class="lead" style="color: #ffc107;"><strong>🎉 Promo:</strong> {{ $booking->promoPackage->name }} ({{ $booking->promoPackage->discount_percentage }}% OFF)</p>
+                            @endif
+                            @if($booking->tourist_guide)
+                                <p class="lead"><strong>Tour guide included</strong> (₱{{ number_format($booking->tourist_guide_fee, 2) }})</p>
+                            @endif
                             @if($booking->special_requests)
                                 <p class="lead"><strong>Requests:</strong> {{ $booking->special_requests }}</p>
+                            @endif
+                            @if($booking->services && count($booking->services) > 0)
+                                <p class="lead"><strong>Extras:</strong> {{ implode(', ', array_map(function ($service) {
+                                    if (is_array($service)) {
+                                        return $service['name'] ?? ucfirst(str_replace('_', ' ', $service['key'] ?? ''));
+                                    }
+
+                                    return ucfirst(str_replace('_', ' ', $service));
+                                }, $booking->services->toArray())) }}</p>
                             @endif
                         </div>
                     </div>
@@ -166,8 +184,26 @@
                             </div>
                         @elseif($booking->status === 'cancelled')
                             <div class="booking-cancelled-info">
-                                <p class="lead">Cancelled{{ $booking->cancellation_reason ? (': ' . $booking->cancellation_reason) : '' }}</p>
+                                <p class="lead">Cancelled</p>
                                 <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
+                                @if($booking->cancellation_reason)
+                                    <button type="button" class="btn btn-info" onclick="showCancellationModal({{ $booking->id }}, '{{ $booking->cancellation_reason }}')">View Cancellation Reason</button>
+                                @endif
+                            </div>
+                        @elseif($booking->status === 'cancellation_pending')
+                            <div class="booking-cancellation-pending-info">
+                                <p class="lead">{{ $booking->cancelled_at?->format('Y-m-d H:i') }}</p>
+                                <div class="booking-actions">
+                                    <button type="button" class="btn btn-info" onclick="showCancellationModal({{ $booking->id }}, '{{ $booking->cancellation_reason }}')">View Cancellation</button>
+                                    <form method="POST" action="{{ route('admin.bookings.approve-cancellation', $booking) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger">Approve Cancellation</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('admin.bookings.reject-cancellation', $booking) }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-secondary">Reject Cancellation</button>
+                                    </form>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -183,4 +219,32 @@
             @endif
         </div>
     </div>
+</div>
+
+<!-- Cancellation Details Modal -->
+<div class="modal fade" id="cancellationModal" tabindex="-1" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancellation Reason</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="cancellationReasonText"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showCancellationModal(bookingId, reason) {
+    document.getElementById('cancellationReasonText').textContent = reason;
+    const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
+    modal.show();
+}
+</script>
+
 </x-layout>

@@ -2,6 +2,8 @@
 
 @php
     $touristUser = auth()->user()?->isTourist() ? auth()->user() : null;
+    $selectedPromo = $selectedPromo ?? null;
+    $promoActive = $selectedPromo?->isActive() ?? false;
     $selectedDuration = $selectedDuration ?? request('duration', 'all');
     if (request()->boolean('dur_1') && ! request()->boolean('dur_all')) {
         $selectedDuration = '1';
@@ -28,6 +30,9 @@
         <aside class="packages-sidebar packages-search-panel">
             <h3>Search tour packages</h3>
             <form action="{{ route('packages.index') }}" method="GET" class="search-form packages-search-form">
+                @if(request('promo'))
+                    <input type="hidden" name="promo" value="{{ request('promo') }}">
+                @endif
                 <div class="form-group packages-search-field packages-search-field-wide">
                     <label for="search">Search tours</label>
                     <div class="search-input-wrap">
@@ -81,6 +86,15 @@
                 </div>
             </div>
 
+            @if($promoActive)
+                <div class="card text-smoke mb-4" style="padding: 1rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(10, 18, 40, 0.92);">
+                    <strong>{{ $selectedPromo->name }}</strong> is active — enjoy {{ number_format($selectedPromo->discount_percentage, 0) }}% off.
+                    @if($selectedPromo->minGuestCapacity())
+                        <span>Showing packages for {{ $selectedPromo->minGuestCapacity() }} or more guests.</span>
+                    @endif
+                </div>
+            @endif
+
             @if($packages->isEmpty())
                 <div class="card text-center text-muted py-5">No packages found.</div>
             @else
@@ -88,13 +102,15 @@
                     @foreach($packages as $package)
                         <article class="package-card destination-card">
                             <div class="package-card-media" style="background-image: url('{{ $package->image_url }}');">
-                                <div class="badge-rating">{{ number_format($package->rating,1) }} ★</div>
+                                <div class="badge-rating">{{ number_format($package->average_rating,1) }} ★</div>
                             </div>
                             <div class="package-card-body">
                                 <div class="package-card-meta">
                                     <span>{{ $package->duration_days }} Day Tour</span>
                                     <span>·</span>
                                     <span>Up to {{ $package->max_guests }} guests</span>
+                                    <span>·</span>
+                                    <span>{{ $package->time_start_formatted }} - {{ $package->time_end_formatted }}</span>
                                     <span>&middot;</span>
                                     <span>{{ $package->location }}</span>
                                 </div>
@@ -103,13 +119,21 @@
                                 <div style="flex:1"></div>
                                 <div class="package-card-footer">
                                     <div class="package-card-price">
+                                    @if($promoActive)
+                                        @php
+                                            $discountedPrice = $selectedPromo->discountedPrice($package->price);
+                                        @endphp
+                                        <span class="price discounted">₱{{ number_format($discountedPrice, 2) }}</span>
+                                        <span class="price-original" style="font-size:0.85rem; text-decoration: line-through; color: rgba(255,255,255,0.65);">₱{{ number_format($package->price, 2) }}</span>
+                                    @else
                                         <span class="price">₱{{ number_format($package->price) }}</span>
-                                        <span class="price-note">/ person</span>
-                                    </div>
+                                    @endif
+                                    <span class="price-note">/ person</span>
+                                </div>
                                     <div class="package-card-actions">
-                                        <a href="{{ route('packages.show', $package) }}" class="btn btn-secondary">View details</a>
+                                        <a href="{{ route('packages.show', array_merge([$package], request()->only('promo'))) }}" class="btn btn-secondary">View details</a>
                                         @if($touristUser)
-                                            <a href="{{ route('packages.show', $package) }}" class="btn">Book</a>
+                                            <a href="{{ route('packages.show', array_merge([$package], request()->only('promo'))) }}" class="btn">Book</a>
                                         @else
                                             <a href="#" class="btn" data-auth-open>Book</a>
                                         @endif
@@ -120,9 +144,6 @@
                     @endforeach
                 </div>
 
-                <div class="package-pagination" style="margin-top:1rem">
-                    {{ $packages->links() }}
-                </div>
             @endif
         </main>
     </div>

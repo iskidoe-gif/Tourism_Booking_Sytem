@@ -12,7 +12,7 @@ class PaymentController extends Controller
 {
     public function index(Request $request): View
     {
-        $payments = Payment::with(['booking.user', 'booking.package'])->latest()->paginate(20);
+        $payments = Payment::with(['booking.user', 'booking.package'])->latest()->paginate(10);
 
         return view('admin.payments.index', compact('payments'));
     }

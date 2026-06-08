@@ -306,7 +306,7 @@
         <div class="dashboard-actions">
             <a href="{{ route('packages.index') }}" class="navbtn">Browse Packages</a>
             <a href="{{ route('reservations.index') }}" class="navbtn">My Reservations</a>
-            <a href="{{ route('packages.index') }}" class="navbtn">Recommended Tours</a>
+            <a href="{{ route('famous-tourist-spots.index') }}" class="navbtn">Famous Tourist Spots</a>
         </div>
     </div>
 

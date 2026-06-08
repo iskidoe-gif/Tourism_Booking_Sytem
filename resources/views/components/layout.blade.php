@@ -4,12 +4,80 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Tourism Booking System') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- Provide runtime API URL for non-built frontend (useful on free Render plan without Vite build) --}}
     <script>
         window.__API_URL__ = "{{ env('VITE_API_URL', env('APP_URL')) }}";
     </script>
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global button enhancement for immediate response
+        document.addEventListener('DOMContentLoaded', function() {
+            // Password visibility toggle
+            const passwordToggles = document.querySelectorAll('.password-toggle');
+            passwordToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const input = this.parentElement.querySelector('input[type=\"password\"], input[type=\"text\"]');
+                    if (input) {
+                        const isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        this.classList.toggle('active', !isPassword);
+                    }
+                });
+            });
+
+            // Enhance all buttons with immediate feedback
+            const buttons = document.querySelectorAll('button, .btn, .btn-primary, .btn-secondary, .navbtn, .bolinao-button');
+
+            buttons.forEach(button => {
+                // Skip password toggles
+                if (button.classList.contains('password-toggle')) return;
+                
+                // Skip if already has onclick handler or is a link with valid href
+                if (button.getAttribute('onclick')) return;
+                if (button.tagName === 'A' && button.getAttribute('href') && button.getAttribute('href') !== '#' && !button.getAttribute('href').startsWith('javascript')) return;
+
+                button.addEventListener('click', function(e) {
+                    const originalText = this.textContent;
+                    const isLink = this.tagName === 'A';
+                    const href = isLink ? this.getAttribute('href') : null;
+
+                    // Show immediate feedback
+                    this.style.opacity = '0.7';
+                    this.style.transform = 'scale(0.98)';
+
+                    // If it's a link, navigate immediately
+                    if (isLink && href && href !== '#' && !href.startsWith('javascript')) {
+                        e.preventDefault();
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 50);
+                    }
+
+                    // Reset visual state after short delay
+                    setTimeout(() => {
+                        this.style.opacity = '1';
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+
+            // Enhance form submissions
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = this.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        const originalText = submitBtn.textContent;
+                        submitBtn.textContent = 'Processing...';
+                        submitBtn.style.opacity = '0.7';
+                    }
+                });
+            });
+        });
+    </script>
 </head>
 @php
     $webUser = auth()->user();
@@ -29,6 +97,9 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">Dashboard</x-nav-link>
                         <x-nav-link :href="route('admin.bookings.index')" :active="request()->routeIs('admin.bookings.index')">Bookings</x-nav-link>
                         <x-nav-link :href="route('admin.packages-stats')" :active="request()->routeIs('admin.packages-stats')">Packages</x-nav-link>
+                        <x-nav-link :href="route('admin.promo-packages.index')" :active="request()->routeIs('admin.promo-packages.*')">Promo Packages</x-nav-link>
+                        <x-nav-link :href="route('admin.famous-tourist-spots.index')" :active="request()->routeIs('admin.famous-tourist-spots.index')">Tourist Spots</x-nav-link>
+                        <x-nav-link :href="route('admin.payments.index')" :active="request()->routeIs('admin.payments.index')">Payments</x-nav-link>
                         <x-nav-link :href="route('admin.reports.index')" :active="request()->routeIs('admin.reports.index')">Reports</x-nav-link>
                         <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf
@@ -37,10 +108,14 @@
                     @elseif($touristUser)
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Packages</x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
-                        <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
-                            <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
-                        </a>
+                        <x-nav-link :href="route('promo-packages.index')" :active="request()->routeIs('promo-packages.*')">Promo Packages</x-nav-link>
+                        <x-nav-link :href="route('famous-tourist-spots.index')" :active="request()->routeIs('famous-tourist-spots.index')">Tourist Spots</x-nav-link>
+                        @if(!$touristUser->isGuest())
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Dashboard</x-nav-link>
+                            <a href="{{ route('dashboard') }}" class="profile-link" title="Go to profile">
+                                <span class="profile-icon" aria-hidden="true">{{ strtoupper(substr($touristUser->name, 0, 1)) }}</span>
+                            </a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}" class="nav-form">
                             @csrf
                             <button class="navbtn">Logout</button>
@@ -48,6 +123,8 @@
                     @else
                         <x-nav-link :href="route('home')" :active="request()->routeIs('home')">Home</x-nav-link>
                         <x-nav-link :href="route('packages.index')" :active="request()->routeIs('packages.index')">Packages</x-nav-link>
+                        <x-nav-link :href="route('promo-packages.index')" :active="request()->routeIs('promo-packages.*')">Promo Packages</x-nav-link>
+                        <x-nav-link :href="route('famous-tourist-spots.index')" :active="request()->routeIs('famous-tourist-spots.index')">Tourist Spots</x-nav-link>
                         <a href="#" class="bolinao-button bolinao-button-light" data-auth-open>Login / Register</a>
                     @endif
                 </div>
@@ -104,7 +181,12 @@
 
                     <div class="auth-group">
                         <label for="modal-login-password">Password</label>
-                        <input id="modal-login-password" name="password" type="password" placeholder="Password" class="auth-input" required />
+                        <div class="password-input-wrapper">
+                            <input id="modal-login-password" name="password" type="password" placeholder="Password" class="auth-input" required />
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <label class="remember-row">
@@ -155,12 +237,22 @@
 
                     <div class="auth-group">
                         <label for="modal-register-password">Password</label>
-                        <input id="modal-register-password" name="password" type="password" placeholder="Password" class="auth-input" required />
+                        <div class="password-input-wrapper">
+                            <input id="modal-register-password" name="password" type="password" placeholder="Password" class="auth-input" required />
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="auth-group">
                         <label for="modal-register-password-confirm">Confirm Password</label>
-                        <input id="modal-register-password-confirm" name="password_confirmation" type="password" placeholder="Confirm Password" class="auth-input" required />
+                        <div class="password-input-wrapper">
+                            <input id="modal-register-password-confirm" name="password_confirmation" type="password" placeholder="Confirm Password" class="auth-input" required />
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn-primary">Create Account</button>
