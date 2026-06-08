@@ -22,6 +22,11 @@ FROM php:8.2-cli-alpine
 # Install system packages and PHP extensions
 RUN apk add --no-cache \
     curl \
+    libzip \
+    libpng \
+    oniguruma \
+    libxml2 \
+    libpq \
     libzip-dev \
     libpng-dev \
     oniguruma-dev \
