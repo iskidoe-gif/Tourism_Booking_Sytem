@@ -2,10 +2,6 @@
 
 echo "=== Starting Laravel container entrypoint ==="
 
-# Use Railway's PORT or default to 80
-PORT=${PORT:-80}
-echo "Using PORT: $PORT"
-
 echo "Checking APP_KEY..."
 if [ -z "$APP_KEY" ]; then
   echo "APP_KEY not set - generating..."
@@ -52,5 +48,4 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-echo "Starting PHP artisan serve on port $PORT..."
-php artisan serve --host=0.0.0.0 --port=$PORT
+echo "Laravel setup complete. Nginx and PHP-FPM will handle web serving."
