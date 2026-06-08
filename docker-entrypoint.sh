@@ -43,9 +43,15 @@ echo "APP_KEY is set: ${APP_KEY:0:20}..."
 echo "Clearing config cache..."
 php artisan config:clear 2>&1 || echo "WARNING: config cache clear failed"
 
+echo "Caching config..."
+php artisan config:cache 2>&1 || echo "WARNING: config cache failed"
+
+echo "Caching routes..."
+php artisan route:cache 2>&1 || echo "WARNING: route cache failed"
+
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   echo "Running migrations..."
-  php artisan migrate --force 2>&1 || echo "WARNING: migrations failed"
+  php artisan migrate --force 2>&1 || echo "WARNING: migrations failed (app will start anyway)"
 fi
 
 if [ "${RUN_SEEDS:-false}" = "true" ]; then
