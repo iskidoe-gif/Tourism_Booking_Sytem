@@ -77,5 +77,5 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-echo "Starting Supervisor..."
-exec /usr/bin/supervisord -c /etc/supervisord.conf
+echo "Starting PHP artisan serve on port $PORT..."
+exec php artisan serve --host=0.0.0.0 --port=$PORT
