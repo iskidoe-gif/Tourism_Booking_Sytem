@@ -20,11 +20,11 @@
                     <p class="package-detail-kicker">Tour package</p>
                     <h1>{{ $tourPackage->name }}</h1>
 
-                    <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->rating, 1) }} out of 5">
+                    <div class="package-detail-rating" aria-label="Rated {{ number_format($tourPackage->average_rating, 1) }} out of 5">
                         @for($i = 1; $i <= 5; $i++)
-                            <span>{!! $i <= round($tourPackage->rating) ? '&#9733;' : '&#9734;' !!}</span>
+                            <span>{!! $i <= round($tourPackage->average_rating) ? '&#9733;' : '&#9734;' !!}</span>
                         @endfor
-                        <strong>{{ number_format($tourPackage->rating, 1) }}</strong>
+                        <strong>{{ number_format($tourPackage->average_rating, 1) }}</strong>
                     </div>
 
                     <p class="package-detail-location">{{ $tourPackage->location }}</p>

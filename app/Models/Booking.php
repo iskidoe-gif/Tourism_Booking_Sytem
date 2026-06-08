@@ -30,6 +30,8 @@ class Booking extends Model
         'total_price',
         'base_price',
         'additional_fees',
+        'tourist_guide',
+        'tourist_guide_fee',
         'discount_amount',
         'discount_code',
         'special_requests',
@@ -72,6 +74,8 @@ class Booking extends Model
             'total_price' => 'decimal:2',
             'base_price' => 'decimal:2',
             'additional_fees' => 'decimal:2',
+            'tourist_guide' => 'boolean',
+            'tourist_guide_fee' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'refund_amount' => 'decimal:2',
             'payment_installments' => 'integer',
@@ -196,7 +200,8 @@ class Booking extends Model
     public function calculateTotalPrice(): float
     {
         $base = $this->base_price ?? $this->package->price * $this->num_guests;
-        return max(0, ($base + $this->additional_fees) - $this->discount_amount);
+        $guideFee = $this->tourist_guide_fee ?? 0;
+        return max(0, ($base + $this->additional_fees + $guideFee) - $this->discount_amount);
     }
 
     public function markAsConfirmed(): void

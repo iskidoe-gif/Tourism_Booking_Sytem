@@ -133,8 +133,20 @@
                             @if($booking->promoPackage)
                                 <p class="lead" style="color: #ffc107;"><strong>🎉 Promo:</strong> {{ $booking->promoPackage->name }} ({{ $booking->promoPackage->discount_percentage }}% OFF)</p>
                             @endif
+                            @if($booking->tourist_guide)
+                                <p class="lead"><strong>Tour guide included</strong> (₱{{ number_format($booking->tourist_guide_fee, 2) }})</p>
+                            @endif
                             @if($booking->special_requests)
                                 <p class="lead"><strong>Requests:</strong> {{ $booking->special_requests }}</p>
+                            @endif
+                            @if($booking->services && count($booking->services) > 0)
+                                <p class="lead"><strong>Extras:</strong> {{ implode(', ', array_map(function ($service) {
+                                    if (is_array($service)) {
+                                        return $service['name'] ?? ucfirst(str_replace('_', ' ', $service['key'] ?? ''));
+                                    }
+
+                                    return ucfirst(str_replace('_', ' ', $service));
+                                }, $booking->services->toArray())) }}</p>
                             @endif
                         </div>
                     </div>

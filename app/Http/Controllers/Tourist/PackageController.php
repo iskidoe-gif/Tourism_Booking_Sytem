@@ -38,6 +38,8 @@ class PackageController extends Controller
         $packages = TourPackage::active()
             ->bolinao()
             ->whereIn('id', [5, 6, 7, 8, 9, 10])
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
             ->when($request->search, fn($q) =>
                 $q->where(function($sub) use ($request) {
                     $sub->where('name', 'like', "%{$request->search}%")
@@ -72,7 +74,7 @@ class PackageController extends Controller
             ->when($capacity, fn($q) => $q->where('max_guests', '>=', $capacity))
             ->when($request->type, fn($q) => $q->where('type', $request->type))
             ->when($request->max_price, fn($q) => $q->where('price', '<=', $request->max_price))
-            ->orderBy('rating', 'desc')
+            ->orderByDesc('reviews_avg_rating')
             ->paginate(6)
             ->withQueryString();
 

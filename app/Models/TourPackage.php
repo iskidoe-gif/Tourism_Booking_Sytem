@@ -190,6 +190,19 @@ class TourPackage extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function getAverageRatingAttribute(): float
+    {
+        if (array_key_exists('reviews_avg_rating', $this->attributes) && $this->attributes['reviews_avg_rating'] !== null) {
+            return round($this->attributes['reviews_avg_rating'], 2);
+        }
+
+        if ($this->relationLoaded('reviews')) {
+            return round($this->reviews->avg('rating') ?? 0, 2);
+        }
+
+        return round($this->rating ?? 0, 2);
+    }
+
     public function scopeActive(Builder $query)
     {
         return $query->where('status', 'active');

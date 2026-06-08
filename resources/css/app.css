@@ -1689,6 +1689,43 @@ input:focus, textarea:focus, select:focus {
 }
 .auth-input:focus { outline: 2px solid rgba(114,136,174,0.48); outline-offset: 2px; }
 
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper .auth-input {
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--palette-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: var(--palette-cream);
+}
+
+.password-toggle .eye-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.password-toggle.active {
+    color: var(--palette-cream);
+}
+
 .btn-primary {
     width: 100%;
     padding: 0.875rem 1.5rem;

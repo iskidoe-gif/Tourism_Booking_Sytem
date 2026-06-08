@@ -102,7 +102,7 @@
                     @foreach($packages as $package)
                         <article class="package-card destination-card">
                             <div class="package-card-media" style="background-image: url('{{ $package->image_url }}');">
-                                <div class="badge-rating">{{ number_format($package->rating,1) }} ★</div>
+                                <div class="badge-rating">{{ number_format($package->average_rating,1) }} ★</div>
                             </div>
                             <div class="package-card-body">
                                 <div class="package-card-meta">

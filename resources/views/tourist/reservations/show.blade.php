@@ -100,16 +100,17 @@
                     <p>{{ $booking->special_requests ?: 'None' }}</p>
                 </div>
                 <div>
-                    <p class="reservation-overview-label">Tour operator status</p>
-                    <p>{{ ucfirst($booking->status) }}</p>
-                </div>
-                <div>
-                    <p class="reservation-overview-label">Actual tour start</p>
-                    <p>{{ $booking->tour_started_at ? $booking->tour_started_at->format('M d, Y h:i A') : 'Not started yet' }}</p>
-                </div>
-                <div>
-                    <p class="reservation-overview-label">Actual tour end</p>
-                    <p>{{ $booking->tour_ended_at ? $booking->tour_ended_at->format('M d, Y h:i A') : 'Not ended yet' }}</p>
+                    <p class="reservation-overview-label">Time</p>
+                    <p>
+                        @if($booking->tourPackage?->time_start || $booking->tourPackage?->time_end)
+                            {{ $booking->tourPackage->time_start_formatted }}
+                            @if($booking->tourPackage->time_end)
+                                &mdash; {{ $booking->tourPackage->time_end_formatted }}
+                            @endif
+                        @else
+                            {{ $booking->tour_start_date?->format('M d, Y') ?: 'TBD' }}
+                        @endif
+                    </p>
                 </div>
             </div>
         </section>
@@ -129,6 +130,12 @@
                     <span>Subtotal</span>
                     <strong>₱{{ number_format($booking->base_price ?? ($booking->tourPackage->price * $booking->num_guests), 2) }}</strong>
                 </div>
+                @if($booking->tourist_guide_fee > 0)
+                    <div>
+                        <span>Tour guide fee</span>
+                        <strong>₱{{ number_format($booking->tourist_guide_fee, 2) }}</strong>
+                    </div>
+                @endif
                 <div>
                     <span>Add-ons</span>
                     <strong>₱{{ number_format($booking->additional_fees ?? 0, 2) }}</strong>

@@ -344,6 +344,12 @@
             <span class="booking-detail-label">Additional Fees</span>
             <span class="booking-detail-value">₱{{ number_format($booking->additional_fees ?? 0, 2) }}</span>
         </div>
+        @if($booking->tourist_guide_fee > 0)
+            <div class="booking-detail-row">
+                <span class="booking-detail-label">Tour guide fee</span>
+                <span class="booking-detail-value">₱{{ number_format($booking->tourist_guide_fee, 2) }}</span>
+            </div>
+        @endif
         @if($booking->discount_amount > 0)
             <div class="booking-detail-row">
                 <span class="booking-detail-label">Discount
@@ -373,9 +379,20 @@
             <div class="booking-detail-title">🎁 Additional Services</div>
             
             @foreach($booking->services as $service)
+                @php
+                    $serviceLabel = 'Service';
+                    $servicePrice = 0;
+
+                    if (is_array($service)) {
+                        $serviceLabel = $service['name'] ?? ($service['key'] ?? 'Service');
+                        $servicePrice = $service['price'] ?? 0;
+                    } elseif (is_string($service)) {
+                        $serviceLabel = ucfirst(str_replace('_', ' ', $service));
+                    }
+                @endphp
                 <div class="booking-detail-row">
-                    <span class="booking-detail-label">{{ $service['name'] ?? 'Service' }}</span>
-                    <span class="booking-detail-value">₱{{ number_format($service['price'] ?? 0, 2) }}</span>
+                    <span class="booking-detail-label">{{ $serviceLabel }}</span>
+                    <span class="booking-detail-value">₱{{ number_format($servicePrice, 2) }}</span>
                 </div>
             @endforeach
         </div>

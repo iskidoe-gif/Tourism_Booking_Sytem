@@ -42,7 +42,7 @@ class BookingService
         // Calculate total price
         $data['total_price'] = $data['total_price'] ?? $this->calculateTotal(
             $data['base_price'] ?? 0,
-            $data['additional_fees'] ?? 0,
+            ($data['additional_fees'] ?? 0) + ($data['tourist_guide_fee'] ?? 0),
             $data['discount_amount'] ?? 0
         );
 
@@ -116,7 +116,7 @@ class BookingService
             'discount_code' => $discountCode,
             'total_price' => $this->calculateTotal(
                 $booking->base_price,
-                $booking->additional_fees,
+                ($booking->additional_fees ?? 0) + ($booking->tourist_guide_fee ?? 0),
                 $newDiscount
             ),
         ]);

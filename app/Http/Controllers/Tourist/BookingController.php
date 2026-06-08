@@ -36,11 +36,11 @@ class BookingController extends Controller
         $validated = $request->validate([
             'tour_start_date'  => 'required|date|after_or_equal:today',
             'tour_end_date'    => 'required|date|after_or_equal:tour_start_date',
-            'num_adults'       => "required|integer|min:0|max:{$tourPackage->max_guests}",
             'num_children'     => "required|integer|min:0|max:{$tourPackage->max_guests}",
             'num_seniors'      => "required|integer|min:0|max:{$tourPackage->max_guests}",
             'num_guests'       => "required|integer|min:1|max:{$tourPackage->max_guests}",
             'promo_package_id' => 'nullable|exists:promo_packages,id',
+            'tourist_guide'    => 'nullable|boolean',
             'guest_name'       => 'required|string|max:255',
             'guest_email'      => 'required|email|max:255',
             'guest_phone'      => 'nullable|string|max:30',
@@ -49,11 +49,15 @@ class BookingController extends Controller
             'services.*'       => ['string', 'in:airport_transfer,travel_insurance,meal_plan'],
         ]);
 
-        $numGuests = $validated['num_adults'] + $validated['num_children'] + $validated['num_seniors'];
-        if ($numGuests !== $validated['num_guests']) {
+        $numGuests = $validated['num_guests'];
+        $numChildren = $validated['num_children'];
+        $numSeniors = $validated['num_seniors'];
+        $numAdults = $numGuests - $numChildren - $numSeniors;
+
+        if ($numAdults < 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['num_guests' => 'Guest total must match adults, children, and seniors.']);
+                ->withErrors(['num_guests' => 'Total travelers must be equal to or greater than children and seniors.']);
         }
 
         $servicePrices = [
@@ -67,7 +71,12 @@ class BookingController extends Controller
             return $sum + ($servicePrices[$service] ?? 0);
         }, 0);
 
-        $basePrice = $tourPackage->price * $numGuests;
+        $touristGuideFee = !empty($validated['tourist_guide']) ? 1200 : 0;
+
+        $adultRate = $tourPackage->price;
+        $childRate = round($tourPackage->price * 0.5, 2);
+        $seniorRate = round($tourPackage->price * 0.8, 2);
+        $basePrice = ($numAdults * $adultRate) + ($numChildren * $childRate) + ($numSeniors * $seniorRate);
         $discountAmount = 0;
         $discountCode = null;
         $promoPackageId = null;
@@ -81,7 +90,7 @@ class BookingController extends Controller
             }
         }
 
-        $totalPrice = round($basePrice - $discountAmount + $additionalFees, 2);
+        $totalPrice = round($basePrice - $discountAmount + $additionalFees + $touristGuideFee, 2);
 
         $booking = Booking::create([
             'user_id'          => Auth::id(),
@@ -91,9 +100,9 @@ class BookingController extends Controller
             'tour_start_date'  => $validated['tour_start_date'],
             'tour_end_date'    => $validated['tour_end_date'],
             'num_guests'       => $numGuests,
-            'num_adults'       => $validated['num_adults'],
-            'num_children'     => $validated['num_children'],
-            'num_seniors'      => $validated['num_seniors'],
+            'num_adults'       => $numAdults,
+            'num_children'     => $numChildren,
+            'num_seniors'      => $numSeniors,
             'guest_details'    => [
                 'name' => $validated['guest_name'],
                 'email' => $validated['guest_email'],
@@ -102,6 +111,8 @@ class BookingController extends Controller
             'services'         => $services,
             'base_price'       => $basePrice,
             'additional_fees'  => $additionalFees,
+            'tourist_guide'    => !empty($validated['tourist_guide']),
+            'tourist_guide_fee' => $touristGuideFee,
             'discount_amount'  => $discountAmount,
             'discount_code'    => $discountCode,
             'total_price'      => $totalPrice,

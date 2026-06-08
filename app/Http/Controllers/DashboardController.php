@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Carbon\Carbon;
 
@@ -74,6 +75,11 @@ class DashboardController extends Controller
         $data = cache()->remember($cacheKey, now()->addMinutes(5), function() use ($request) {
             return $this->buildDashboardData($request);
         });
+
+        $data = array_merge([
+            'topCategories' => $data['topCategories'] ?? collect(),
+            'categoryLabels' => $data['categoryLabels'] ?? TourPackage::categoryLabels(),
+        ], $data);
 
         if ($request->expectsJson()) {
             return response()->json($data);
@@ -238,6 +244,7 @@ class DashboardController extends Controller
             'guest_email' => ['required', 'email', 'max:255'],
             'guest_phone' => ['nullable', 'string', 'max:50'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
+            'tourist_guide' => ['nullable', 'boolean'],
             'services' => ['nullable', 'array'],
             'services.*' => ['in:airport_transfer,travel_insurance,meal_plan'],
         ]);
@@ -282,6 +289,8 @@ class DashboardController extends Controller
             }
         }
 
+        $touristGuideFee = !empty($validated['tourist_guide']) ? 1200 : 0;
+
         // Apply promo package discount if provided
         $discountAmount = 0;
         $discountCode = null;
@@ -319,6 +328,8 @@ class DashboardController extends Controller
             'num_seniors' => $validated['num_seniors'],
             'base_price' => $package->price * $totalGuests,
             'additional_fees' => $serviceTotal,
+            'tourist_guide' => !empty($validated['tourist_guide']),
+            'tourist_guide_fee' => $touristGuideFee,
             'discount_amount' => $discountAmount,
             'discount_code' => $discountCode,
             'services' => collect($serviceItems),
@@ -583,9 +594,11 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        // Get top packages by booking count
-        $topPackages = TourPackage::withCount('bookings')
-            ->orderBy('bookings_count', 'desc')
+        // Get top packages by bookings and live review average
+        $topPackages = TourPackage::withCount(['bookings', 'reviews'])
+            ->withAvg('reviews', 'rating')
+            ->orderByDesc('bookings_count')
+            ->orderByDesc('reviews_avg_rating')
             ->limit(5)
             ->get();
 
@@ -611,6 +624,16 @@ class DashboardController extends Controller
             'cancelled' => $bookingStats->cancelled ?? 0,
         ];
 
+        // Get top categories by total bookings
+        $topCategories = Booking::join('tour_packages', 'bookings.tour_package_id', '=', 'tour_packages.id')
+            ->select('tour_packages.category', DB::raw('COUNT(bookings.id) as total_bookings'))
+            ->groupBy('tour_packages.category')
+            ->orderByDesc('total_bookings')
+            ->limit(3)
+            ->get();
+
+        $categoryLabels = TourPackage::categoryLabels();
+
         // Get payment breakdown
         $paymentsByStatus = [
             'paid' => $paymentStats->paid_count ?? 0,
@@ -622,12 +645,6 @@ class DashboardController extends Controller
         $recentReviews = Review::with(['user', 'tourPackage'])
             ->latest()
             ->limit(8)
-            ->get();
-
-        // Optimize: Remove N+1 query by not loading reviews for each package
-        $packageRatings = TourPackage::withCount('reviews')
-            ->orderBy('rating', 'desc')
-            ->limit(5)
             ->get();
 
         // Calculate customer satisfaction
@@ -665,10 +682,11 @@ class DashboardController extends Controller
             ],
             'recentBookings' => $recentBookings,
             'topPackages' => $topPackages,
+            'topCategories' => $topCategories,
+            'categoryLabels' => $categoryLabels,
             'famousTouristSpots' => $famousTouristSpots,
             'monthlyBookings' => $monthlyBookings,
             'recentReviews' => $recentReviews,
-            'packageRatings' => $packageRatings,
             'upcomingCheckIns' => $upcomingCheckIns,
         ];
     }
