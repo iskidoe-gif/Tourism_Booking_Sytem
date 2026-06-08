@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     oniguruma \
     libxml2 \
     libpq \
+    supervisor \
     libzip-dev \
     libpng-dev \
     oniguruma-dev \
@@ -52,8 +53,14 @@ RUN mkdir -p storage bootstrap/cache && \
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Copy supervisord configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create supervisord log directories
+RUN mkdir -p /var/log/supervisor
+
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT:-80}/health || exit 1
 
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

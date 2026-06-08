@@ -53,4 +53,4 @@ else
   echo "(no laravel.log present yet)"
 fi
 echo "Starting PHP artisan serve on port $PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+php artisan serve --host=0.0.0.0 --port=$PORT
