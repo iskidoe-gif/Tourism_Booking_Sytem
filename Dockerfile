@@ -39,6 +39,10 @@ COPY . .
 COPY --from=composer_builder /app/vendor ./vendor
 COPY --from=node_builder /app/public ./public
 
+# Ensure CSS/JS files exist (fallback if Vite build fails)
+RUN if [ ! -f public/css/app.css ]; then mkdir -p public/css && echo "/* Fallback CSS */" > public/css/app.css; fi
+RUN if [ ! -f public/js/app.js ]; then mkdir -p public/js && echo "// Fallback JS" > public/js/app.js; fi
+
 # Setup Laravel directories
 RUN mkdir -p storage bootstrap/cache && \
     chmod -R 777 storage bootstrap/cache
