@@ -1,4 +1,8 @@
 <x-layout>
+    @php
+        $topCategories = $topCategories ?? collect();
+        $categoryLabels = $categoryLabels ?? [];
+    @endphp
     <style>
         /* Dark & Simple Admin Dashboard */
         .admin-dashboard-header {

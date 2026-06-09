@@ -76,23 +76,23 @@ RUN mkdir -p /usr/local/etc/php-fpm.d && \
     echo 'pm.max_spare_servers = 3' >> /usr/local/etc/php-fpm.d/www.conf
 
 # Configure Nginx
-RUN mkdir -p /etc/nginx/http.d && \
-    echo 'server {' > /etc/nginx/http.d/default.conf && \
-    echo '    listen 0.0.0.0:__PORT__;' >> /etc/nginx/http.d/default.conf && \
-    echo '    listen [::]:__PORT__;' >> /etc/nginx/http.d/default.conf && \
-    echo '    root /var/www/html/public;' >> /etc/nginx/http.d/default.conf && \
-    echo '    index index.php;' >> /etc/nginx/http.d/default.conf && \
+RUN mkdir -p /etc/nginx/conf.d && \
+    echo 'server {' > /etc/nginx/conf.d/default.conf && \
+    echo '    listen 0.0.0.0:__PORT__;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    listen [::]:__PORT__;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    root /var/www/html/public;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    index index.php;' >> /etc/nginx/conf.d/default.conf && \
 
-    echo '    client_max_body_size 10G;' >> /etc/nginx/http.d/default.conf && \
-    echo '    location / {' >> /etc/nginx/http.d/default.conf && \
-    echo '        try_files $uri $uri/ /index.php?$query_string;' >> /etc/nginx/http.d/default.conf && \
-    echo '    }' >> /etc/nginx/http.d/default.conf && \
-    echo '    location ~ \.php$ {' >> /etc/nginx/http.d/default.conf && \
-    echo '        fastcgi_pass 127.0.0.1:9000;' >> /etc/nginx/http.d/default.conf && \
-    echo '        fastcgi_index index.php;' >> /etc/nginx/http.d/default.conf && \
-    echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' >> /etc/nginx/http.d/default.conf && \
-    echo '        include fastcgi_params;' >> /etc/nginx/http.d/default.conf && \
-    echo '    }' >> /etc/nginx/http.d/default.conf && \
-    echo '}' >> /etc/nginx/http.d/default.conf
+    echo '    client_max_body_size 10G;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.php?$query_string;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '    location ~ \.php$ {' >> /etc/nginx/conf.d/default.conf && \
+    echo '        fastcgi_pass 127.0.0.1:9000;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        fastcgi_index index.php;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' >> /etc/nginx/conf.d/default.conf && \
+    echo '        include fastcgi_params;' >> /etc/nginx/conf.d/default.conf && \
+    echo '    }' >> /etc/nginx/conf.d/default.conf && \
+    echo '}' >> /etc/nginx/conf.d/default.conf
 
 CMD ["/usr/local/bin/docker-entrypoint.sh"]

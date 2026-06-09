@@ -17,6 +17,9 @@ echo "APP_KEY is set: ${APP_KEY:0:20}..."
 echo "Clearing config cache..."
 php artisan config:clear 2>&1 || echo "WARNING: config cache clear failed"
 
+echo "Clearing view cache..."
+php artisan view:clear 2>&1 || echo "WARNING: view cache clear failed"
+
 echo "Caching config..."
 php artisan config:cache 2>&1 || echo "WARNING: config cache failed"
 
