@@ -2,8 +2,9 @@
 
 echo "=== Starting Laravel container entrypoint ==="
 
-# Use Railway's PORT or default to 80
-PORT=${PORT:-80}
+# Use Railway's PORT or default to 8080
+PORT=${PORT:-8080}
+export PORT
 echo "Using PORT: $PORT"
 
 echo "Checking APP_KEY..."
