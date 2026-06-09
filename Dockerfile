@@ -6,7 +6,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY resources/ resources/
-RUN npm ci --legacy-peer-deps && npm run build && npm cache clean --force
+RUN npm ci --legacy-peer-deps && npm run build && \
+    if [ -f public/build/.vite/manifest.json ] && [ ! -f public/build/manifest.json ]; then \
+        cp public/build/.vite/manifest.json public/build/manifest.json; \
+    fi && \
+    npm cache clean --force
 
 # Stage 2: Build PHP dependencies
 FROM composer:2 AS composer_builder

@@ -40,6 +40,13 @@ if [ "${RUN_SEEDS:-false}" = "true" ]; then
   php artisan db:seed --force 2>&1 || echo "WARNING: seeders failed"
 fi
 
+# Repair Vite manifest location after the node build stage, if it was generated inside .vite
+if [ -f public/build/.vite/manifest.json ] && [ ! -f public/build/manifest.json ]; then
+  echo "Repairing Vite manifest location..."
+  mkdir -p public/build
+  cp public/build/.vite/manifest.json public/build/manifest.json
+fi
+
 echo "=== Container startup complete ==="
 echo "Ensuring storage and cache directories exist and have correct permissions..."
 mkdir -p storage/logs bootstrap/cache

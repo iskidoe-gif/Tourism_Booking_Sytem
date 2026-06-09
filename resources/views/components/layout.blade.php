@@ -4,7 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Tourism Booking System') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @php
+        $buildManifest = public_path('build/manifest.json');
+        $buildAssets = public_path('build/assets');
+    @endphp
+
+    @if (file_exists($buildManifest))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @elseif (file_exists($buildAssets.'/app.js') && file_exists($buildAssets.'/app.css'))
+        <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+        <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
+    @endif
+
     {{-- Provide runtime API URL for non-built frontend (useful on free Render plan without Vite build) --}}
     <script>
         window.__API_URL__ = "{{ env('VITE_API_URL', env('APP_URL')) }}";
