@@ -13,7 +13,7 @@ services:
       - key: APP_URL
         sync: false
       - key: DB_CONNECTION
-        value: pgsql
+        value: postgres
       - key: DB_HOST
         fromDatabase:
           name: tourism-db

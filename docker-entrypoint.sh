@@ -37,8 +37,7 @@ fi
 echo "=== Container startup complete ==="
 echo "Ensuring storage and cache directories exist and have correct permissions..."
 mkdir -p storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache || true
-chmod -R 775 storage bootstrap/cache || true
+chmod -R 777 storage bootstrap/cache
 
 # Allow forcing debug mode for short-lived troubleshooting via FORCE_APP_DEBUG env var
 if [ "${FORCE_APP_DEBUG:-false}" = "true" ]; then
