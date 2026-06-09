@@ -2,8 +2,9 @@
 
 echo "=== Starting Laravel container entrypoint ==="
 
-# Use Railway's PORT or default to 80
-PORT=${PORT:-80}
+# Use Railway's PORT or default to 8080
+PORT=${PORT:-8080}
+export PORT
 echo "Using PORT: $PORT"
 
 echo "Checking APP_KEY..."
@@ -57,6 +58,13 @@ if [ "${RUN_SEEDS:-true}" = "true" ]; then
   php artisan db:seed --force 2>&1 || echo "WARNING: seeders failed"
 fi
 
+# Repair Vite manifest location after the node build stage, if it was generated inside .vite
+if [ -f public/build/.vite/manifest.json ] && [ ! -f public/build/manifest.json ]; then
+  echo "Repairing Vite manifest location..."
+  mkdir -p public/build
+  cp public/build/.vite/manifest.json public/build/manifest.json
+fi
+
 echo "=== Container startup complete ==="
 echo "Ensuring storage and cache directories exist and have correct permissions..."
 mkdir -p storage/logs bootstrap/cache storage/framework/sessions storage/framework/views
@@ -84,5 +92,10 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-echo "Starting PHP artisan serve on port $PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+
+if [ -f /etc/nginx/conf.d/default.conf ]; then
+  sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/default.conf
+fi
+
+echo "Starting supervisord to launch nginx and php-fpm..."
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf

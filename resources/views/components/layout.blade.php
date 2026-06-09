@@ -4,25 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'Tourism Booking System') }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @if(!file_exists(public_path('build/manifest.json')))
-        <style>
-            /* Fallback basic styles if Vite build fails */
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-            .btn { display: inline-block; padding: 10px 20px; background: #4B5694; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
-            .btn:hover { background: #3d4a7d; }
-            .btn-secondary { background: #7288AE; }
-            .alert { padding: 15px; margin: 20px 0; border-radius: 5px; }
-            .alert-error { background: #fee; color: #c33; border: 1px solid #fcc; }
-            .alert-success { background: #efe; color: #3c3; border: 1px solid #cfc; }
-            nav { background: #111844; padding: 15px 0; }
-            nav a { color: #EAE0CF; text-decoration: none; margin-right: 20px; }
-            nav a:hover { color: #fff; }
-            .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0; }
-            input, select, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        </style>
+    @php
+        $buildManifest = public_path('build/manifest.json');
+        $buildAssets = public_path('build/assets');
+    @endphp
+
+    @if (file_exists($buildManifest))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @elseif (file_exists($buildAssets.'/app.js') && file_exists($buildAssets.'/app.css'))
+        <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
+        <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
     @endif
     {{-- Provide runtime API URL for non-built frontend (useful on free Render plan without Vite build) --}}
     <script>
