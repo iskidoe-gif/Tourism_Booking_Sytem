@@ -4300,6 +4300,8 @@ input:focus, textarea:focus, select:focus {
     background: rgba(8, 14, 34, 0.94);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 2rem 3rem rgba(0, 0, 0, 0.25);
+    position: relative;
+    z-index: 10;
 }
 
 .auth-header {
