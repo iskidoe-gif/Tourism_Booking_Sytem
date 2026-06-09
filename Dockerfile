@@ -6,7 +6,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY vite.config.js ./
 COPY resources/ resources/
-RUN npm ci --legacy-peer-deps && npm run build && npm cache clean --force
+RUN npm ci --legacy-peer-deps
+RUN npm run build || (echo "Build failed, trying alternative..." && npm run build -- --mode production)
+RUN npm cache clean --force
+# Verify build output
+RUN ls -laR public/build && echo "Build completed successfully"
 
 # Stage 2: Build PHP dependencies
 FROM composer:2 AS composer_builder
@@ -44,9 +48,16 @@ COPY . .
 COPY --from=composer_builder /app/vendor ./vendor
 COPY --from=node_builder /app/public/build ./public/build
 
+# Verify build assets were copied
+RUN ls -laR public/build && test -f public/build/manifest.json || (echo "ERROR: Build assets not found" && exit 1)
+
 # Setup Laravel directories
 RUN mkdir -p storage bootstrap/cache && \
     chmod -R 777 storage bootstrap/cache
+
+# Set environment variable for asset loading in production
+# Leave ASSET_URL empty so Laravel uses relative paths
+ENV ASSET_URL=""
 
 # Copy and prepare entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
