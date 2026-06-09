@@ -1,5 +1,8 @@
 #!/bin/sh
 
+LISTEN_PORT="${PORT:-80}"
+sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/http.d/default.conf
+
 echo "=== Starting Laravel container entrypoint ==="
 
 echo "Checking APP_KEY..."
@@ -48,4 +51,4 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-echo "Laravel setup complete. Nginx and PHP-FPM will handle web serving."
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf

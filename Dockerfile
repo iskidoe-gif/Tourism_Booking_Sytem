@@ -78,10 +78,11 @@ RUN mkdir -p /usr/local/etc/php-fpm.d && \
 # Configure Nginx
 RUN mkdir -p /etc/nginx/http.d && \
     echo 'server {' > /etc/nginx/http.d/default.conf && \
-    echo '    listen 0.0.0.0:80;' >> /etc/nginx/http.d/default.conf && \
-    echo '    listen [::]:80;' >> /etc/nginx/http.d/default.conf && \
+    echo '    listen 0.0.0.0:__PORT__;' >> /etc/nginx/http.d/default.conf && \
+    echo '    listen [::]:__PORT__;' >> /etc/nginx/http.d/default.conf && \
     echo '    root /var/www/html/public;' >> /etc/nginx/http.d/default.conf && \
     echo '    index index.php;' >> /etc/nginx/http.d/default.conf && \
+
     echo '    client_max_body_size 10G;' >> /etc/nginx/http.d/default.conf && \
     echo '    location / {' >> /etc/nginx/http.d/default.conf && \
     echo '        try_files $uri $uri/ /index.php?$query_string;' >> /etc/nginx/http.d/default.conf && \
@@ -94,8 +95,4 @@ RUN mkdir -p /etc/nginx/http.d && \
     echo '    }' >> /etc/nginx/http.d/default.conf && \
     echo '}' >> /etc/nginx/http.d/default.conf
 
-EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-80}/health || exit 1
-
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
