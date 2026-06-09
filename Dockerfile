@@ -69,7 +69,7 @@ RUN mkdir -p /usr/local/etc/php-fpm.d && \
 # Configure nginx
 RUN mkdir -p /etc/nginx/conf.d && \
     printf 'server {\n    listen 0.0.0.0:__PORT__;\n    listen [::]:__PORT__;\n    root /var/www/html/public;\n    index index.php;\n    client_max_body_size 10G;\n\n    location / {\n        try_files $uri $uri/ /index.php?$query_string;\n    }\n\n    location ~ \.php$ {\n        fastcgi_pass 127.0.0.1:9000;\n        fastcgi_index index.php;\n        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n        include fastcgi_params;\n    }\n}\n' > /etc/nginx/conf.d/default.conf && \
-    cat > /etc/nginx/nginx.conf <<'EOF'\nuser nginx;\nworker_processes auto;\npid /var/run/nginx.pid;\n\nevents {\n    worker_connections 1024;\n}\n\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    sendfile on;\n    keepalive_timeout 65;\n    server_tokens off;\n\n    include /etc/nginx/conf.d/*.conf;\n}\nEOF
+    printf 'user nginx;\nworker_processes auto;\npid /var/run/nginx.pid;\n\nevents {\n    worker_connections 1024;\n}\n\nhttp {\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    sendfile on;\n    keepalive_timeout 65;\n    server_tokens off;\n\n    include /etc/nginx/conf.d/*.conf;\n}\n' > /etc/nginx/nginx.conf
 
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
