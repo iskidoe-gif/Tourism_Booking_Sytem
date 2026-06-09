@@ -2,6 +2,22 @@
 
 This guide explains how to set up environment variables for Railway deployment.
 
+## CRITICAL: Add PostgreSQL Database First
+
+**Before deploying, you MUST add a PostgreSQL database to your Railway project:**
+
+1. In your Railway project, click "New Service"
+2. Select "Database" → "PostgreSQL"
+3. Railway will automatically create and link the database
+4. Railway will automatically populate these environment variables:
+   - `DATABASE_URL` (full connection string)
+   - `DB_HOST`
+   - `DB_PORT`
+   - `DB_USERNAME`
+   - `DB_PASSWORD`
+
+**Without a database, the application will not work - no data will be stored and authentication will fail.**
+
 ## Required Environment Variables in Railway
 
 Add these variables in your Railway project settings (Project Settings → Variables):
@@ -16,18 +32,14 @@ APP_URL=https://your-app-name.up.railway.app
 
 **Note**: Replace `your-app-name.up.railway.app` with your actual Railway URL after deployment.
 
-### Database Settings (Auto-populated by Railway)
-When you add a PostgreSQL database to your Railway project, Railway will automatically populate:
+### Database Settings
+After adding the PostgreSQL database, set:
 ```
 DB_CONNECTION=pgsql
-DB_HOST=          # Railway auto-populates this
-DB_PORT=5432
 DB_DATABASE=tourismdb
-DB_USERNAME=      # Railway auto-populates this
-DB_PASSWORD=      # Railway auto-populates this
 ```
 
-**Important**: You only need to set `DB_CONNECTION=pgsql` and `DB_DATABASE=tourismdb`. Railway will fill in the rest.
+**Important**: Railway will automatically populate `DB_HOST`, `DB_PORT`, `DB_USERNAME`, and `DB_PASSWORD` from the linked database. You only need to set `DB_CONNECTION=pgsql` and `DB_DATABASE=tourismdb`.
 
 ### Cache and Session
 ```
@@ -45,8 +57,10 @@ LOG_LEVEL=info
 ### Railway-Specific Settings
 ```
 RUN_MIGRATIONS=true
-RUN_SEEDS=false
+RUN_SEEDS=true
 ```
+
+**Important**: Set `RUN_SEEDS=true` to populate the database with sample data (tour packages, destinations, etc.) This is required for the UI to display content.
 
 ### Optional Settings
 ```

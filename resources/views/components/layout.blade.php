@@ -15,7 +15,6 @@
         <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
         <script type="module" src="{{ asset('build/assets/app.js') }}"></script>
     @endif
-
     {{-- Provide runtime API URL for non-built frontend (useful on free Render plan without Vite build) --}}
     <script>
         window.__API_URL__ = "{{ env('VITE_API_URL', env('APP_URL')) }}";

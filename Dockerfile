@@ -50,10 +50,17 @@ COPY . .
 COPY --from=composer_builder /app/vendor ./vendor
 COPY --from=node_builder /app/public/build ./public/build
 
+# Verify build assets were copied
+RUN ls -laR public/build && test -f public/build/manifest.json || (echo "ERROR: Build assets not found" && exit 1)
+
 # Setup Laravel directories
 RUN mkdir -p storage bootstrap/cache /var/log/supervisor /var/run/supervisor && \
     chown -R www-data:www-data storage bootstrap/cache && \
     chmod -R 755 storage bootstrap/cache
+
+# Set environment variable for asset loading in production
+# Leave ASSET_URL empty so Laravel uses relative paths
+ENV ASSET_URL=""
 
 # Copy and prepare entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
