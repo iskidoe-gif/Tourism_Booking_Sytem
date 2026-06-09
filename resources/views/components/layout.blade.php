@@ -37,8 +37,8 @@
                 });
             });
 
-            // Enhance all buttons with immediate feedback
-            const buttons = document.querySelectorAll('button, .btn, .btn-primary, .btn-secondary, .navbtn, .bolinao-button');
+            // Enhance all buttons with immediate feedback (excluding submit buttons)
+            const buttons = document.querySelectorAll('button:not([type="submit"]), .btn:not(button), .btn-primary:not(button), .btn-secondary:not(button), .navbtn, .bolinao-button');
 
             buttons.forEach(button => {
                 // Skip password toggles
@@ -73,19 +73,6 @@
                 });
             });
 
-            // Enhance form submissions
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    const submitBtn = this.querySelector('button[type="submit"], input[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        const originalText = submitBtn.textContent;
-                        submitBtn.textContent = 'Processing...';
-                        submitBtn.style.opacity = '0.7';
-                    }
-                });
-            });
         });
     </script>
 </head>
