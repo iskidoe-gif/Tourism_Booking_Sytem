@@ -23,9 +23,8 @@ Route::get('/health', function () {
 Route::get('/_diagnostics', [DiagnosticsController::class, 'status'])->name('diagnostics.status');
 
 Route::middleware('guest')->group(function () {
-    // Keep a lightweight GET route for legacy '/login' links.
-    Route::get('/login', function () { return redirect()->route('home', ['auth' => 'signin']); })->name('login');
-    Route::get('/register', function () { return redirect()->route('home', ['auth' => 'register']); });
+    Route::get('/login', [AuthController::class, 'showTouristLoginForm'])->name('login');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form');
 
     Route::post('/login', [AuthController::class, 'loginTourist'])->name('login.store');
     Route::get('/admin/login', [AuthController::class, 'showAdminLoginForm'])->name('admin.login');
