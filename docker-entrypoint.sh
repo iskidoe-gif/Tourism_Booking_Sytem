@@ -10,10 +10,12 @@ echo "Checking APP_KEY..."
 if [ -z "$APP_KEY" ]; then
   echo "APP_KEY not set - generating..."
   export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
-  echo "Generated APP_KEY: ${APP_KEY:0:20}..."
+  APP_KEY_PREVIEW=$(printf '%s' "$APP_KEY" | cut -c 1-20)
+  echo "Generated APP_KEY: ${APP_KEY_PREVIEW}..."
 fi
 
-echo "APP_KEY is set: ${APP_KEY:0:20}..."
+APP_KEY_PREVIEW=$(printf '%s' "$APP_KEY" | cut -c 1-20)
+echo "APP_KEY is set: ${APP_KEY_PREVIEW}..."
 
 echo "Clearing config cache..."
 php artisan config:clear 2>&1 || echo "WARNING: config cache clear failed"
