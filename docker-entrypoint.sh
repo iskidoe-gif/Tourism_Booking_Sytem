@@ -1,13 +1,10 @@
 #!/bin/sh
 
-LISTEN_PORT="${PORT:-80}"
-if [ -f /etc/nginx/conf.d/default.conf ]; then
-  sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/conf.d/default.conf
-elif [ -f /etc/nginx/http.d/default.conf ]; then
-  sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/http.d/default.conf
-fi
-
 echo "=== Starting Laravel container entrypoint ==="
+
+# Use Railway's PORT or default to 80
+PORT=${PORT:-80}
+echo "Using PORT: $PORT"
 
 echo "Checking APP_KEY..."
 if [ -z "$APP_KEY" ]; then
@@ -20,9 +17,6 @@ echo "APP_KEY is set: ${APP_KEY:0:20}..."
 
 echo "Clearing config cache..."
 php artisan config:clear 2>&1 || echo "WARNING: config cache clear failed"
-
-echo "Clearing view cache..."
-php artisan view:clear 2>&1 || echo "WARNING: view cache clear failed"
 
 echo "Caching config..."
 php artisan config:cache 2>&1 || echo "WARNING: config cache failed"
@@ -57,4 +51,5 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
+echo "Starting PHP artisan serve on port $PORT..."
+exec php artisan serve --host=0.0.0.0 --port=$PORT
