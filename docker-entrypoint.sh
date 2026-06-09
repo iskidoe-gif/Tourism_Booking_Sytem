@@ -59,5 +59,9 @@ if [ -f storage/logs/laravel.log ]; then
 else
   echo "(no laravel.log present yet)"
 fi
-echo "Starting PHP artisan serve on port $PORT..."
-exec php artisan serve --host=0.0.0.0 --port=$PORT
+if [ -f /etc/nginx/conf.d/default.conf ]; then
+  sed -i "s/__PORT__/${PORT}/g" /etc/nginx/conf.d/default.conf
+fi
+
+echo "Starting supervisord to launch nginx and php-fpm..."
+exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
