@@ -82,7 +82,6 @@ RUN mkdir -p /etc/nginx/conf.d && \
     echo '    listen [::]:__PORT__;' >> /etc/nginx/conf.d/default.conf && \
     echo '    root /var/www/html/public;' >> /etc/nginx/conf.d/default.conf && \
     echo '    index index.php;' >> /etc/nginx/conf.d/default.conf && \
-
     echo '    client_max_body_size 10G;' >> /etc/nginx/conf.d/default.conf && \
     echo '    location / {' >> /etc/nginx/conf.d/default.conf && \
     echo '        try_files $uri $uri/ /index.php?$query_string;' >> /etc/nginx/conf.d/default.conf && \
@@ -93,6 +92,25 @@ RUN mkdir -p /etc/nginx/conf.d && \
     echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' >> /etc/nginx/conf.d/default.conf && \
     echo '        include fastcgi_params;' >> /etc/nginx/conf.d/default.conf && \
     echo '    }' >> /etc/nginx/conf.d/default.conf && \
-    echo '}' >> /etc/nginx/conf.d/default.conf
+    echo '}' >> /etc/nginx/conf.d/default.conf && \
+    cat > /etc/nginx/nginx.conf <<'EOF'
+user nginx;
+worker_processes auto;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+    server_tokens off;
+
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
 
 CMD ["/usr/local/bin/docker-entrypoint.sh"]

@@ -1,7 +1,11 @@
 #!/bin/sh
 
 LISTEN_PORT="${PORT:-80}"
-sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/http.d/default.conf
+if [ -f /etc/nginx/conf.d/default.conf ]; then
+  sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/conf.d/default.conf
+elif [ -f /etc/nginx/http.d/default.conf ]; then
+  sed -i "s/__PORT__/${LISTEN_PORT}/g" /etc/nginx/http.d/default.conf
+fi
 
 echo "=== Starting Laravel container entrypoint ==="
 
