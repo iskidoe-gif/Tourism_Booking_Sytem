@@ -28,6 +28,19 @@ This project supports:
 
 Full SRS and implementation details are available in [docs/SRS.md](docs/SRS.md).
 
+## Fork and Clone
+
+1. Go to the repository on GitHub.
+2. Click the **Fork** button in the top-right corner to create your own copy.
+3. Open a terminal and clone your fork:
+```bash
+git clone https://github.com/<your-username>/Tourism_Booking_Sytem.git
+```
+4. Change into the project directory:
+```bash
+cd Tourism_Booking_Sytem
+```
+
 ## Setup
 
 1. Install dependencies:
