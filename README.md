@@ -92,3 +92,11 @@ php artisan serve
 ## Notes
 
 The application now includes destination and review management, plus admin payment verification and export report support.
+
+## URL of Deployed System
+
+- https://tourism-booking-system-production-b0bb.up.railway.app
+
+## LINK OF VIDEO PRESENTATIONS (API-CALLING & SYSTEM WALKTHROUGH)
+
+- https://drive.google.com/drive/folders/1XpPhJEfKICkvdaj35GETAwiPqO5rdNpf
